@@ -216,44 +216,81 @@ if (quoteForm) {
   });
 }
 
-// Homepage featured banner slider
+// Homepage featured banner slider — auto-advances and slides horizontally
 (() => {
   const slider = document.querySelector('.home-slider');
   if (!slider || slider.dataset.initialized === 'true') return;
   slider.dataset.initialized = 'true';
+
+  const stage = slider.querySelector('.home-slider-stage');
   const slides = Array.from(slider.querySelectorAll('.home-slide'));
   const dots = Array.from(slider.querySelectorAll('.home-slider-dots button'));
   const prev = slider.querySelector('.home-slider-prev');
   const next = slider.querySelector('.home-slider-next');
-  if (!slides.length) return;
+  if (!stage || !slides.length) return;
+
   let current = 0;
   let timer = null;
-  const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  let touchStartX = null;
+
   const show = (index) => {
     current = (index + slides.length) % slides.length;
+    stage.style.transform = `translate3d(-${current * 100}%, 0, 0)`;
+
     slides.forEach((slide, i) => {
       const active = i === current;
       slide.classList.toggle('is-active', active);
       slide.setAttribute('aria-hidden', String(!active));
     });
+
     dots.forEach((dot, i) => {
       const active = i === current;
       dot.classList.toggle('is-active', active);
-      if (active) dot.setAttribute('aria-current', 'true'); else dot.removeAttribute('aria-current');
+      if (active) dot.setAttribute('aria-current', 'true');
+      else dot.removeAttribute('aria-current');
     });
   };
-  const stop = () => { if (timer) window.clearInterval(timer); timer = null; };
+
+  const stop = () => {
+    if (timer) window.clearInterval(timer);
+    timer = null;
+  };
+
   const start = () => {
     stop();
-    if (!reduceMotion && slides.length > 1) timer = window.setInterval(() => show(current + 1), 5500);
+    if (slides.length > 1) {
+      timer = window.setInterval(() => show(current + 1), 5000);
+    }
   };
-  prev?.addEventListener('click', () => { show(current - 1); start(); });
-  next?.addEventListener('click', () => { show(current + 1); start(); });
+
+  const goNext = () => { show(current + 1); start(); };
+  const goPrev = () => { show(current - 1); start(); };
+
+  prev?.addEventListener('click', goPrev);
+  next?.addEventListener('click', goNext);
   dots.forEach((dot, i) => dot.addEventListener('click', () => { show(i); start(); }));
-  slider.addEventListener('mouseenter', stop);
-  slider.addEventListener('mouseleave', start);
-  slider.addEventListener('focusin', stop);
-  slider.addEventListener('focusout', start);
-  document.addEventListener('visibilitychange', () => document.hidden ? stop() : start());
-  show(0); start();
+
+  // Keep autoplay running even when the mouse rests over the banner.
+  // Pause only while the tab is hidden, then resume when the user returns.
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stop();
+    else start();
+  });
+
+  // Basic touch swipe on phones/tablets.
+  slider.addEventListener('touchstart', (event) => {
+    touchStartX = event.touches[0]?.clientX ?? null;
+  }, { passive: true });
+
+  slider.addEventListener('touchend', (event) => {
+    if (touchStartX === null) return;
+    const endX = event.changedTouches[0]?.clientX ?? touchStartX;
+    const delta = endX - touchStartX;
+    touchStartX = null;
+    if (Math.abs(delta) < 45) return;
+    if (delta < 0) goNext(); else goPrev();
+  }, { passive: true });
+
+  show(0);
+  start();
 })();
