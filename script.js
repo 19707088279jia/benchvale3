@@ -215,3 +215,45 @@ if (quoteForm) {
     window.location.href = mailto;
   });
 }
+
+// Homepage featured banner slider
+(() => {
+  const slider = document.querySelector('.home-slider');
+  if (!slider || slider.dataset.initialized === 'true') return;
+  slider.dataset.initialized = 'true';
+  const slides = Array.from(slider.querySelectorAll('.home-slide'));
+  const dots = Array.from(slider.querySelectorAll('.home-slider-dots button'));
+  const prev = slider.querySelector('.home-slider-prev');
+  const next = slider.querySelector('.home-slider-next');
+  if (!slides.length) return;
+  let current = 0;
+  let timer = null;
+  const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  const show = (index) => {
+    current = (index + slides.length) % slides.length;
+    slides.forEach((slide, i) => {
+      const active = i === current;
+      slide.classList.toggle('is-active', active);
+      slide.setAttribute('aria-hidden', String(!active));
+    });
+    dots.forEach((dot, i) => {
+      const active = i === current;
+      dot.classList.toggle('is-active', active);
+      if (active) dot.setAttribute('aria-current', 'true'); else dot.removeAttribute('aria-current');
+    });
+  };
+  const stop = () => { if (timer) window.clearInterval(timer); timer = null; };
+  const start = () => {
+    stop();
+    if (!reduceMotion && slides.length > 1) timer = window.setInterval(() => show(current + 1), 5500);
+  };
+  prev?.addEventListener('click', () => { show(current - 1); start(); });
+  next?.addEventListener('click', () => { show(current + 1); start(); });
+  dots.forEach((dot, i) => dot.addEventListener('click', () => { show(i); start(); }));
+  slider.addEventListener('mouseenter', stop);
+  slider.addEventListener('mouseleave', start);
+  slider.addEventListener('focusin', stop);
+  slider.addEventListener('focusout', start);
+  document.addEventListener('visibilitychange', () => document.hidden ? stop() : start());
+  show(0); start();
+})();
