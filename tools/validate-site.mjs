@@ -39,6 +39,7 @@ for (const file of htmlFiles) {
   if (!html.includes("Products</a>") || !html.includes("Request a Quote")) {
     failures.push(`${relativeFile}: missing Products navigation or RFQ path`);
   }
+  if (!html.includes("Laboratory Products &amp; Equipment")) failures.push(`${relativeFile}: distributor identity missing`);
   if (html.includes("jiafeng@benchvalescientific.com")) failures.push(`${relativeFile}: outdated public email remains`);
 }
 
@@ -47,16 +48,25 @@ const expectedCategories = ["chromatography", "sample-preparation", "environment
 for (const category of expectedCategories) {
   if (!productsIndex.includes(`id="${category}"`)) failures.push(`products.html: missing fixed category ${category}`);
 }
+for (const enhancement of ["productSearch", "data-product-filter", "data-product-card", "data-search"]) {
+  if (!productsIndex.includes(enhancement)) failures.push(`products.html: missing catalogue enhancement ${enhancement}`);
+}
+for (const internalPhrase of ["Catalogue status", "Product Architecture", "Initial Product Records", "fixed categories", "Pricing Logic", "supplier quote → landed cost"]) {
+  if (productsIndex.includes(internalPhrase)) failures.push(`products.html: internal project wording remains: ${internalPhrase}`);
+}
 
 const productFiles = htmlFiles.filter((path) => dirname(path) === resolve(root, "products"));
 if (productFiles.length !== 14) failures.push(`Expected 14 product pages; found ${productFiles.length}`);
-const requiredProductFields = ["Manufacturer", "Manufacturer Cat.No.", "Benchvale SKU", "Description", "Specifications", "Pack size", "Documents / Datasheet", "Availability", "Shipping", "Warranty", "Request a Quote", "Add to Cart"];
+const requiredProductFields = ["Manufacturer", "Manufacturer Cat.No.", "Benchvale SKU", "Description", "Specifications", "Pack size", "Documents / Datasheet", "Availability", "Shipping", "Warranty", "Request a Quote", "Add to Quote", "Add to Cart"];
 for (const productFile of productFiles) {
   const html = readFileSync(productFile, "utf8");
   for (const field of requiredProductFields) {
     if (!html.includes(field)) failures.push(`${productFile.slice(root.length + 1)}: missing ${field}`);
   }
-  if (!html.includes("disabled") || !html.includes("Request a Quote</strong>")) failures.push(`${productFile.slice(root.length + 1)}: cart placeholder or quote-only price missing`);
+  if (!html.includes("Request a Quote</strong>") || !html.includes("Technical product-class illustration")) failures.push(`${productFile.slice(root.length + 1)}: quote-only price or technical illustration missing`);
+  const catNo = html.match(/Manufacturer Cat\.No\.<\/dt><dd>([^<]+)<\/dd>/)?.[1];
+  const allowedCatNos = ["Manufacturer model pending", "55301", "52010, 53010, 52200, 53200"];
+  if (!catNo || !allowedCatNos.includes(catNo)) failures.push(`${productFile.slice(root.length + 1)}: unapproved manufacturer Cat.No. value ${catNo || "missing"}`);
 }
 
 const quote = readFileSync(resolve(root, "quote.html"), "utf8");
@@ -64,7 +74,15 @@ for (const field of ["name", "organization", "email", "product[]", "productQuant
   if (!quote.includes(`name="${field}"`)) failures.push(`quote.html: missing RFQ field ${field}`);
 }
 if (!readFileSync(resolve(root, "script.js"), "utf8").includes("mailto:quotes@benchvalescientific.com")) failures.push("script.js: RFQ mailto destination missing");
+for (const quoteFeature of ["benchvaleQuoteProducts", "data-product-card", "data-product-filter"]) {
+  if (!readFileSync(resolve(root, "script.js"), "utf8").includes(quoteFeature)) failures.push(`script.js: missing storefront behavior ${quoteFeature}`);
+}
 if (readFileSync(resolve(root, "CNAME"), "utf8").trim() !== "benchvalescientific.com") failures.push("CNAME: custom domain changed");
+
+const home = readFileSync(resolve(root, "index.html"), "utf8");
+for (const section of ["Shop by Category", "Featured Products", "Why Buy from Benchvale", "Sourcing Support"]) {
+  if (!home.includes(section)) failures.push(`index.html: missing storefront section ${section}`);
+}
 
 const petri = readFileSync(resolve(root, "products", "90mm-petri-dish.html"), "utf8");
 for (const fact of ["RUNLAB", "55301", "90 × 15 mm", "high-transparency PS", "EO sterile", "Triple vent", "10/pack; 500/case"]) {

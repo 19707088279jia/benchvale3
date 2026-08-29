@@ -1,4 +1,4 @@
-/* Benchvale Scientific — shared site behavior (mobile nav, reveal animation, RFQ form) */
+/* Benchvale Scientific — shared navigation, catalogue, and static RFQ behavior */
 
 // Mobile nav toggle
 const navToggle = document.getElementById("navToggle");
@@ -41,6 +41,87 @@ if ("IntersectionObserver" in window && revealEls.length) {
 // Footer year
 document.querySelectorAll("[data-year]").forEach((el) => {
   el.textContent = new Date().getFullYear();
+});
+
+// Search and category filters enhance the catalogue; all products remain visible without JavaScript.
+(() => {
+  const searchInput = document.getElementById("productSearch");
+  const cards = Array.from(document.querySelectorAll("[data-product-card]"));
+  const filterButtons = Array.from(document.querySelectorAll("[data-product-filter]"));
+  const categoryLinks = Array.from(document.querySelectorAll("[data-category-link]"));
+  const status = document.getElementById("productSearchStatus");
+  const empty = document.getElementById("catalogueEmpty");
+  if (!searchInput || !cards.length) return;
+
+  let activeCategory = "all";
+
+  const applyFilters = () => {
+    const query = searchInput.value.trim().toLocaleLowerCase("en-CA");
+    let visibleCount = 0;
+
+    cards.forEach((card) => {
+      const categoryMatch = activeCategory === "all" || card.dataset.category === activeCategory;
+      const searchMatch = !query || (card.dataset.search || "").includes(query);
+      const visible = categoryMatch && searchMatch;
+      card.hidden = !visible;
+      if (visible) visibleCount += 1;
+    });
+
+    if (status) status.textContent = `Showing ${visibleCount} ${visibleCount === 1 ? "product" : "products"}`;
+    if (empty) empty.hidden = visibleCount !== 0;
+  };
+
+  const selectCategory = (category) => {
+    activeCategory = category;
+    filterButtons.forEach((button) => {
+      const selected = button.dataset.productFilter === category;
+      button.classList.toggle("is-active", selected);
+      button.setAttribute("aria-pressed", String(selected));
+    });
+    applyFilters();
+  };
+
+  searchInput.addEventListener("input", applyFilters);
+  filterButtons.forEach((button) => button.addEventListener("click", () => {
+    selectCategory(button.dataset.productFilter || "all");
+  }));
+  categoryLinks.forEach((link) => link.addEventListener("click", () => {
+    selectCategory(link.dataset.categoryLink || "all");
+  }));
+})();
+
+// A small local quote list lets visitors carry products into the multi-product RFQ form.
+const quoteStorageKey = "benchvaleQuoteProducts";
+const readQuoteProducts = () => {
+  try {
+    const stored = JSON.parse(window.localStorage.getItem(quoteStorageKey) || "[]");
+    return Array.isArray(stored) ? stored.filter((item) => typeof item === "string" && item.trim()) : [];
+  } catch {
+    return [];
+  }
+};
+const writeQuoteProducts = (products) => {
+  try {
+    window.localStorage.setItem(quoteStorageKey, JSON.stringify(products));
+  } catch {
+    // The direct quote link still works if browser storage is unavailable.
+  }
+};
+
+document.querySelectorAll("[data-add-to-quote]").forEach((button) => {
+  button.addEventListener("click", () => {
+    const productName = button.dataset.productName?.trim();
+    if (!productName) return;
+    const products = readQuoteProducts();
+    if (!products.includes(productName)) {
+      products.push(productName);
+      writeQuoteProducts(products);
+    }
+    button.textContent = "Added to Quote";
+    button.classList.add("is-added");
+    const feedback = document.querySelector("[data-quote-feedback]");
+    if (feedback) feedback.innerHTML = `Added to your quote list. <a href="../quote.html">Review quote request</a>.`;
+  });
 });
 
 // Request for Quote form -> structured mailto composition (static site; no backend)
@@ -131,12 +212,43 @@ if (quoteForm) {
     refreshProductRows();
   }
 
-  // Pre-fill the first product when arriving from a product or legacy equipment link.
+  // Pre-fill requested and locally saved products without requiring a server-side cart.
   const params = new URLSearchParams(window.location.search);
   const requestedProduct = params.get("product") || params.get("equipment");
+  const requestedProducts = [...new Set([requestedProduct, ...readQuoteProducts()].filter(Boolean))];
   const firstProductField = quoteForm.querySelector('input[name="product[]"]');
-  if (requestedProduct && firstProductField && !firstProductField.value) {
-    firstProductField.value = requestedProduct;
+  if (requestedProducts.length && productList && firstProductField) {
+    firstProductField.value = requestedProducts[0];
+    requestedProducts.slice(1).forEach((productName) => {
+      const row = createProductRow();
+      const productInput = row.querySelector('input[name="product[]"]');
+      if (productInput) productInput.value = productName;
+      productList.appendChild(row);
+    });
+    refreshProductRows();
+  }
+
+  const documentationRequest = params.get("request") === "documentation";
+  const notesField = quoteForm.querySelector('[name="notes"]');
+  if (documentationRequest && notesField && !notesField.value) {
+    notesField.value = "Please include the applicable manufacturer documentation / datasheet with the quotation.";
+  }
+
+  const clearQuoteButton = document.getElementById("clearQuoteProducts");
+  if (clearQuoteButton) {
+    clearQuoteButton.hidden = requestedProducts.length === 0;
+    clearQuoteButton.addEventListener("click", () => {
+      writeQuoteProducts([]);
+      const rows = Array.from(quoteForm.querySelectorAll("[data-product-row]"));
+      rows.slice(1).forEach((row) => row.remove());
+      const remainingProduct = quoteForm.querySelector('input[name="product[]"]');
+      const remainingQuantity = quoteForm.querySelector('input[name="productQuantity[]"]');
+      if (remainingProduct) remainingProduct.value = "";
+      if (remainingQuantity) remainingQuantity.value = "";
+      refreshProductRows();
+      clearQuoteButton.hidden = true;
+      remainingProduct?.focus();
+    });
   }
 
   quoteForm.addEventListener("submit", (event) => {
