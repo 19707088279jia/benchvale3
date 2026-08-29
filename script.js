@@ -1,4 +1,4 @@
-/* Benchvale Scientific — shared site behavior (mobile nav, reveal animation, quote form) */
+/* Benchvale Scientific — shared site behavior (mobile nav, reveal animation, RFQ form) */
 
 // Mobile nav toggle
 const navToggle = document.getElementById("navToggle");
@@ -43,100 +43,100 @@ document.querySelectorAll("[data-year]").forEach((el) => {
   el.textContent = new Date().getFullYear();
 });
 
-// Quote request form -> structured mailto composition (no backend available)
+// Request for Quote form -> structured mailto composition (static site; no backend)
 const quoteForm = document.getElementById("quoteForm");
 
 if (quoteForm) {
-  const equipmentList = document.getElementById("equipmentRequestList");
-  const addEquipmentButton = document.getElementById("addEquipmentItem");
+  const productList = document.getElementById("productRequestList");
+  const addProductButton = document.getElementById("addProductItem");
 
-  const refreshEquipmentRows = () => {
-    const rows = Array.from(quoteForm.querySelectorAll("[data-equipment-row]"));
+  const refreshProductRows = () => {
+    const rows = Array.from(quoteForm.querySelectorAll("[data-product-row]"));
 
     rows.forEach((row, index) => {
       const itemNumber = index + 1;
-      const equipmentInput = row.querySelector('input[name="equipment[]"]');
-      const quantityInput = row.querySelector('input[name="equipmentQuantity[]"]');
-      const equipmentLabel = row.querySelector(".equipment-request-input label");
-      const quantityLabel = row.querySelector(".equipment-request-quantity label");
-      const removeButton = row.querySelector("[data-remove-equipment]");
+      const productInput = row.querySelector('input[name="product[]"]');
+      const quantityInput = row.querySelector('input[name="productQuantity[]"]');
+      const productLabel = row.querySelector(".product-request-input label");
+      const quantityLabel = row.querySelector(".product-request-quantity label");
+      const removeButton = row.querySelector("[data-remove-product]");
 
-      if (equipmentInput) {
-        equipmentInput.id = `equipment-${itemNumber}`;
+      if (productInput) {
+        productInput.id = `product-${itemNumber}`;
       }
       if (quantityInput) {
-        quantityInput.id = `equipment-quantity-${itemNumber}`;
+        quantityInput.id = `product-quantity-${itemNumber}`;
       }
-      if (equipmentLabel) {
-        equipmentLabel.setAttribute("for", `equipment-${itemNumber}`);
+      if (productLabel) {
+        productLabel.setAttribute("for", `product-${itemNumber}`);
       }
       if (quantityLabel) {
-        quantityLabel.setAttribute("for", `equipment-quantity-${itemNumber}`);
+        quantityLabel.setAttribute("for", `product-quantity-${itemNumber}`);
       }
       if (removeButton) {
         removeButton.hidden = rows.length === 1;
-        removeButton.setAttribute("aria-label", `Remove equipment item ${itemNumber}`);
+        removeButton.setAttribute("aria-label", `Remove product ${itemNumber}`);
       }
     });
   };
 
-  const createEquipmentRow = () => {
+  const createProductRow = () => {
     const row = document.createElement("div");
-    row.className = "equipment-request-row";
-    row.setAttribute("data-equipment-row", "");
+    row.className = "product-request-row";
+    row.setAttribute("data-product-row", "");
     row.innerHTML = `
-      <div class="equipment-request-input">
-        <label>Equipment / instrument <span class="required-mark" aria-hidden="true">*</span></label>
-        <input name="equipment[]" type="text" required />
+      <div class="product-request-input">
+        <label>Product <span class="required-mark" aria-hidden="true">*</span></label>
+        <input name="product[]" type="text" required />
       </div>
-      <div class="equipment-request-quantity">
+      <div class="product-request-quantity">
         <label>Quantity <span class="required-mark" aria-hidden="true">*</span></label>
-        <input name="equipmentQuantity[]" type="number" min="1" step="1" inputmode="numeric" required />
+        <input name="productQuantity[]" type="text" placeholder="e.g., 2 cases" required />
       </div>
-      <div class="equipment-request-actions">
-        <button type="button" class="equipment-remove-button" data-remove-equipment>Remove</button>
+      <div class="product-request-actions">
+        <button type="button" class="product-remove-button" data-remove-product>Remove</button>
       </div>
     `;
     return row;
   };
 
-  if (equipmentList && addEquipmentButton) {
+  if (productList && addProductButton) {
     // Give the first row the same remove control used by any additional rows.
-    const firstRow = equipmentList.querySelector("[data-equipment-row]");
-    if (firstRow && !firstRow.querySelector("[data-remove-equipment]")) {
+    const firstRow = productList.querySelector("[data-product-row]");
+    if (firstRow && !firstRow.querySelector("[data-remove-product]")) {
       const actions = document.createElement("div");
-      actions.className = "equipment-request-actions";
-      actions.innerHTML = '<button type="button" class="equipment-remove-button" data-remove-equipment hidden>Remove</button>';
+      actions.className = "product-request-actions";
+      actions.innerHTML = '<button type="button" class="product-remove-button" data-remove-product hidden>Remove</button>';
       firstRow.appendChild(actions);
     }
 
-    addEquipmentButton.addEventListener("click", () => {
-      const row = createEquipmentRow();
-      equipmentList.appendChild(row);
-      refreshEquipmentRows();
-      row.querySelector('input[name="equipment[]"]')?.focus();
+    addProductButton.addEventListener("click", () => {
+      const row = createProductRow();
+      productList.appendChild(row);
+      refreshProductRows();
+      row.querySelector('input[name="product[]"]')?.focus();
     });
 
-    equipmentList.addEventListener("click", (event) => {
-      const removeButton = event.target.closest("[data-remove-equipment]");
+    productList.addEventListener("click", (event) => {
+      const removeButton = event.target.closest("[data-remove-product]");
       if (!removeButton) return;
 
-      const rows = quoteForm.querySelectorAll("[data-equipment-row]");
+      const rows = quoteForm.querySelectorAll("[data-product-row]");
       if (rows.length <= 1) return;
 
-      removeButton.closest("[data-equipment-row]")?.remove();
-      refreshEquipmentRows();
+      removeButton.closest("[data-product-row]")?.remove();
+      refreshProductRows();
     });
 
-    refreshEquipmentRows();
+    refreshProductRows();
   }
 
-  // Pre-fill the first equipment item when arriving from an equipment category link.
+  // Pre-fill the first product when arriving from a product or legacy equipment link.
   const params = new URLSearchParams(window.location.search);
-  const requestedEquipment = params.get("equipment");
-  const firstEquipmentField = quoteForm.querySelector('input[name="equipment[]"]');
-  if (requestedEquipment && firstEquipmentField && !firstEquipmentField.value) {
-    firstEquipmentField.value = requestedEquipment;
+  const requestedProduct = params.get("product") || params.get("equipment");
+  const firstProductField = quoteForm.querySelector('input[name="product[]"]');
+  if (requestedProduct && firstProductField && !firstProductField.value) {
+    firstProductField.value = requestedProduct;
   }
 
   quoteForm.addEventListener("submit", (event) => {
@@ -149,37 +149,28 @@ if (quoteForm) {
     const organization = get("organization");
     const email = get("email");
     const phone = get("phone");
-    const province = get("province");
-    const deliveryAddress = get("deliveryAddress");
-    const application = get("application");
-    const specifications = get("specifications");
-    const manufacturer = get("manufacturer");
-    const budget = get("budget");
-    const condition = get("condition");
-    const timeline = get("timeline");
-    const deliveryDate = get("deliveryDate");
-    const coordinatedPurchasing = data.get("coordinatedPurchasing") === "Yes";
-    const additional = get("additional");
+    const postalCode = get("postalCode");
+    const requiredDate = get("requiredDate");
+    const notes = get("notes");
 
-    const equipmentItems = Array.from(quoteForm.querySelectorAll("[data-equipment-row]")).map((row) => ({
-      equipment: (row.querySelector('input[name="equipment[]"]')?.value || "").trim(),
-      quantity: (row.querySelector('input[name="equipmentQuantity[]"]')?.value || "").trim(),
+    const productItems = Array.from(quoteForm.querySelectorAll("[data-product-row]")).map((row) => ({
+      product: (row.querySelector('input[name="product[]"]')?.value || "").trim(),
+      quantity: (row.querySelector('input[name="productQuantity[]"]')?.value || "").trim(),
     }));
 
-    // Defensive validation in addition to native required/min constraints.
-    const invalidItem = equipmentItems.find((item) => !item.equipment || !item.quantity || Number(item.quantity) < 1);
-    if (!province || !deliveryAddress || invalidItem) {
+    const invalidItem = productItems.find((item) => !item.product || !item.quantity);
+    if (!postalCode || !requiredDate || invalidItem) {
       quoteForm.reportValidity();
       return;
     }
 
-    const subjectEquipment = equipmentItems.length === 1
-      ? equipmentItems[0].equipment
-      : "Multiple Laboratory Equipment Items";
-    const subject = `Request for Quote — ${subjectEquipment || "Laboratory Equipment"}`;
+    const subjectProduct = productItems.length === 1
+      ? productItems[0].product
+      : "Multiple Laboratory Products";
+    const subject = `Request for Quote — ${subjectProduct || "Laboratory Products"}`;
 
-    const equipmentLines = equipmentItems.flatMap((item, index) => [
-      `Equipment ${index + 1}: ${item.equipment}`,
+    const productLines = productItems.flatMap((item, index) => [
+      `Product ${index + 1}: ${item.product}`,
       `Quantity ${index + 1}: ${item.quantity}`,
     ]);
 
@@ -190,22 +181,14 @@ if (quoteForm) {
       `Organization: ${organization}`,
       `Business email: ${email}`,
       `Phone: ${phone || "Not provided"}`,
-      `Province / Territory: ${province}`,
-      `Delivery address: ${deliveryAddress}`,
+      `Postal code: ${postalCode}`,
+      `Required date: ${requiredDate}`,
       "",
-      "EQUIPMENT REQUESTED",
-      ...equipmentLines,
+      "PRODUCTS REQUESTED",
+      ...productLines,
       "",
-      `Application / intended use: ${application || "Not provided"}`,
-      `Technical specifications: ${specifications || "Not provided"}`,
-      `Preferred manufacturer: ${manufacturer || "No preference"}`,
-      `Budget range: ${budget || "Not provided"}`,
-      `New / refurbished / either: ${condition || "Not specified"}`,
-      `Timeline: ${timeline || "Not specified"}`,
-      `Preferred delivery date: ${deliveryDate || "Not provided"}`,
-      `Open to coordinated purchasing: ${coordinatedPurchasing ? "Yes" : "No"}`,
-      "",
-      `Additional information: ${additional || "None"}`,
+      "NOTES / SPECIFICATIONS",
+      notes || "None provided",
     ];
 
     const mailto = `mailto:quotes@benchvalescientific.com?subject=${encodeURIComponent(
