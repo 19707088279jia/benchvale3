@@ -31,6 +31,27 @@ export const categories = [
         ]
       },
       {
+        "name": "Spectroscopy",
+        "items": [
+          {
+            "name": "Elemental Analysis",
+            "search": "elemental"
+          },
+          {
+            "name": "Fluorescence",
+            "search": "fluorescence"
+          },
+          {
+            "name": "FTIR",
+            "search": "ftir"
+          },
+          {
+            "name": "UV/Vis/NIR",
+            "search": "uv vis nir"
+          }
+        ]
+      },
+      {
         "name": "Chemical & Petrochemical Testing",
         "items": [
           {
@@ -77,27 +98,6 @@ export const categories = [
           {
             "name": "Thermal Analyzers",
             "search": "thermal"
-          }
-        ]
-      },
-      {
-        "name": "Spectroscopy",
-        "items": [
-          {
-            "name": "Elemental Analysis",
-            "search": "elemental"
-          },
-          {
-            "name": "Fluorescence",
-            "search": "fluorescence"
-          },
-          {
-            "name": "FTIR",
-            "search": "ftir"
-          },
-          {
-            "name": "UV/Vis/NIR",
-            "search": "uv vis nir"
           }
         ]
       }

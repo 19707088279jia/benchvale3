@@ -1,6 +1,6 @@
 import { categories, categoryUrl, familyUrl, directoryUrl } from './taxonomy.mjs';
 const esc = (s) => s.replaceAll('&', '&amp;').replaceAll('"', '&quot;');
-// Flat groups flow in document order; CSS alone determines columns and rows.
+// Flat groups follow taxonomy reading order; CSS columns keep each group intact.
 const megaContent = (c, link) => Array.isArray(c.groups)
   ? `<div class="mega-group-grid">${c.groups.map(group => `<section class="mega-group"><h3>${esc(group.name)}</h3><ul>${group.items.map(topic => `<li><a href="${link(directoryUrl(c, topic))}">${esc(topic.name)}</a></li>`).join('')}</ul></section>`).join('')}</div>`
   : `<div class="mega-content"><div class="mega-intro"><h2>${esc(c.name)}</h2><p>${esc(c.description)}</p></div><div class="mega-families"><h3>Product families</h3>${c.families.length ? `<ul>${c.families.map(f => `<li><a href="${link(familyUrl(c,f))}">${esc(f.name)}</a></li>`).join('')}</ul>` : '<p>No product families are currently listed.</p>'}</div></div>`;

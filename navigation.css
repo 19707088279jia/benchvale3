@@ -75,32 +75,31 @@
 
 #product-sourcing-support, #documentation-support { scroll-margin-top:180px; }
 
-/* Flat taxonomy groups auto-place in source order; no column assignments. */
-.mega-menu-directory { padding:24px 34px 0; }
+/* Native columns flow in taxonomy reading order; groups never split across columns. */
+.mega-menu-directory { padding:24px 36px 0; }
 .mega-group-grid {
- display:grid;
- grid-template-columns:repeat(3, minmax(240px, 290px));
- column-gap:44px;
- row-gap:24px;
- justify-content:start;
- max-width:none;
+ display:block;
+ column-count:3;
+ column-gap:18px;
+ column-fill:balance;
+ max-width:876px;
  margin:0;
- padding-bottom:22px;
- align-items:start;
+ padding-bottom:18px;
 }
-.mega-group { min-width:0; margin:0; padding:0; }
+.mega-group { break-inside:avoid; display:block; width:100%; min-width:0; margin:0 0 20px; padding:0; }
 .mega-group h3 { margin:0 0 8px; font-size:.95rem; line-height:1.4; font-weight:700; color:var(--navy-900); }
 .mega-group ul { margin:0; padding:0; list-style:none; }
 .mega-group a { display:block; padding:5px 0; color:#53616c; font-size:.875rem; line-height:1.45; }
 .mega-group a:hover { color:var(--teal-600); text-decoration:underline; text-underline-offset:3px; }
-.mega-menu-directory .mega-view-all { max-width:calc(3 * 290px + 2 * 44px); margin:0; padding-block:15px; }
-/* Match the existing navigation's tablet and mobile breakpoints. */
+.mega-menu-directory .mega-view-all { max-width:876px; margin:0; padding-block:15px; }
+/* Keep the existing accordion breakpoints, with two columns on tablets and one on phones. */
 @media (max-width:1279px) {
  .mega-menu-directory { padding:20px 16px 0; }
- .mega-group-grid { grid-template-columns:repeat(2, minmax(0, 1fr)); gap:28px 56px; max-width:1160px; margin-inline:auto; }
- .mega-menu-directory .mega-view-all { max-width:1160px; margin-inline:auto; }
+ .mega-group-grid { column-count:2; column-gap:16px; max-width:576px; }
+ .mega-menu-directory .mega-view-all { max-width:576px; }
  .mega-group a { min-height:44px; display:flex; align-items:center; padding-block:8px; }
 }
 @media (max-width:767px) {
- .mega-group-grid { grid-template-columns:1fr; }
+ .mega-group-grid { column-count:1; max-width:none; }
+ .mega-menu-directory .mega-view-all { max-width:none; }
 }
