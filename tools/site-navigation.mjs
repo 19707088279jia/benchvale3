@@ -6,7 +6,7 @@ export function header(depth = '') {
   <div class="container category-header-top">
     <a href="${depth}index.html" class="brand"><svg class="brand-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true"><circle cx="20" cy="20" r="13" stroke="currentColor" stroke-width="1.4"/><path d="M20 2v7M20 31v7M2 20h7M31 20h7" stroke="currentColor" stroke-width="1.4"/><circle cx="20" cy="20" r="3" fill="#0f8a8a"/></svg><span class="brand-text"><span class="brand-name">Benchvale Scientific</span><span class="brand-sub">Laboratory Products &amp; Equipment</span></span></a>
     <form class="category-search" role="search" action="${depth}products.html" method="get"><label class="nav-sr-only" for="homeSearch">Search products, models, and applications</label><input id="homeSearch" name="search" type="search" placeholder="Search products, models, applications..."/><button type="submit" aria-label="Search products"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button></form>
-    <a href="${depth}quote.html" class="btn btn-primary header-quote">Request a Quote</a>
+    <div class="header-quote-actions"><a class="header-quote-cart" href="${depth}quote.html">Quote Cart <span data-quote-count aria-live="polite" aria-atomic="true">0</span></a><a href="${depth}quote.html" class="btn btn-primary header-quote">Request a Quote</a></div>
     <button class="category-nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="primaryNav">Menu <span aria-hidden="true">☰</span></button>
   </div>
   <nav class="category-nav" id="primaryNav" aria-label="Primary"><ul class="category-nav-list">

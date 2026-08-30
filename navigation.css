@@ -11,8 +11,8 @@
 .category-search svg { width:21px; height:21px; stroke:currentColor; stroke-width:1.8; }
 .category-search:focus-within { outline:2px solid #0f8a8a; outline-offset:2px; }
 .category-nav-toggle { display:none; }
-.category-nav { position:relative; border-top:1px solid #e0e6eb; background:white; color:#0a1f33; }
-.category-nav-list { display:flex; justify-content:space-between; gap:4px; max-width:1680px; padding:0 24px; margin:0 auto; list-style:none; }
+.category-nav { width:calc(100% - 48px); max-width:1480px; margin-inline:auto; padding-inline:24px; position:relative; border-top:1px solid #e0e6eb; background:white; color:#0a1f33; }
+.category-nav-list { display:flex; justify-content:space-between; gap:4px; padding:0; margin:0 auto; list-style:none; }
 .category-nav-label { display:flex; align-items:stretch; }
 .category-nav-label > a { display:flex; align-items:center; padding:16px 3px; font-size:14px; font-weight:600; line-height:1.4; white-space:nowrap; color:#0a1f33; border:0; }
 .category-disclosure { background:transparent; border:0; padding:0 4px; color:#0f7376; cursor:pointer; }
@@ -20,7 +20,7 @@
 .category-nav a:focus-visible, .category-nav button:focus-visible, .category-nav-toggle:focus-visible { outline:2px solid #0f8a8a; outline-offset:-2px; }
 .category-nav-item.is-open > .category-nav-label { background:#f0f7f7; box-shadow:inset 0 -3px #0f8a8a; }
 .category-disclosure[aria-expanded="true"] span { display:block; transform:rotate(180deg); }
-.mega-menu { position:absolute; top:100%; left:24px; right:24px; max-width:1632px; margin:0 auto; padding:32px 36px 0; background:white; border:1px solid #dce3e9; box-shadow:0 16px 24px #0a1f3314; max-height:calc(100dvh - 160px); overflow:auto; }
+.mega-menu { position:absolute; top:100%; left:0; right:0; margin:0 auto; padding:32px 36px 0; background:white; border:1px solid #dce3e9; box-shadow:0 16px 24px #0a1f3314; max-height:calc(100dvh - 160px); overflow:auto; }
 .mega-menu[hidden] { display:none; }
 .mega-content { display:grid; grid-template-columns:minmax(220px,1fr) minmax(0,3fr); gap:48px; padding-bottom:28px; }
 .mega-intro { border-right:1px solid #e0e6eb; padding-right:32px; }
@@ -33,7 +33,7 @@
 @media (max-width:1279px) {
  .category-header-top { grid-template-columns:auto minmax(0,1fr) auto auto; gap:16px; }
  .category-nav-toggle { display:flex; gap:8px; align-items:center; padding:10px 12px; border:1px solid #ccd5dc; border-radius:4px; background:white; color:#0a1f33; min-height:44px; }
- .category-nav { display:none; max-height:calc(100dvh - 150px); overflow:auto; }
+ .category-nav { width:100%; padding-inline:0; display:none; max-height:calc(100dvh - 150px); overflow:auto; }
  .category-nav.open { display:block; }
  .category-nav-list { display:block; padding:8px 24px 16px; }
  .category-nav-label { border-bottom:1px solid #e0e6eb; }
@@ -53,9 +53,24 @@
  .category-nav-toggle { grid-column:2; grid-row:1; font-size:.85rem; padding:8px; }
  .category-search { grid-row:2; grid-column:1 / -1; }
  .category-search input { min-height:42px; font-size:.85rem; }
- .header-quote { grid-column:1 / -1; justify-self:start; padding:8px 14px; font-size:.85rem; }
+ .header-quote-actions { grid-column:1 / -1; justify-content:space-between; }
+ .header-quote { padding:8px 14px; font-size:.85rem; }
  .category-header { position:relative; }
  .category-nav { max-height:none; }
  .category-nav-list { padding-inline:16px; }
  .mega-families ul { grid-template-columns:1fr; gap:0; }
 }
+
+.header-quote-actions { display:flex; align-items:center; gap:20px; }
+.header-quote-cart { display:flex; align-items:center; gap:6px; white-space:nowrap; color:var(--navy-900); font-size:.88rem; font-weight:600; }
+[data-quote-count] { min-width:20px; padding:2px 5px; border-radius:3px; background:#edf6f6; color:#0f7376; text-align:center; font-size:.76rem; }
+@media (min-width:768px) and (max-width:1023px) {
+ .category-header-top { grid-template-columns:1fr auto auto; }
+ .category-search { grid-column:1 / -1; grid-row:2; }
+}
+@media (max-width:767px) {
+ .header-quote-actions { gap:12px; }
+ .header-quote-cart { font-size:.84rem; }
+}
+
+#product-sourcing-support, #documentation-support { scroll-margin-top:180px; }

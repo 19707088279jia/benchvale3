@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 
 import { categories } from "./taxonomy.mjs";
 import { header } from "./site-navigation.mjs";
+import { categoryTemplates } from "./category-layout.mjs";
 
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const productDirectory = resolve(repositoryRoot, "products");
@@ -177,7 +178,7 @@ const illustration = (type, label = "") => {
 
 const footer = (depth = "") => `<footer class="site-footer"><div class="container"><div class="footer-grid"><div><span class="footer-brand-name">Benchvale Scientific</span><p>Laboratory Products &amp; Equipment</p><p>Ontario, Canada</p></div><div><span class="footer-heading">Contact</span><ul><li><a href="mailto:eric@benchvalescientific.com">eric@benchvalescientific.com</a></li><li><a href="mailto:quotes@benchvalescientific.com">quotes@benchvalescientific.com</a></li></ul></div><div><span class="footer-heading">Navigate</span><ul><li><a href="${depth}products.html">Products</a></li><li><a href="${depth}equipment.html">Equipment</a></li><li><a href="${depth}sourcing.html">Sourcing</a></li><li><a href="${depth}about.html">About</a></li><li><a href="${depth}contact.html">Contact</a></li><li><a href="${depth}shipping.html">Shipping</a></li><li><a href="${depth}returns.html">Returns &amp; RMA</a></li><li><a href="${depth}warranty.html">Warranty</a></li><li><a href="${depth}terms.html">Terms</a></li><li><a href="${depth}privacy.html">Privacy</a></li></ul></div></div><div class="footer-bottom"><span>&copy; <span data-year></span> Benchvale Scientific. Ontario, Canada.</span><span><a href="${depth}terms.html">Terms</a> · <a href="${depth}privacy.html">Privacy</a></span></div></div></footer>`;
 
-const categoryCard = (category) => `<article class="shop-category-card" id="${category.anchor}">${illustration(category.icon)}<div class="shop-category-card-copy"><h2>${escapeHtml(category.name)}</h2><p>${escapeHtml(category.description)}</p><ul>${category.families.map((item) => `<li>${escapeHtml(item.name)}</li>`).join("")}</ul><a href="#catalogue" class="category-filter-link" data-category-link="${category.anchor}">View products <span aria-hidden="true">→</span></a></div></article>`;
+const categoryCard = (category) => `<article class="shop-category-card" id="${category.anchor}">${illustration(category.icon)}<div class="shop-category-card-copy"><h2>${escapeHtml(category.name)}</h2><p>${escapeHtml(category.description)}</p><ul>${category.families.map((item) => `<li>${escapeHtml(item.name)}</li>`).join("")}</ul><a href="products.html?category=${category.anchor}" class="category-filter-link" data-category-link="${category.anchor}">View products <span aria-hidden="true">→</span></a></div></article>`;
 
 const productCard = (product) => {
   const meta = product.verified
@@ -202,6 +203,8 @@ const productsIndexTemplate = () => `<!DOCTYPE html>
   <meta name="theme-color" content="#0a1f33" />
   <link rel="icon" href="images/favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="styles.css" /><link rel="stylesheet" href="navigation.css" />
+  <link rel="stylesheet" href="category-page.css" />
+  <script>if (new URLSearchParams(location.search).has("category")) document.documentElement.classList.add("category-pending");</script>
 </head>
 <body class="products-page">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -212,6 +215,8 @@ const productsIndexTemplate = () => `<!DOCTYPE html>
     <section class="catalogue-section section-alt" id="catalogue" aria-labelledby="catalogue-heading"><div class="container"><div class="catalogue-heading-row"><div><p class="eyebrow">Product Catalogue</p><h2 id="catalogue-heading">Browse all products</h2></div><a href="quote.html" class="btn btn-secondary">Request Multiple Products</a></div><div class="catalogue-toolbar"><div class="catalogue-search"><label for="productSearch">Search products</label><div class="catalogue-search-control"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6"/><path d="m16 16 4 4"/></svg><input type="search" id="productSearch" placeholder="Search product, category, manufacturer, Cat.No., SKU, or specification" autocomplete="off" /></div></div><div class="catalogue-filters" aria-label="Filter products by category"><button type="button" class="filter-button is-active" data-product-filter="all" aria-pressed="true">All</button>${categories.map((category) => `<button type="button" class="filter-button" data-product-filter="${category.anchor}" aria-pressed="false">${escapeHtml(category.name)}</button>`).join("")}</div><p class="catalogue-result-count" id="productSearchStatus" aria-live="polite">Showing ${products.length} products</p></div><div class="product-card-grid retail-product-grid" id="productGrid">${products.map(productCard).join("\n")}</div><div class="catalogue-empty" id="catalogueEmpty" hidden><h3>No matching products found</h3><p>Try a broader search or <a href="quote.html">send us the product requirements</a> for a sourced option.</p></div></div></section>
     <section class="catalogue-help"><div class="container catalogue-help-inner"><div><p class="eyebrow">Need a different configuration?</p><h2>Tell us the specifications that matter</h2><p>Benchvale can review a preferred manufacturer or Cat.No., required documentation, pack size, quantity, postal code, and required date.</p></div><a href="quote.html" class="btn btn-primary">Start an RFQ</a></div></section>
   </main>
+  ${categoryTemplates(categories, illustration)}
+  <script src="category-page.js"></script>
   ${footer()}
   <script src="script.js"></script>
 </body>

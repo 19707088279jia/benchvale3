@@ -46,6 +46,7 @@ for (const file of htmlFiles) {
   if (!html.includes(header(dirname(file) === resolve(root, "products") ? "../" : "")) || !html.includes("Request a Quote")) {
     failures.push(`${relativeFile}: missing shared category navigation or RFQ path`);
   }
+  if (!html.includes("header-quote-cart") || !html.includes("data-quote-count")) failures.push(`${relativeFile}: missing Quote Cart`);
   if (!html.includes("Laboratory Products &amp; Equipment")) failures.push(`${relativeFile}: distributor identity missing`);
   if (html.includes("jiafeng@benchvalescientific.com")) failures.push(`${relativeFile}: outdated public email remains`);
 }
@@ -55,7 +56,10 @@ const expectedCategories = categories.map(c => c.anchor);
 for (const category of expectedCategories) {
   if (!productsIndex.includes(`id="${category}"`)) failures.push(`products.html: missing fixed category ${category}`);
 }
-for (const enhancement of ["productSearch", "data-product-filter", "data-product-card", "data-search"]) {
+for (const category of categories) {
+  if (!productsIndex.includes(`id="category-page-${category.anchor}"`)) failures.push(`Missing landing template for ${category.name}`);
+}
+for (const enhancement of ["category-page.js", "category-page.css", "productSearch", "data-product-filter", "data-product-card", "data-search"]) {
   if (!productsIndex.includes(enhancement)) failures.push(`products.html: missing catalogue enhancement ${enhancement}`);
 }
 for (const internalPhrase of ["Catalogue status", "Product Architecture", "Initial Product Records", "fixed categories", "Pricing Logic", "supplier quote → landed cost"]) {
@@ -140,7 +144,7 @@ for (const fact of ["52010", "53010", "52200", "53200", "Rainin LTS-compatible",
 notes.push(`${htmlFiles.length} HTML pages scanned`);
 notes.push(`${productFiles.length} product pages checked`);
 notes.push("All local href/src/action targets and internal anchors checked");
-notes.push("No duplicate IDs on any page; Explore section order and navigation checked");
+notes.push("No duplicate IDs on any page; shared navigation, Quote Cart, and category templates checked");
 notes.push("Homepage service/promotion counts, section order, and search form checked");
 
 if (failures.length) {

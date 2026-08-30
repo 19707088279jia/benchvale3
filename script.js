@@ -140,7 +140,7 @@ document.querySelectorAll("[data-year]").forEach((el) => {
   // The homepage search is a native GET form, so shared search links work on GitHub Pages.
   const params = new URLSearchParams(window.location.search);
   const initialQuery = params.get("search");
-  const requestedCategory = params.get("category");
+  const requestedCategory = params.get("filter");
   const initialCategory = filterButtons.some(button => button.dataset.productFilter === requestedCategory) ? requestedCategory : "all";
   if (initialQuery !== null) searchInput.value = initialQuery;
   selectCategory(initialCategory);
@@ -169,12 +169,19 @@ const readQuoteProducts = () => {
     return [];
   }
 };
+const updateQuoteCount = () => {
+  const count = readQuoteProducts().length;
+  document.querySelectorAll('[data-quote-count]').forEach(el => { el.textContent = count; });
+};
+updateQuoteCount();
+window.addEventListener('storage', event => { if (event.key === quoteStorageKey || event.key === null) updateQuoteCount(); });
 const writeQuoteProducts = (products) => {
   try {
     window.localStorage.setItem(quoteStorageKey, JSON.stringify(products));
   } catch {
     // The direct quote link still works if browser storage is unavailable.
   }
+  updateQuoteCount();
 };
 
 document.querySelectorAll("[data-add-to-quote]").forEach((button) => {

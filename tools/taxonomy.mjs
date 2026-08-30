@@ -5,7 +5,7 @@ export const categories = [
     "name": "Analytical",
     "anchor": "analytical",
     "icon": "equipment",
-    "description": "Analytical product families will appear here as catalogue data becomes available.",
+    "description": "Product sourcing support for analytical laboratory workflows. Share your method, specifications, or preferred manufacturer.",
     "navLabel": "Analytical",
     "families": []
   },
@@ -19,16 +19,22 @@ export const categories = [
       {
         "name": "Autosampler Vials",
         "search": "autosampler vial",
-        "page": "products/2ml-autosampler-vial.html"
+        "page": "products/2ml-autosampler-vial.html",
+        "icon": "vial",
+        "description": "Vials for sample introduction."
       },
       {
         "name": "Caps & Septa",
         "search": "cap",
-        "page": "products/9mm-cap-septa.html"
+        "page": "products/9mm-cap-septa.html",
+        "icon": "cap",
+        "description": "Closures for autosampler vials."
       },
       {
         "name": "Chromatography Consumables",
-        "search": "chromatography"
+        "search": "chromatography",
+        "icon": "vial",
+        "description": "Routine chromatography supplies."
       }
     ]
   },
@@ -42,16 +48,22 @@ export const categories = [
       {
         "name": "Sample Bottles",
         "search": "sample bottle",
-        "page": "products/hdpe-bottles.html"
+        "page": "products/hdpe-bottles.html",
+        "icon": "bottle",
+        "description": "Containers for collected samples."
       },
       {
         "name": "Reagent Bottles",
         "search": "reagent bottle",
-        "page": "products/hdpe-bottles.html"
+        "page": "products/hdpe-bottles.html",
+        "icon": "bottle",
+        "description": "Bottles for laboratory reagents."
       },
       {
         "name": "Water Testing Supplies",
-        "search": "water testing"
+        "search": "water testing",
+        "icon": "bottle",
+        "description": "Supplies for water workflows."
       }
     ]
   },
@@ -65,16 +77,22 @@ export const categories = [
       {
         "name": "Syringe Filters",
         "search": "syringe filter",
-        "page": "products/syringe-filters.html"
+        "page": "products/syringe-filters.html",
+        "icon": "filter",
+        "description": "Membrane sample filtration."
       },
       {
         "name": "SPE Cartridges",
         "search": "spe cartridge",
-        "page": "products/spe-cartridges.html"
+        "page": "products/spe-cartridges.html",
+        "icon": "spe",
+        "description": "Solid-phase extraction formats."
       },
       {
         "name": "Filtration",
-        "search": "filtration"
+        "search": "filtration",
+        "icon": "filter",
+        "description": "Sample filtration supplies."
       }
     ]
   },
@@ -88,37 +106,53 @@ export const categories = [
       {
         "name": "Petri Dishes",
         "search": "petri dish",
-        "page": "products/90mm-petri-dish.html"
+        "page": "products/90mm-petri-dish.html",
+        "icon": "dish",
+        "description": "Dishes for routine laboratory use."
       },
       {
         "name": "General Labware",
-        "search": "general lab"
+        "search": "general lab",
+        "icon": "dish",
+        "description": "Everyday laboratory essentials."
       },
       {
         "name": "Lab Containers",
-        "search": "container"
+        "search": "container",
+        "icon": "bottle",
+        "description": "Routine laboratory containers."
       },
       {
         "name": "General Consumables",
-        "search": "general lab"
+        "search": "general lab",
+        "icon": "dish",
+        "description": "Supplies for everyday bench work."
       },
       {
         "name": "Mixing & Stirring",
-        "search": "benchtop"
+        "search": "benchtop",
+        "icon": "vortex",
+        "description": "Benchtop mixing and stirring."
       },
       {
         "name": "Mixers & Shakers",
         "search": "vortex",
-        "page": "products/vortex-mixer.html"
+        "page": "products/vortex-mixer.html",
+        "icon": "vortex",
+        "description": "Mixing for sample workflows."
       },
       {
         "name": "Heating & Stirring",
         "search": "stirring",
-        "page": "products/hotplate-magnetic-stirrer.html"
+        "page": "products/hotplate-magnetic-stirrer.html",
+        "icon": "hotplate",
+        "description": "Benchtop heating and stirring."
       },
       {
         "name": "Benchtop Equipment",
-        "search": "benchtop"
+        "search": "benchtop",
+        "icon": "equipment",
+        "description": "Equipment for routine bench work."
       }
     ]
   },
@@ -131,15 +165,21 @@ export const categories = [
     "families": [
       {
         "name": "Centrifuge Tubes",
-        "search": "centrifuge tube"
+        "search": "centrifuge tube",
+        "icon": "tube",
+        "description": "Tubes for sample processing."
       },
       {
         "name": "Microtubes",
-        "search": "microtube"
+        "search": "microtube",
+        "icon": "microtube",
+        "description": "Small-volume sample handling."
       },
       {
         "name": "Sample Storage",
-        "search": "sample"
+        "search": "sample",
+        "icon": "tube",
+        "description": "Sample-handling containers."
       }
     ]
   },
@@ -153,19 +193,25 @@ export const categories = [
       {
         "name": "Pipette Tips",
         "search": "pipette tips",
-        "page": "products/pipette-tips.html"
+        "page": "products/pipette-tips.html",
+        "icon": "tips",
+        "description": "Tips for routine liquid handling."
       },
       {
         "name": "Serological Pipettes",
         "search": "serological pipette",
-        "page": "products/serological-pipettes.html"
+        "page": "products/serological-pipettes.html",
+        "icon": "pipette",
+        "description": "Pipettes for liquid transfer."
       },
       {
         "name": "Liquid Transfer",
-        "search": "transfer"
+        "search": "transfer",
+        "icon": "pipette",
+        "description": "Routine transfer supplies."
       }
     ]
   }
 ];
 export const categoryUrl = (category) => `products.html?category=${category.anchor}`;
-export const familyUrl = (category, family) => family.page || `${categoryUrl(category)}&search=${encodeURIComponent(family.search)}`;
+export const familyUrl = (category, family) => family.page || `products.html?filter=${category.anchor}&search=${encodeURIComponent(family.search)}`;
