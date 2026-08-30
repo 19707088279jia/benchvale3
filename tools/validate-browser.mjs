@@ -336,7 +336,7 @@ export async function validateBrowser(root, files) {
     assert.equal(await page.locator('main h1').textContent(),'Analytical');
   }
   await go('index.html');
-  const expected=[...categories.map(c=>c.navLabel),'Services','Promotions','About','Contact'];
+  const expected=[...categories.map(c=>c.navLabel),'Services','Contact'];
   assert.deepEqual(await page.locator('.category-nav-label > a').allTextContents(),expected);
   for (const c of categories) {
    const item=page.locator('.category-nav-item').filter({has:page.locator(`#mega-${c.anchor}`)});

@@ -32,6 +32,6 @@ export function header(depth = '') {
   <nav class="category-nav" id="primaryNav" aria-label="Primary"><ul class="category-nav-list">
   ${categories.map(c => `<li class="category-nav-item"><div class="category-nav-label"><a href="${link(categoryUrl(c))}">${esc(c.navLabel)}</a><button class="category-disclosure" type="button" aria-label="Show ${esc(c.name)} categories" aria-controls="mega-${c.anchor}" aria-expanded="false"><span aria-hidden="true">⌄</span></button></div>
   <div class="mega-menu${Array.isArray(c.groups) ? ' mega-menu-directory' : ''}" id="mega-${c.anchor}" hidden>${megaContent(c, link)}${megaFooter(c, link)}</div></li>`).join('\n')}
-  ${['Services','Promotions','About','Contact'].map(n=>`<li class="category-nav-item"><div class="category-nav-label"><a href="${depth}${n.toLowerCase()}.html">${n}</a></div></li>`).join('')}
+  ${['Services','Contact'].map(n=>`<li class="category-nav-item"><div class="category-nav-label"><a href="${depth}${n.toLowerCase()}.html">${n}</a></div></li>`).join('')}
   </ul></nav></header>`;
 }
