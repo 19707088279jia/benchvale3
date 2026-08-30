@@ -75,31 +75,38 @@
 
 #product-sourcing-support, #documentation-support { scroll-margin-top:180px; }
 
-/* Native columns flow in taxonomy reading order; groups never split across columns. */
-.mega-menu-directory { padding:24px 36px 0; }
-.mega-group-grid {
- display:block;
- column-count:3;
- column-gap:18px;
- column-fill:balance;
- max-width:876px;
+/* Real, independently stacking columns generated from balanced taxonomy chunks. */
+.mega-menu-directory { padding:22px 28px 0; }
+.mega-directory-columns {
+ display:none;
+ grid-template-columns:repeat(3, 220px);
+ column-gap:14px;
+ align-items:start;
+ justify-content:start;
+ max-width:688px;
  margin:0;
  padding-bottom:18px;
 }
-.mega-group { break-inside:avoid; display:block; width:100%; min-width:0; margin:0 0 20px; padding:0; }
+.mega-directory-columns[data-columns="3"] { display:grid; }
+.mega-directory-column { display:flex; flex-direction:column; gap:20px; min-width:0; }
+.mega-group { width:100%; min-width:0; margin:0; padding:0; }
 .mega-group h3 { margin:0 0 8px; font-size:.95rem; line-height:1.4; font-weight:700; color:var(--navy-900); }
 .mega-group ul { margin:0; padding:0; list-style:none; }
 .mega-group a { display:block; padding:5px 0; color:#53616c; font-size:.875rem; line-height:1.45; }
 .mega-group a:hover { color:var(--teal-600); text-decoration:underline; text-underline-offset:3px; }
-.mega-menu-directory .mega-view-all { max-width:876px; margin:0; padding-block:15px; }
-/* Keep the existing accordion breakpoints, with two columns on tablets and one on phones. */
+.mega-menu-directory .mega-view-all { max-width:688px; margin:0; padding-block:15px; }
+/* Match the existing navigation breakpoints; inactive variants have no tab stops. */
 @media (max-width:1279px) {
  .mega-menu-directory { padding:20px 16px 0; }
- .mega-group-grid { column-count:2; column-gap:16px; max-width:576px; }
- .mega-menu-directory .mega-view-all { max-width:576px; }
+ .mega-directory-columns { grid-template-columns:repeat(2, 220px); max-width:454px; }
+ .mega-directory-columns[data-columns="3"] { display:none; }
+ .mega-directory-columns[data-columns="2"] { display:grid; }
+ .mega-menu-directory .mega-view-all { max-width:454px; }
  .mega-group a { min-height:44px; display:flex; align-items:center; padding-block:8px; }
 }
 @media (max-width:767px) {
- .mega-group-grid { column-count:1; max-width:none; }
- .mega-menu-directory .mega-view-all { max-width:none; }
+ .mega-directory-columns { grid-template-columns:minmax(0, 220px); max-width:220px; }
+ .mega-directory-columns[data-columns="2"] { display:none; }
+ .mega-directory-columns[data-columns="1"] { display:grid; }
+ .mega-menu-directory .mega-view-all { max-width:220px; }
 }

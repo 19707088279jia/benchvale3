@@ -4,7 +4,7 @@ import {readFileSync} from 'node:fs';
 import {extname, relative, resolve, sep} from 'node:path';
 import {createRequire} from 'node:module';
 import {categories, familyUrl, directoryUrl} from './taxonomy.mjs';
-import {header} from './site-navigation.mjs';
+import {header, splitGroups} from './site-navigation.mjs';
 
 // Install playwright locally or provide its package directory through NODE_PATH.
 export async function validateBrowser(root, files) {
@@ -78,18 +78,27 @@ export async function validateBrowser(root, files) {
   await go('products.html');assert.equal(await visible(),14);
   await page.locator('[data-product-filter="general-lab"]').click();assert.equal(await visible(),3);
   await page.locator('#productSearch').fill('vortex');assert.equal(await visible(),1);
+  for(const [input,expected] of [
+    [[],[[],[],[]]],
+    [['A'],[['A'],[],[]]],
+    [['A','B'],[['A'],['B'],[]]],
+    [['A','B','C','D'],[['A','B'],['C'],['D']]],
+    [['A','B','C','D','E'],[['A','B'],['C','D'],['E']]],
+    [['A','B','C','D','E','F'],[['A','B'],['C','D'],['E','F']]],
+  ]) assert.deepEqual(splitGroups(input,3),expected,'Sequential balanced chunking contract');
   const analytical = categories.find(c=>c.anchor==='analytical');
   const directoryTopics = analytical.groups.flatMap(group=>group.items);
   await go('index.html');
   const directory = page.locator('#mega-analytical');
+  const activeColumns = () => directory.locator('.mega-directory-columns:visible');
   await page.locator('[aria-controls="mega-analytical"]').hover();
   assert.equal(await directory.locator('.mega-intro, .mega-families').count(),0);
   assert(!(await directory.innerText()).includes('No product families are currently listed.'));
-  assert.deepEqual(await directory.locator('h3').allTextContents(),analytical.groups.map(group=>group.name));
-  assert.deepEqual(await directory.locator('.mega-group a').evaluateAll(links=>links.map(a=>a.getAttribute('href'))),directoryTopics.map(topic=>directoryUrl(analytical,topic)));
+  assert.deepEqual(await activeColumns().locator('h3').allTextContents(),analytical.groups.map(group=>group.name));
+  assert.deepEqual(await activeColumns().locator('.mega-group a').evaluateAll(links=>links.map(a=>a.getAttribute('href'))),directoryTopics.map(topic=>directoryUrl(analytical,topic)));
   assert.equal(await directory.locator('.mega-view-all').getAttribute('href'),'products.html?category=analytical');
   // Change only taxonomy objects in memory, then use the production renderer.
-  // This proves new groups require no column assignments, wrappers, or CSS edits.
+  // The renderer builds column wrappers without taxonomy assignments or CSS edits.
   const originalGroups = analytical.groups;
   try {
     for (const [width, columns] of [[320,1],[767,1],[768,2],[1024,2],[1279,2],[1280,3],[1366,3],[1440,3],[1600,3],[1920,3]]) {
@@ -98,50 +107,49 @@ export async function validateBrowser(root, files) {
         await page.locator('#navToggle').click();
         await page.locator('[aria-controls="mega-analytical"]').click();
       } else await page.locator('[aria-controls="mega-analytical"]').hover();
-      for (const count of [3,4,6,8]) {
+      for (const count of [3,4,5,6,8]) {
         analytical.groups = originalGroups.slice(0,count);
         while(analytical.groups.length<count) analytical.groups.push({name:`Validation group ${analytical.groups.length+1}`,items:[{name:'Density Meters',search:'density'}]});
         await directory.evaluate((panel, renderedHeader)=>{
           const parsed=new DOMParser().parseFromString(renderedHeader,'text/html');
           panel.replaceChildren(...parsed.querySelector('#mega-analytical').childNodes);
         }, header());
-        assert.equal(await directory.locator('.mega-group-grid > section.mega-group').count(),count);
-        const layout=await directory.evaluate(panel=>{
-          const grid=panel.querySelector('.mega-group-grid');const style=getComputedStyle(grid);
-          const groups=[...grid.children].map(group=>{const r=group.getBoundingClientRect();return {name:group.querySelector("h3").textContent,x:r.x,y:r.y,bottom:r.bottom,width:r.width,right:r.right,fragments:group.getClientRects().length};});
-          const g=grid.getBoundingClientRect(),p=panel.getBoundingClientRect();
-          return {groups,columns:Number(style.columnCount),gap:style.columnGap,width:g.width,center:g.x+g.width/2,panelCenter:p.x+p.width/2,panelLeft:p.x,footerWidth:panel.querySelector(".mega-view-all").getBoundingClientRect().width,footerLeft:panel.querySelector(".mega-view-all").getBoundingClientRect().x};
+        assert.equal(await activeColumns().count(),1,'Exactly one responsive variant is visible');
+        assert.equal(await activeColumns().locator('.mega-directory-column > section.mega-group').count(),count);
+        const layout=await activeColumns().evaluate(grid=>{
+          const style=getComputedStyle(grid);
+          const rect=e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,bottom:r.bottom,width:r.width,right:r.right};};
+          const columnElements=[...grid.children];
+          const columnGroups=columnElements.map(column=>[...column.children].map(group=>({name:group.querySelector('h3').textContent,...rect(group)})));
+          const panel=grid.closest('.mega-menu');
+          return {groups:columnGroups.flat(),columnGroups,columns:columnElements.map(rect),columnCount:Number(grid.dataset.columns),gap:style.columnGap,groupGap:getComputedStyle(columnElements[0]).gap,grid:rect(grid),panel:rect(panel),footer:rect(panel.querySelector('.mega-view-all'))};
         });
-        assert.equal(layout.columns,columns);
-        assert.equal(layout.gap,width>=1280?'18px':'16px');
-        const occupiedColumns=[...new Set(layout.groups.map(g=>g.x))];
-        assert.equal(occupiedColumns.length,columns,'Native flow uses the expected number of columns');
-        for(let i=0;i<count;i++) {
-          assert.equal(layout.groups[i].fragments,1,'A group must never split across columns');
-          assert(layout.groups[i].x>=layout.groups[0].x);
-          if(i && layout.groups[i].x===layout.groups[i-1].x) {
-            assert(Math.abs(layout.groups[i].y-layout.groups[i-1].bottom-20)<1,'Groups within a column stack with a normal 20px gap');
+        assert.equal(layout.columnCount,columns);assert.equal(layout.columns.length,columns);
+        assert.equal(layout.gap,'14px');assert.equal(layout.groupGap,'20px');
+        const expectedSizes = columns===3 ? ({3:[1,1,1],4:[2,1,1],5:[2,2,1],6:[2,2,2],8:[3,3,2]})[count] : columns===2 ? [Math.ceil(count/2),Math.floor(count/2)] : [count];
+        assert.deepEqual(layout.columnGroups.map(groups=>groups.length),expectedSizes);
+        assert.deepEqual(layout.groups.map(g=>g.name),analytical.groups.map(g=>g.name),'Chunking preserves taxonomy order');
+        for(let i=0;i<columns;i++) {
+          assert.equal(layout.columns[i].width,220);
+          if(i) {
+            assert.equal(layout.columns[i].x-layout.columns[i-1].right,14);
+            assert.equal(layout.columns[i].y,layout.columns[0].y,'Independent columns align at the top');
           }
+          const groups=layout.columnGroups[i];
+          for(let j=1;j<groups.length;j++) assert(Math.abs(groups[j].y-groups[j-1].bottom-20)<1,'Groups stack with exactly 20px separation');
         }
+        assert.equal(layout.grid.width,columns*220+(columns-1)*14);
+        assert.equal(layout.footer.x,layout.grid.x);assert.equal(layout.footer.width,layout.grid.width);
         if(width>=1280) {
-          const first=layout.groups[0];
-          assert(first.x-layout.panelLeft>=35 && first.x-layout.panelLeft<=45,'First column sits 35–45px inside the panel');
-          assert.equal(layout.width,876,'Desktop content remains clustered rather than stretching');
-          for(const group of layout.groups) assert.equal(group.width,280);
-          for(let i=1;i<occupiedColumns.length;i++) assert.equal(occupiedColumns[i]-occupiedColumns[i-1]-280,18);
-          assert.equal(layout.footerLeft,first.x);assert.equal(layout.footerWidth,876);
+          assert(layout.grid.x-layout.panel.x>=28 && layout.grid.x-layout.panel.x<=35,'Desktop starts 28–35px inside the panel');
           if(count===originalGroups.length) {
             const instruments=layout.groups.find(g=>g.name==='Analytical Instruments');
             const spectroscopy=layout.groups.find(g=>g.name==='Spectroscopy');
             const materials=layout.groups.find(g=>g.name==='Materials & Physical Testing');
             assert.equal(spectroscopy.x,instruments.x);
-            assert(Math.abs(spectroscopy.y-instruments.bottom-20)<1,'Spectroscopy immediately follows Analytical Instruments');
-            assert(spectroscopy.y<materials.bottom,'Spectroscopy does not wait for the tallest neighboring group');
+            assert(Math.abs(spectroscopy.y-instruments.bottom-20)<1);
+            assert(spectroscopy.y<materials.bottom,'Spectroscopy does not wait for a taller neighboring column');
           }
-        } else {
-          assert.equal(layout.footerLeft,layout.groups[0].x,'Responsive content stays left aligned');
-          assert.equal(layout.footerWidth,layout.width);
-          if(columns===2) assert.equal(layout.width,576);
         }
         await overflow(`${count} groups at ${width}`);
       }
@@ -155,7 +163,7 @@ export async function validateBrowser(root, files) {
     const result=await page.evaluate(rendered=>{
       const parsed=new DOMParser().parseFromString(rendered,'text/html');
       const panel=parsed.querySelector('#mega-chromatography');
-      return {groups:panel.querySelectorAll('.mega-group').length,href:panel.querySelector('.mega-group a').getAttribute('href'),familyFallback:!!parsed.querySelector('#mega-general-lab .mega-families')};
+      return {groups:panel.querySelectorAll('[data-columns="3"] .mega-group').length,href:panel.querySelector('.mega-group a').getAttribute('href'),familyFallback:!!parsed.querySelector('#mega-general-lab .mega-families')};
     },header('../'));
     assert.deepEqual(result,{groups:1,href:'../products.html?category=chromatography&search=vial',familyFallback:true});
   } finally {
@@ -165,10 +173,10 @@ export async function validateBrowser(root, files) {
   for (const width of [1280,1366,1440,1600,1920]) {
     await page.setViewportSize({width,height:800});
     await page.locator('[aria-controls="mega-analytical"]').hover();
-    assert.equal(await directory.locator('.mega-group-grid').evaluate(e=>Number(getComputedStyle(e).columnCount)),3);
+    assert.equal(await activeColumns().locator(':scope > .mega-directory-column').count(),3);
     await overflow(`Analytical directory at ${width}`);
     if(process.env.BENCHVALE_SCREENSHOT_DIR && [1366,1440,1600,1920].includes(width)) {
-      await page.screenshot({path:resolve(process.env.BENCHVALE_SCREENSHOT_DIR,`analytical-flow-${width}.png`)});
+      await page.screenshot({path:resolve(process.env.BENCHVALE_SCREENSHOT_DIR,`analytical-real-columns-${width}.png`)});
     }
   }
   await page.setViewportSize({width:1440,height:1000});

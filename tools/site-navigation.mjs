@@ -1,8 +1,22 @@
 import { categories, categoryUrl, familyUrl, directoryUrl } from './taxonomy.mjs';
 const esc = (s) => s.replaceAll('&', '&amp;').replaceAll('"', '&quot;');
-// Flat groups follow taxonomy reading order; CSS columns keep each group intact.
+// Split in source order; earlier columns receive the remainder (4 -> 2/1/1).
+export function splitGroups(groups, columnCount) {
+  const size = Math.floor(groups.length / columnCount);
+  const remainder = groups.length % columnCount;
+  let offset = 0;
+  return Array.from({ length: columnCount }, (_, index) => {
+    const count = size + (index < remainder ? 1 : 0);
+    const column = groups.slice(offset, offset + count);
+    offset += count;
+    return column;
+  });
+}
+const groupMarkup = (category, group, link) => `<section class="mega-group"><h3>${esc(group.name)}</h3><ul>${group.items.map(topic => `<li><a href="${link(directoryUrl(category, topic))}">${esc(topic.name)}</a></li>`).join('')}</ul></section>`;
+// All responsive variants come from one taxonomy. CSS exposes just one variant,
+// so no browser-side regrouping or manual column assignments are necessary.
 const megaContent = (c, link) => Array.isArray(c.groups)
-  ? `<div class="mega-group-grid">${c.groups.map(group => `<section class="mega-group"><h3>${esc(group.name)}</h3><ul>${group.items.map(topic => `<li><a href="${link(directoryUrl(c, topic))}">${esc(topic.name)}</a></li>`).join('')}</ul></section>`).join('')}</div>`
+  ? [3, 2, 1].map(count => `<div class="mega-directory-columns" data-columns="${count}">${splitGroups(c.groups, count).map(column => `<div class="mega-directory-column">${column.map(group => groupMarkup(c, group, link)).join('')}</div>`).join('')}</div>`).join('')
   : `<div class="mega-content"><div class="mega-intro"><h2>${esc(c.name)}</h2><p>${esc(c.description)}</p></div><div class="mega-families"><h3>Product families</h3>${c.families.length ? `<ul>${c.families.map(f => `<li><a href="${link(familyUrl(c,f))}">${esc(f.name)}</a></li>`).join('')}</ul>` : '<p>No product families are currently listed.</p>'}</div></div>`;
 export function header(depth = '') {
   const link = (url) => esc(depth + url);

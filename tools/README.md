@@ -56,17 +56,21 @@ Categories without `groups` retain their existing `families` menu layout.
 To expand Analytical, append one object to its `groups` array in
 `tools/taxonomy.mjs`, then run `node tools/update-navigation.mjs` to refresh the
 static pages. No renderer or CSS edits are needed. The renderer creates one
-`section.mega-group` per object. Native CSS multi-columns distribute the groups
-in taxonomy reading order, using three columns on desktop, two on tablet, and
-one on mobile. Groups remain intact and stack with a 20px gap, independently
-of neighboring column heights. Spectroscopy follows Analytical Instruments in
-the data so the current desktop layout reads down that first column naturally.
-No individual group has a hardcoded CSS position or column assignment.
+`section.mega-group` per object and distributes groups sequentially into real
+column containers. Balanced chunking gives earlier columns the remainder:
+4 groups become 2/1/1, 5 become 2/2/1, and 6 become 2/2/2 on desktop.
+The same algorithm generates 3-, 2-, and 1-column variants. CSS displays only
+the variant matching the existing navigation breakpoint; inactive variants are
+hidden from both display and keyboard navigation. No runtime regrouping is needed.
 
-Desktop content starts 37px inside the panel, with three 280px columns separated
-by 18px gaps, for a fixed maximum width of 876px. Tablet columns use 16px gaps.
-The directory and its bottom link remain left aligned; the existing mobile
-accordion behavior is unchanged.
+Columns stack independently with a 20px flex gap. Spectroscopy follows Analytical
+Instruments in the taxonomy and therefore immediately follows it in column one
+for the current four groups. No group has a column field or hardcoded position.
+
+Desktop content starts 29px inside the panel, with three 220px columns and 14px
+gaps, occupying 688px. Tablet and mobile variants use two and one real columns.
+The bottom link and divider match the active directory width. The existing
+mobile accordion behavior is unchanged.
 
 Grouped navigation topics remain separate from verified catalogue `families`.
 `directoryUrl` uses a dedicated `page` if supplied, otherwise the category URL
@@ -74,5 +78,5 @@ plus `search`. These links retain the category landing-page behavior described
 above and do not add product records. Add catalogue families only when verified
 data becomes available.
 
-Browser validation covers 3, 4, 6, and 8 groups using in-memory taxonomy fixtures;
+Browser validation covers 3, 4, 5, 6, and 8 groups using in-memory taxonomy fixtures;
 those fixtures are never written to the catalogue or generated site.
