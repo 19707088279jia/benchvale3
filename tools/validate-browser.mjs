@@ -96,7 +96,8 @@ export async function validateBrowser(root, files) {
   assert(!(await directory.innerText()).includes('No product families are currently listed.'));
   assert.deepEqual(await activeColumns().locator('h3').allTextContents(),analytical.groups.map(group=>group.name));
   assert.deepEqual(await activeColumns().locator('.mega-group a').evaluateAll(links=>links.map(a=>a.getAttribute('href'))),directoryTopics.map(topic=>directoryUrl(analytical,topic)));
-  assert.equal(await directory.locator('.mega-view-all').getAttribute('href'),'products.html?category=analytical');
+  assert.equal(await directory.locator('.mega-view-all').count(),0,'Directory has no footer link or divider');
+  assert.equal(await page.locator('.category-nav-label > a').first().getAttribute('href'),'products.html?category=analytical');
   // Change only taxonomy objects in memory, then use the production renderer.
   // The renderer builds column wrappers without taxonomy assignments or CSS edits.
   const originalGroups = analytical.groups;
@@ -120,13 +121,16 @@ export async function validateBrowser(root, files) {
           const style=getComputedStyle(grid);
           const rect=e=>{const r=e.getBoundingClientRect();return {x:r.x,y:r.y,bottom:r.bottom,width:r.width,right:r.right};};
           const columnElements=[...grid.children];
-          const columnGroups=columnElements.map(column=>[...column.children].map(group=>({name:group.querySelector('h3').textContent,...rect(group)})));
+          const columnGroups=columnElements.map(column=>[...column.children].map(group=>{
+            const separator=getComputedStyle(group,'::before');
+            return {name:group.querySelector('h3').textContent,...rect(group),headingY:rect(group.querySelector('h3')).y,separator:{content:separator.content,width:separator.width,border:separator.borderTopWidth,color:separator.borderTopColor,below:separator.marginBottom}};
+          }));
           const panel=grid.closest('.mega-menu');
           const columnStyles=columnElements.map(column=>{const s=getComputedStyle(column);return {left:s.paddingLeft,right:s.paddingRight,border:s.borderLeftWidth,color:s.borderLeftColor};});
-          return {groups:columnGroups.flat(),columnGroups,columns:columnElements.map(rect),columnStyles,columnCount:Number(grid.dataset.columns),gap:style.columnGap,groupGap:getComputedStyle(columnElements[0]).gap,grid:rect(grid),panel:rect(panel),panelOverflow:panel.scrollWidth>panel.clientWidth,footer:rect(panel.querySelector('.mega-view-all'))};
+          return {groups:columnGroups.flat(),columnGroups,columns:columnElements.map(rect),columnStyles,columnCount:Number(grid.dataset.columns),gap:style.columnGap,groupGap:getComputedStyle(columnElements[0]).gap,grid:rect(grid),panel:rect(panel),panelOverflow:panel.scrollWidth>panel.clientWidth,footerCount:panel.querySelectorAll('.mega-view-all').length};
         });
         assert.equal(layout.columnCount,columns);assert.equal(layout.columns.length,columns);
-        assert.equal(layout.gap,'0px');assert.equal(layout.groupGap,'18px');
+        assert.equal(layout.gap,'0px');assert.equal(layout.groupGap,'0px');
         const expectedSizes = columns===3 ? ({3:[1,1,1],4:[2,1,1],5:[2,2,1],6:[2,2,2],8:[3,3,2]})[count] : columns===2 ? [Math.ceil(count/2),Math.floor(count/2)] : [count];
         assert.deepEqual(layout.columnGroups.map(groups=>groups.length),expectedSizes);
         assert.deepEqual(layout.groups.map(g=>g.name),analytical.groups.map(g=>g.name),'Chunking preserves taxonomy order');
@@ -141,8 +145,17 @@ export async function validateBrowser(root, files) {
             assert.equal(layout.columns[i].y,layout.columns[0].y,'Independent columns align at the top');
           }
           const groups=layout.columnGroups[i];
-          assert.equal(layout.columns[i].bottom,groups.at(-1).bottom,'Separators stop at each column\'s content');
-          for(let j=1;j<groups.length;j++) assert(Math.abs(groups[j].y-groups[j-1].bottom-18)<1,'Groups stack with exactly 18px separation');
+          assert.equal(layout.columns[i].bottom,layout.grid.bottom,'Every vertical separator reaches the bottom of the directory');
+          assert.equal(groups[0].separator.content,'none','First group has no horizontal rule');
+          for(let j=1;j<groups.length;j++) {
+            assert(Math.abs(groups[j].y-groups[j-1].bottom-9)<1,'Only 9px above each group separator');
+            assert.equal(groups[j].separator.border,'1px');
+            assert.equal(groups[j].separator.color,'rgb(10, 31, 51)');
+            assert.equal(groups[j].separator.width,'144px');
+            assert(144<groups[j].width,'Group separator remains shorter than the text column');
+            assert.equal(groups[j].separator.below,'9px');
+            assert(Math.abs(groups[j].headingY-groups[j].y-10)<1,'Heading follows the 1px rule and 9px spacing');
+          }
         }
         assert.equal(layout.grid.width,columns*230);
         const panelInset=width>=1280?17:16;
@@ -150,14 +163,16 @@ export async function validateBrowser(root, files) {
         assert.equal(layout.panel.right-layout.grid.right,panelInset,'Panel ends immediately after the last column');
         assert.equal(layout.panel.width,layout.grid.width+2*panelInset,'Panel fits the active columns and padding');
         assert(!layout.panelOverflow,'No horizontal scrolling inside the directory panel');
-        assert.equal(layout.footer.x,layout.grid.x);assert.equal(layout.footer.width,layout.grid.width);
+        assert.equal(layout.footerCount,0);
+        assert.equal(layout.panel.bottom-layout.grid.bottom,width>=1280?1:0,'No footer row or padding below the vertical dividers');
+        assert.equal(layout.grid.bottom-Math.max(...layout.groups.map(group=>group.bottom)),50,'Exactly 50px of clean space below the tallest content column');
         if(width>=1280) {
           if(count===originalGroups.length) {
             const instruments=layout.groups.find(g=>g.name==='Analytical Instruments');
             const spectroscopy=layout.groups.find(g=>g.name==='Spectroscopy');
             const materials=layout.groups.find(g=>g.name==='Materials & Physical Testing');
             assert.equal(spectroscopy.x,instruments.x);
-            assert(Math.abs(spectroscopy.y-instruments.bottom-18)<1);
+            assert(Math.abs(spectroscopy.headingY-instruments.bottom-19)<1);
             assert(spectroscopy.y<materials.bottom,'Spectroscopy does not wait for a taller neighboring column');
           }
         }
@@ -173,9 +188,9 @@ export async function validateBrowser(root, files) {
     const result=await page.evaluate(rendered=>{
       const parsed=new DOMParser().parseFromString(rendered,'text/html');
       const panel=parsed.querySelector('#mega-chromatography');
-      return {groups:panel.querySelectorAll('[data-columns="3"] .mega-group').length,href:panel.querySelector('.mega-group a').getAttribute('href'),familyFallback:!!parsed.querySelector('#mega-general-lab .mega-families')};
+      return {groups:panel.querySelectorAll('[data-columns="3"] .mega-group').length,href:panel.querySelector('.mega-group a').getAttribute('href'),familyFallback:!!parsed.querySelector('#mega-general-lab .mega-families'),directoryFooter:!!panel.querySelector('.mega-view-all'),familyFooter:!!parsed.querySelector('#mega-general-lab .mega-view-all')};
     },header('../'));
-    assert.deepEqual(result,{groups:1,href:'../products.html?category=chromatography&search=vial',familyFallback:true});
+    assert.deepEqual(result,{groups:1,href:'../products.html?category=chromatography&search=vial',familyFallback:true,directoryFooter:false,familyFooter:true});
   } finally {
     if(previousGroups===undefined) delete chromatography.groups; else chromatography.groups=previousGroups;
   }
@@ -186,7 +201,7 @@ export async function validateBrowser(root, files) {
     assert.equal(await activeColumns().locator(':scope > .mega-directory-column').count(),3);
     await overflow(`Analytical directory at ${width}`);
     if(process.env.BENCHVALE_SCREENSHOT_DIR && [1366,1440,1600,1920].includes(width)) {
-      await page.screenshot({path:resolve(process.env.BENCHVALE_SCREENSHOT_DIR,`analytical-compact-panel-${width}.png`)});
+      await page.screenshot({path:resolve(process.env.BENCHVALE_SCREENSHOT_DIR,`analytical-full-dividers-${width}.png`)});
     }
   }
   await page.setViewportSize({width:1440,height:1000});

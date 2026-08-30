@@ -63,17 +63,22 @@ The same algorithm generates 3-, 2-, and 1-column variants. CSS displays only
 the variant matching the existing navigation breakpoint; inactive variants are
 hidden from both display and keyboard navigation. No runtime regrouping is needed.
 
-Columns stack independently with an 18px flex gap. Spectroscopy follows Analytical
-Instruments in the taxonomy and therefore immediately follows it in column one
-for the current four groups. No group has a column field or hardcoded position.
+Groups stack at the top of each column. A short 144px navy rule with 9px of space
+above and below automatically separates adjacent groups in the same column.
+Spectroscopy follows Analytical Instruments in the taxonomy and therefore
+immediately follows it in column one for the current four groups. No group has
+a column field or hardcoded position.
 
 Directory panels size to their content instead of spanning the navigation.
 Desktop content starts 17px inside the panel, with three 230px columns and no
 grid gap, occupying 690px inside a 724px panel. Navy separators and 14px inner
-column padding distinguish neighboring columns; each separator ends with its
-column's content. Tablet and mobile variants use two and one real columns, with
-one separator on tablet and none on mobile. The bottom link and divider match
-the active directory width. The existing mobile accordion behavior is unchanged.
+column padding distinguish neighboring columns. Columns stretch to equal height,
+and 50px of bottom padding inside each column extends the navy separators through
+the bottom whitespace to the panel edge. Directory menus have no footer link or
+footer divider; their main navigation label still links to the category page.
+Tablet and mobile variants use two and one real columns, with one vertical
+separator on tablet and none on mobile. The existing mobile accordion behavior
+is unchanged, and other categories retain their family-menu footer links.
 
 Grouped navigation topics remain separate from verified catalogue `families`.
 `directoryUrl` uses a dedicated `page` if supplied, otherwise the category URL

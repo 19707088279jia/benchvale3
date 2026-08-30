@@ -18,6 +18,8 @@ const groupMarkup = (category, group, link) => `<section class="mega-group"><h3>
 const megaContent = (c, link) => Array.isArray(c.groups)
   ? [3, 2, 1].map(count => `<div class="mega-directory-columns" data-columns="${count}">${splitGroups(c.groups, count).map(column => `<div class="mega-directory-column">${column.map(group => groupMarkup(c, group, link)).join('')}</div>`).join('')}</div>`).join('')
   : `<div class="mega-content"><div class="mega-intro"><h2>${esc(c.name)}</h2><p>${esc(c.description)}</p></div><div class="mega-families"><h3>Product families</h3>${c.families.length ? `<ul>${c.families.map(f => `<li><a href="${link(familyUrl(c,f))}">${esc(f.name)}</a></li>`).join('')}</ul>` : '<p>No product families are currently listed.</p>'}</div></div>`;
+// Directory labels already link to their category; only family menus keep a footer link.
+const megaFooter = (c, link) => Array.isArray(c.groups) ? '' : `<a class="mega-view-all" href="${link(categoryUrl(c))}">View All ${esc(c.name)} <span aria-hidden="true">→</span></a>`;
 export function header(depth = '') {
   const link = (url) => esc(depth + url);
   return `<header class="site-header category-header">
@@ -29,7 +31,7 @@ export function header(depth = '') {
   </div>
   <nav class="category-nav" id="primaryNav" aria-label="Primary"><ul class="category-nav-list">
   ${categories.map(c => `<li class="category-nav-item"><div class="category-nav-label"><a href="${link(categoryUrl(c))}">${esc(c.navLabel)}</a><button class="category-disclosure" type="button" aria-label="Show ${esc(c.name)} categories" aria-controls="mega-${c.anchor}" aria-expanded="false"><span aria-hidden="true">⌄</span></button></div>
-  <div class="mega-menu${Array.isArray(c.groups) ? ' mega-menu-directory' : ''}" id="mega-${c.anchor}" hidden>${megaContent(c, link)}<a class="mega-view-all" href="${link(categoryUrl(c))}">View All ${esc(c.name)} <span aria-hidden="true">→</span></a></div></li>`).join('\n')}
+  <div class="mega-menu${Array.isArray(c.groups) ? ' mega-menu-directory' : ''}" id="mega-${c.anchor}" hidden>${megaContent(c, link)}${megaFooter(c, link)}</div></li>`).join('\n')}
   ${['Services','Promotions','About','Contact'].map(n=>`<li class="category-nav-item"><div class="category-nav-label"><a href="${depth}${n.toLowerCase()}.html">${n}</a></div></li>`).join('')}
   </ul></nav></header>`;
 }
