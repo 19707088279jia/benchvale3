@@ -19,6 +19,11 @@ for (const file of htmlFiles) {
   const html = readFileSync(file, "utf8");
   const relativeFile = file.slice(root.length + 1);
   const references = Array.from(html.matchAll(/\s(?:href|src|action)=["']([^"']+)["']/g), (match) => match[1]);
+  const seenIds = new Set();
+  for (const [, id] of html.matchAll(/\sid=["']([^"']+)["']/g)) {
+    if (seenIds.has(id)) failures.push(`${relativeFile}: duplicate id="${id}"`);
+    seenIds.add(id);
+  }
 
   for (const reference of references) {
     if (/^(?:https?:|mailto:|tel:|data:|javascript:)/i.test(reference)) continue;
@@ -80,18 +85,43 @@ for (const quoteFeature of ["benchvaleQuoteProducts", "data-product-card", "data
 if (readFileSync(resolve(root, "CNAME"), "utf8").trim() !== "benchvalescientific.com") failures.push("CNAME: custom domain changed");
 
 const home = readFileSync(resolve(root, "index.html"), "utf8");
-for (const section of ["Shop by Category", "Featured Promotions", "Services", "Why Buy from Benchvale", "Sourcing Support"]) {
+for (const section of ["Featured Promotions", "Services"]) {
   if (!home.includes(section)) failures.push(`index.html: missing storefront section ${section}`);
 }
 for (const [className, count] of [["home-service-card", 6], ["home-promotion-card", 6]]) {
   if (home.split(`class="${className}"`).length - 1 !== count) failures.push(`index.html: expected ${count} ${className} elements`);
 }
 if (home.includes('class="featured-products-section')) failures.push("index.html: duplicate standalone Featured Products section remains");
-if (!(home.indexOf('class="home-slider"') < home.indexOf('class="home-services-promotions"') && home.indexOf('class="home-services-promotions"') < home.indexOf('class="home-shop-section"'))) {
-  failures.push("index.html: services/promotions must follow the hero and precede Shop by Category");
+const sectionClasses = (html) => Array.from((html.match(/<main\b[^>]*>([\s\S]*?)<\/main>/)?.[1] || "").matchAll(/<section\s+class="([^"\s]+)/g), (match) => match[1]);
+if (sectionClasses(home).join(",") !== "home-slider,home-services,home-promotions") {
+  failures.push("index.html: only the carousel and Services / Featured Promotions sections should remain");
 }
+if (!/class="[^"]*\bhome-explore-link\b[^"]*"[^>]*>\s*<a href="explore.html">Explore Products &amp; Services →<\/a>/.test(home)) {
+  failures.push("index.html: subtle Explore Products & Services link missing");
+}
+if (!home.includes('<footer class="site-footer">')) failures.push("index.html: normal site footer missing");
 if (!/<form[^>]*role="search"[^>]*action="products.html"[^>]*method="get"/.test(home) || !home.includes('name="search"')) {
   failures.push("index.html: homepage search must submit a search query to products.html");
+}
+
+const explorePath = resolve(root, "explore.html");
+const explore = existsSync(explorePath) ? readFileSync(explorePath, "utf8") : "";
+const movedSections = ["home-shop-section", "why-buy-section", "home-industries-section", "home-sourcing-section", "cta-band"];
+if (sectionClasses(explore).join(",") !== ["page-hero", ...movedSections].join(",")) {
+  failures.push("explore.html: intro and five moved sections must each appear once, in the requested order");
+}
+for (const className of movedSections) {
+  if (home.includes(`class="${className}`)) failures.push(`index.html: moved ${className} section is duplicated on the homepage`);
+}
+for (const content of ["<title>Explore Benchvale | Laboratory Products, Industries &amp; Sourcing</title>", "Products, purchasing support, and laboratory solutions", "Shop by Category", "Why Buy from Benchvale", "Laboratories Served", "Sourcing Support", '<footer class="site-footer">']) {
+  if (!explore.includes(content)) failures.push(`explore.html: missing ${content}`);
+}
+for (const [name, html] of [["index.html", home], ["explore.html", explore]]) {
+  const nav = html.match(/<nav\b[^>]*id="primaryNav"[^>]*>([\s\S]*?)<\/nav>/)?.[1] || "";
+  const destinations = Array.from(nav.matchAll(/<a\s+href="([^"]+)"/g), (match) => match[1]);
+  if (destinations.join(",") !== "products.html,equipment.html,industries.html,sourcing.html,about.html,contact.html,quote.html") {
+    failures.push(`${name}: existing primary navigation destinations changed`);
+  }
 }
 
 const petri = readFileSync(resolve(root, "products", "90mm-petri-dish.html"), "utf8");
@@ -106,6 +136,7 @@ for (const fact of ["52010", "53010", "52200", "53200", "Rainin LTS-compatible",
 notes.push(`${htmlFiles.length} HTML pages scanned`);
 notes.push(`${productFiles.length} product pages checked`);
 notes.push("All local href/src/action targets and internal anchors checked");
+notes.push("No duplicate IDs on any page; Explore section order and navigation checked");
 notes.push("Homepage service/promotion counts, section order, and search form checked");
 
 if (failures.length) {

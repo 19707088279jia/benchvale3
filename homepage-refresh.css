@@ -65,10 +65,11 @@
 
 /* Six taller service cards, alongside a two-row, three-column product showcase. */
 .home-services-promotions {
-  padding-block: var(--sp-16);
+  padding: 32px 0 48px;
   background: var(--gray-50);
   border-bottom: var(--border);
 }
+.home-services-promotions > .container { max-width: 1440px; }
 .home-discovery-grid {
   display: grid;
   grid-template-columns: minmax(0, .32fr) minmax(0, .68fr);
@@ -76,7 +77,7 @@
 }
 .home-services,
 .home-promotions { min-width: 0; padding: 0; }
-.home-discovery-heading { margin-bottom: var(--sp-6); }
+.home-discovery-heading { margin-bottom: 16px; }
 .home-discovery-heading .eyebrow { margin-bottom: var(--sp-2); }
 .home-discovery-heading h2 { margin-bottom: 0; font-size: clamp(1.5rem, 2.2vw, 1.85rem); }
 .home-service-list { display: grid; gap: var(--sp-3); }
@@ -193,6 +194,9 @@
 }
 .home-requirements-cta p { margin: 0; color: var(--navy-900); font-size: .87rem; font-weight: 600; }
 .home-requirements-cta .btn { padding: 10px 16px; font-size: .82rem; }
+.home-explore-link { margin-top: var(--sp-6); text-align: right; }
+.home-explore-link a { display: inline-block; padding-block: var(--sp-2); font-size: .86rem; font-weight: 600; }
+.home-explore-link a:hover { text-decoration: underline; text-underline-offset: 3px; }
 
 @media (max-width: 1100px) {
   .home-header-top { gap: var(--sp-5); }
@@ -225,7 +229,6 @@
   .home-header .brand-mark { width: 30px; height: 30px; }
   .home-site-search input { padding-inline: var(--sp-3); font-size: .86rem; }
   .home-site-search button { flex-basis: 44px; }
-  .home-services-promotions { padding-block: var(--sp-10); }
   .home-promotion-grid { grid-template-columns: 1fr; grid-template-rows: none; }
   .home-promotion-card { min-height: 0; }
   .home-promotion-visual { flex: none; min-height: 210px; }
