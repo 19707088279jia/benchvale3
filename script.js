@@ -10,10 +10,16 @@ if (navToggle && primaryNav) {
   const updateDirectoryPosition = () => {
     if (!header.classList.contains("directory-overlay-open")) return;
     const bounds = primaryNav.getBoundingClientRect();
+    const item = primaryNav.querySelector(".directory-overlay-open");
+    // A desktop dropdown must not remain floating after its navigation scrolls away.
+    if (bounds.bottom <= 0) {
+      if (item.contains(document.activeElement)) item.querySelector(".category-disclosure").focus({ preventScroll: true });
+      setOpen(item, false);
+      return;
+    }
     header.style.setProperty("--mega-menu-top", `${Math.max(0, bounds.bottom)}px`);
     // Measure at the navigation edge first, so a previous viewport/label cannot constrain width.
     header.style.setProperty("--mega-menu-left", `${bounds.left}px`);
-    const item = primaryNav.querySelector(".directory-overlay-open");
     const panelWidth = item.querySelector(".mega-menu-directory").getBoundingClientRect().width;
     const labelLeft = item.querySelector(".category-nav-label").getBoundingClientRect().left;
     const inset = parseFloat(getComputedStyle(primaryNav).paddingLeft);

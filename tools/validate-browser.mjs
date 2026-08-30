@@ -295,12 +295,19 @@ export async function validateBrowser(root, files) {
   }
   await go('index.html');await page.locator('[aria-controls="mega-analytical"]').focus();
   await page.setViewportSize({width:1440,height:900});await checkDesktopOverlay();
-  await page.evaluate(()=>window.scrollTo({top:450,behavior:'instant'}));
+  await page.evaluate(()=>window.scrollTo({top:40,behavior:'instant'}));
   await page.evaluate(()=>new Promise(requestAnimationFrame));await checkDesktopOverlay();
   // Header height changes without a window resize must update the measured top.
   await page.locator('.category-header-top').evaluate(e=>e.style.paddingBottom='40px');
   await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
   await checkDesktopOverlay();
+  await page.evaluate(()=>window.scrollTo({top:450,behavior:'instant'}));
+  await page.waitForFunction(()=>document.querySelector('#mega-analytical').hidden);
+  assert(await page.locator('.site-header').evaluate(e=>e.getBoundingClientRect().bottom<=0),'The entire header scrolls out of view');
+  assert.equal(await page.locator('.category-header.directory-overlay-open').count(),0,'No detached desktop menu remains');
+  assert.equal(await page.evaluate(()=>scrollY),450,'Closing a focused menu must not scroll the header back into view');
+  await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
+  await page.keyboard.press('Enter');await checkDesktopOverlay();
   await page.keyboard.press('Escape');assert(!(await directory.isVisible()));
   await go('index.html');await page.locator('[aria-controls="mega-analytical"]').hover();
   await page.keyboard.press('Escape');assert(!(await directory.isVisible()),'Escape also closes a mouse-opened overlay');
