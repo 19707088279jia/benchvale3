@@ -27,6 +27,8 @@ export async function validateBrowser(root, files) {
   const go = path=>page.goto(base+path);
   const visible = ()=>page.locator('[data-product-card]:visible').count();
   const overflow = async(label)=>assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),`Horizontal overflow: ${label}`);
+  // Measure final geometry after the short desktop entrance animation.
+  const settleMenu = panel=>panel.evaluate(e=>Promise.all(e.getAnimations().map(animation=>animation.finished)));
   await go('products.html');
   const inventory=await page.locator('[data-product-card]').evaluateAll(cards=>cards.map(c=>({category:c.dataset.category,search:c.dataset.search})));
   const checkCategory = async category => {
@@ -108,6 +110,7 @@ export async function validateBrowser(root, files) {
         await page.locator('#navToggle').click();
         await page.locator('[aria-controls="mega-analytical"]').click();
       } else await page.locator('[aria-controls="mega-analytical"]').hover();
+      await settleMenu(directory);
       for (const count of [3,4,5,6,8]) {
         analytical.groups = originalGroups.slice(0,count);
         while(analytical.groups.length<count) analytical.groups.push({name:`Validation group ${analytical.groups.length+1}`,items:[{name:'Density Meters',search:'density'}]});
@@ -203,6 +206,7 @@ export async function validateBrowser(root, files) {
     generalLab.groups=previousGeneralGroups;
   }
   const checkDesktopOverlay=async(panel=directory,category=analytical)=>{
+    await settleMenu(panel);
     const overlay=await panel.evaluate(panel=>{
       const r=panel.getBoundingClientRect(),nav=document.querySelector('#primaryNav').getBoundingClientRect();
       const label=panel.parentElement.querySelector('.category-nav-label').getBoundingClientRect();
@@ -419,6 +423,7 @@ export async function validateBrowser(root, files) {
    await page.setViewportSize({width:375,height:1000});await go('products.html?category=chromatography');
    await page.screenshot({path:resolve(process.env.BENCHVALE_SCREENSHOT_DIR,'category-mobile.png')});
    await page.setViewportSize({width:1440,height:900});await go('index.html');await page.locator('[aria-controls="mega-analytical"]').hover();
+   await settleMenu(directory);
    await page.screenshot({path:resolve(process.env.BENCHVALE_SCREENSHOT_DIR,'analytical-directory-desktop.png')});
    await page.setViewportSize({width:375,height:900});await go('index.html');await page.locator('#navToggle').click();await page.locator('[aria-controls="mega-analytical"]').click();
    await page.screenshot({path:resolve(process.env.BENCHVALE_SCREENSHOT_DIR,'analytical-directory-mobile.png')});

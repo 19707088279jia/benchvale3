@@ -22,6 +22,10 @@
 .category-disclosure[aria-expanded="true"] span { display:block; transform:rotate(180deg); }
 .mega-menu { position:absolute; top:100%; left:0; right:0; margin:0 auto; padding:32px 36px 0; background:white; border:1px solid #dce3e9; box-shadow:0 16px 24px #0a1f3314; max-height:calc(100dvh - 160px); overflow:auto; }
 .mega-menu[hidden] { display:none; }
+@keyframes mega-menu-open {
+ from { opacity:0; transform:translateY(-4px); }
+ to { opacity:1; transform:translateY(0); }
+}
 .mega-content { display:grid; grid-template-columns:minmax(220px,1fr) minmax(0,3fr); gap:48px; padding-bottom:28px; }
 .mega-intro { border-right:1px solid #e0e6eb; padding-right:32px; }
 .mega-intro h2 { font-size:1.25rem; margin:0 0 12px; }
@@ -100,6 +104,7 @@
 .mega-group a { display:block; padding:5px 0; color:#53616c; font-size:.875rem; line-height:1.45; }
 .mega-group a:hover { color:var(--teal-600); text-decoration:underline; text-underline-offset:3px; }
 @media (min-width:1280px) {
+ .mega-menu:not([hidden]) { animation:mega-menu-open 150ms ease-out; }
  /* Keep the label group centered; narrower desktops need less gap to avoid wrapping. */
  .category-nav { width:calc(100% - 160px); max-width:1560px; padding-inline:0; }
  .category-nav-list { justify-content:center; gap:clamp(15px, calc(12.5vw - 145px), 32px); }
@@ -124,4 +129,7 @@
  .mega-directory-columns { grid-template-columns:minmax(0, 230px); max-width:230px; }
  .mega-directory-columns[data-columns="2"] { display:none; }
  .mega-directory-columns[data-columns="1"] { display:grid; }
+}
+@media (prefers-reduced-motion: reduce) {
+ .mega-menu:not([hidden]) { animation:none; }
 }
