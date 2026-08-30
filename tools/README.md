@@ -75,15 +75,17 @@ Directory panels size to their content instead of spanning the navigation.
 Desktop content starts 17px inside the panel, with three 230px columns and no
 grid gap, occupying 690px inside a 724px panel. Navy separators and 14px inner
 column padding distinguish neighboring columns. On desktop, the fixed directory
-extends from the category navigation to the viewport bottom. A separate white
-backdrop covers the underlying page across the viewport without widening the
-directory. Columns stretch to fill the overlay, extending their navy separators
-to the bottom; long directories scroll inside the panel. The shared navigation
+extends from the category navigation to 24px above the viewport bottom. White
+background exists only inside the compact panel: there is no separate backdrop,
+and the page remains visible to its right and below it. Columns stretch to fill
+the panel, extending their navy separators to its bottom; long directories
+scroll inside the panel. The shared navigation
 script measures the navigation's bottom and left edge on open, resize, header
 resize, and page scroll. Header backdrop blur is disabled only while the overlay
 is open so it cannot change the fixed positioning reference.
 
-Clicking the white backdrop or pressing Escape closes the overlay. Hover and
+Moving the pointer out (unless focus remains inside), clicking outside, or
+pressing Escape closes the menu. Hover and
 keyboard navigation between categories remain available. Directory menus have
 no footer link or divider; their main navigation label links to the category page.
 Tablet and mobile variants use two and one real columns, with one vertical

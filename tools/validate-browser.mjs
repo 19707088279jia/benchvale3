@@ -168,9 +168,9 @@ export async function validateBrowser(root, files) {
         assert(Math.abs(layout.panel.bottom-layout.grid.bottom)<1,'Vertical dividers reach the panel bottom');
         const bottomSpace=layout.grid.bottom-Math.max(...layout.groups.map(group=>group.bottom));
         if(width<1280) assert.equal(bottomSpace,50,'Mobile bottom spacing stays unchanged');
-        else assert(bottomSpace>=50,'Desktop columns fill the viewport, retaining minimum bottom space');
+        else assert(bottomSpace>=50,'Desktop columns fill the tall panel, retaining minimum bottom space');
         if(width>=1280) {
-          assert.equal(layout.panel.bottom,1000,'Desktop overlay reaches the viewport bottom');
+          assert.equal(layout.panel.bottom,976,'Desktop panel leaves 24px of viewport clearance');
           if(count===originalGroups.length) {
             const instruments=layout.groups.find(g=>g.name==='Analytical Instruments');
             const spectroscopy=layout.groups.find(g=>g.name==='Spectroscopy');
@@ -201,19 +201,17 @@ export async function validateBrowser(root, files) {
   const checkDesktopOverlay=async()=>{
     const overlay=await directory.evaluate(panel=>{
       const r=panel.getBoundingClientRect(),nav=document.querySelector('#primaryNav').getBoundingClientRect();
-      const backdrop=getComputedStyle(panel.parentElement,'::before');
       const groups=panel.querySelector('[data-columns="3"]');
       const firstLink=groups.querySelector('a').getBoundingClientRect();
-      return {top:r.top,bottom:r.bottom,left:r.left,width:r.width,navBottom:nav.bottom,navLeft:nav.left,viewportHeight:innerHeight,position:getComputedStyle(panel).position,backdrop:{position:backdrop.position,top:parseFloat(backdrop.top),bottom:backdrop.bottom,left:backdrop.left,right:backdrop.right,color:backdrop.backgroundColor},rowHeight:firstLink.height,columnBottoms:[...groups.children].map(c=>c.getBoundingClientRect().bottom),covered:[[4,nav.bottom+4],[innerWidth-4,nav.bottom+4],[4,innerHeight-4],[innerWidth-4,innerHeight-4],[r.left+20,innerHeight-4]].every(([x,y])=>!!document.elementFromPoint(x,y)?.closest('.category-nav-item.directory-overlay-open'))};
+      return {top:r.top,bottom:r.bottom,left:r.left,width:r.width,navBottom:nav.bottom,navLeft:nav.left,viewportHeight:innerHeight,position:getComputedStyle(panel).position,backdropContent:getComputedStyle(panel.parentElement,'::before').content,rowHeight:firstLink.height,columnBottoms:[...groups.children].map(c=>c.getBoundingClientRect().bottom),pageVisibleOutside:[[r.right+4,nav.bottom+4],[innerWidth-4,nav.bottom+4],[innerWidth-4,innerHeight-4],[r.left+20,innerHeight-8]].every(([x,y])=>!document.elementFromPoint(x,y)?.closest('.category-header')),panelCoversItsBottom:panel.contains(document.elementFromPoint(r.left+20,r.bottom-4))};
     });
     assert.equal(overlay.position,'fixed');assert.equal(overlay.width,724);
     assert.equal(overlay.left,overlay.navLeft);assert.equal(overlay.top,overlay.navBottom);
-    assert.equal(overlay.bottom,overlay.viewportHeight);
-    assert(overlay.columnBottoms.every(bottom=>Math.abs(bottom-overlay.bottom)<1),'Dividers extend to viewport bottom');
-    const {top:backdropTop,...backdropStyle}=overlay.backdrop;
-    assert(Math.abs(backdropTop-overlay.navBottom)<1,'Backdrop starts at the measured navigation bottom');
-    assert.deepEqual(backdropStyle,{position:'fixed',bottom:'0px',left:'0px',right:'0px',color:'rgb(255, 255, 255)'});
-    assert(overlay.covered,'White overlay covers the underlying page across the viewport');
+    assert.equal(overlay.bottom,overlay.viewportHeight-24);
+    assert(overlay.columnBottoms.every(bottom=>Math.abs(bottom-overlay.bottom)<1),'Dividers extend to the panel bottom');
+    assert.equal(overlay.backdropContent,'none','No full-width white pseudo-element');
+    assert(overlay.pageVisibleOutside,'Page remains visible to the right and through the 24px bottom clearance');
+    assert(overlay.panelCoversItsBottom,'White coverage continues to the compact panel bottom');
     assert(overlay.rowHeight>=20 && overlay.rowHeight<=22,'Desktop link rows are approximately 20–22px');
   };
   for (const [width,height] of [[1280,800],[1366,768],[1440,900],[1600,900],[1920,1080]]) {
@@ -223,10 +221,11 @@ export async function validateBrowser(root, files) {
     await checkDesktopOverlay();
     await overflow(`Analytical directory at ${width}`);
     if(process.env.BENCHVALE_SCREENSHOT_DIR && [1366,1440,1600,1920].includes(width)) {
-      await page.screenshot({path:resolve(process.env.BENCHVALE_SCREENSHOT_DIR,`analytical-overlay-${width}x${height}.png`)});
+      await page.screenshot({path:resolve(process.env.BENCHVALE_SCREENSHOT_DIR,`analytical-compact-tall-${width}x${height}.png`)});
     }
-    await page.mouse.move(width-8,height-8);assert(await directory.isVisible(),'Moving across the backdrop keeps the overlay open');
-    await page.mouse.click(width-8,height-8);assert(!(await directory.isVisible()),'Clicking the backdrop closes the overlay');
+    await page.mouse.move(width-8,height-8);assert(!(await directory.isVisible()),'Leaving the menu restores normal page interaction');
+    await page.locator('[aria-controls="mega-analytical"]').focus();assert(await directory.isVisible());
+    await page.mouse.click(width-8,height-8);assert(!(await directory.isVisible()),'Clicking outside closes the focused menu');
     assert.equal(await page.locator('.category-header.directory-overlay-open').count(),0);
   }
   await go('index.html');await page.locator('[aria-controls="mega-analytical"]').focus();
@@ -240,7 +239,7 @@ export async function validateBrowser(root, files) {
   await page.keyboard.press('Escape');assert(!(await directory.isVisible()));
   await go('index.html');await page.locator('[aria-controls="mega-analytical"]').hover();
   await page.keyboard.press('Escape');assert(!(await directory.isVisible()),'Escape also closes a mouse-opened overlay');
-  // A long directory scrolls within the overlay; the page stays covered and stationary.
+  // A long directory scrolls within the compact panel; the underlying page stays stationary.
   try {
     analytical.groups=Array.from({length:24},(_,i)=>({name:`Validation group ${i+1}`,items:originalGroups[i%originalGroups.length].items}));
     await page.setViewportSize({width:1366,height:500});await go('index.html');
@@ -254,7 +253,7 @@ export async function validateBrowser(root, files) {
     await page.waitForFunction(()=>document.querySelector('#mega-analytical').scrollTop>0);
     assert.equal(await page.evaluate(()=>scrollY),0,'Overlay scrolling does not scroll the underlying page');
     await directory.evaluate(e=>e.scrollTop=e.scrollHeight);
-    assert(await activeColumns().locator('.mega-group a').last().evaluate(e=>e.getBoundingClientRect().bottom<=innerHeight));
+    assert(await activeColumns().locator('.mega-group a').last().evaluate(e=>e.getBoundingClientRect().bottom<=innerHeight-24));
     await overflow('Long scrolling desktop directory');
   } finally { analytical.groups=originalGroups; }
   await page.setViewportSize({width:1024,height:900});

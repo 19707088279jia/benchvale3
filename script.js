@@ -40,10 +40,6 @@ if (navToggle && primaryNav) {
       pointerOpen = null;
       closeAll(); setOpen(item, open);
     });
-    // The white backdrop belongs to this item, so crossing it keeps the menu open.
-    item.addEventListener("click", event => {
-      if (event.target === item && item.classList.contains("directory-overlay-open")) closeAll();
-    });
     item.addEventListener("pointerenter", event => {
       if (desktop.matches && event.pointerType === "mouse") openOnly(item);
     });
