@@ -45,3 +45,14 @@ link from looping back to its category card. Plain `?search=` is unchanged.
 
 Quote Cart links to the existing quote form and displays the count from the
 existing saved-product list. It adds no checkout or server-side behavior.
+
+## Analytical navigation directory
+
+The optional `directoryColumns` field in the shared taxonomy defines grouped
+navigation topics independently of verified catalogue `families`. Analytical
+uses three columns and six groups; other category menus keep their existing
+family layouts. `directoryUrl` uses a dedicated `page` if supplied, otherwise
+`products.html?category=analytical&search=<term>`, as requested. These links keep
+the category landing-page behavior described above; they do not add product
+records or change the general catalogue. Add real catalogue families separately
+when verified data becomes available.

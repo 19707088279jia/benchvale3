@@ -125,6 +125,12 @@ for (const content of ["<title>Explore Benchvale | Laboratory Products, Industri
 // Every family link is checked by the HTML link scan above. Validate taxonomy coverage too.
 for (const c of categories) {
   if (!productsIndex.includes(`data-product-filter="${c.anchor}"`)) failures.push(`Missing ${c.name} filter`);
+  for (const column of c.directoryColumns || []) for (const group of column.groups) {
+    if (!group.name || !group.links.length) failures.push(`Empty directory group in ${c.name}`);
+    for (const topic of group.links) {
+      if (!topic.name || (!topic.page && !topic.search)) failures.push(`Missing directory destination in ${group.name}`);
+    }
+  }
   for (const f of c.families) {
     if (!f.page && !f.search) failures.push(`Missing destination for ${f.name}`);
   }

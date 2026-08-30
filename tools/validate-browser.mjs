@@ -3,7 +3,7 @@ import {createServer} from 'node:http';
 import {readFileSync} from 'node:fs';
 import {extname, relative, resolve, sep} from 'node:path';
 import {createRequire} from 'node:module';
-import {categories, familyUrl} from './taxonomy.mjs';
+import {categories, familyUrl, directoryUrl} from './taxonomy.mjs';
 
 // Install playwright locally or provide its package directory through NODE_PATH.
 export async function validateBrowser(root, files) {
@@ -77,6 +77,31 @@ export async function validateBrowser(root, files) {
   await go('products.html');assert.equal(await visible(),14);
   await page.locator('[data-product-filter="general-lab"]').click();assert.equal(await visible(),3);
   await page.locator('#productSearch').fill('vortex');assert.equal(await visible(),1);
+  const analytical = categories.find(c=>c.anchor==='analytical');
+  const directoryTopics = analytical.directoryColumns.flatMap(column=>column.groups.flatMap(group=>group.links));
+  await go('index.html');
+  const directory = page.locator('#mega-analytical');
+  await page.locator('[aria-controls="mega-analytical"]').hover();
+  assert.equal(await directory.locator('.mega-intro, .mega-families').count(),0);
+  assert(!(await directory.innerText()).includes('No product families are currently listed.'));
+  assert.deepEqual(await directory.locator('h3').allTextContents(),analytical.directoryColumns.flatMap(column=>column.groups.map(group=>group.name)));
+  assert.deepEqual(await directory.locator('.mega-directory-group a').evaluateAll(links=>links.map(a=>a.getAttribute('href'))),directoryTopics.map(topic=>directoryUrl(analytical,topic)));
+  assert.equal(await directory.locator('.mega-view-all').getAttribute('href'),'products.html?category=analytical');
+  for (const width of [1280,1440,1920]) {
+    await page.setViewportSize({width,height:800});
+    await page.locator('[aria-controls="mega-analytical"]').hover();
+    assert.equal(await directory.locator('.mega-directory-columns').evaluate(e=>getComputedStyle(e).gridTemplateColumns.split(' ').length),3);
+    await overflow(`Analytical directory at ${width}`);
+  }
+  await page.setViewportSize({width:1440,height:1000});
+  await page.locator('[aria-controls="mega-analytical"]').hover();
+  await Promise.all([page.waitForURL('**/products.html?category=analytical&search=density'),directory.getByRole('link',{name:'Density Meters',exact:true}).click()]);
+  await page.waitForLoadState('load');await checkCategory(analytical);
+  assert.equal(new URL(page.url()).searchParams.get('search'),'density');
+  for (const topic of directoryTopics) {
+    const response=await go(directoryUrl(analytical,topic));assert(response.ok());
+    assert.equal(await page.locator('main h1').textContent(),'Analytical');
+  }
   await go('index.html');
   const expected=[...categories.map(c=>c.navLabel),'Services','Promotions','About','Contact'];
   assert.deepEqual(await page.locator('.category-nav-label > a').allTextContents(),expected);
@@ -160,6 +185,10 @@ export async function validateBrowser(root, files) {
    await page.screenshot({path:resolve(process.env.BENCHVALE_SCREENSHOT_DIR,'category-desktop.png')});
    await page.setViewportSize({width:375,height:1000});await go('products.html?category=chromatography');
    await page.screenshot({path:resolve(process.env.BENCHVALE_SCREENSHOT_DIR,'category-mobile.png')});
+   await page.setViewportSize({width:1440,height:900});await go('index.html');await page.locator('[aria-controls="mega-analytical"]').hover();
+   await page.screenshot({path:resolve(process.env.BENCHVALE_SCREENSHOT_DIR,'analytical-directory-desktop.png')});
+   await page.setViewportSize({width:375,height:900});await go('index.html');await page.locator('#navToggle').click();await page.locator('[aria-controls="mega-analytical"]').click();
+   await page.screenshot({path:resolve(process.env.BENCHVALE_SCREENSHOT_DIR,'analytical-directory-mobile.png')});
   }
   assert.deepEqual(errors,[],'Browser JS errors');
   console.log('PASS browser: seven category landing pages, family destinations, catalogue filters/search, Quote Cart, quote form, mega menus, keyboard/touch navigation, carousel, all pages and categories at 320–1920px.');
