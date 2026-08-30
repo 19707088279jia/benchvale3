@@ -63,14 +63,17 @@ The same algorithm generates 3-, 2-, and 1-column variants. CSS displays only
 the variant matching the existing navigation breakpoint; inactive variants are
 hidden from both display and keyboard navigation. No runtime regrouping is needed.
 
-Columns stack independently with a 20px flex gap. Spectroscopy follows Analytical
+Columns stack independently with an 18px flex gap. Spectroscopy follows Analytical
 Instruments in the taxonomy and therefore immediately follows it in column one
 for the current four groups. No group has a column field or hardcoded position.
 
-Desktop content starts 29px inside the panel, with three 220px columns and 14px
-gaps, occupying 688px. Tablet and mobile variants use two and one real columns.
-The bottom link and divider match the active directory width. The existing
-mobile accordion behavior is unchanged.
+Directory panels size to their content instead of spanning the navigation.
+Desktop content starts 17px inside the panel, with three 230px columns and no
+grid gap, occupying 690px inside a 724px panel. Navy separators and 14px inner
+column padding distinguish neighboring columns; each separator ends with its
+column's content. Tablet and mobile variants use two and one real columns, with
+one separator on tablet and none on mobile. The bottom link and divider match
+the active directory width. The existing mobile accordion behavior is unchanged.
 
 Grouped navigation topics remain separate from verified catalogue `families`.
 `directoryUrl` uses a dedicated `page` if supplied, otherwise the category URL

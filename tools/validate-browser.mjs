@@ -122,32 +122,42 @@ export async function validateBrowser(root, files) {
           const columnElements=[...grid.children];
           const columnGroups=columnElements.map(column=>[...column.children].map(group=>({name:group.querySelector('h3').textContent,...rect(group)})));
           const panel=grid.closest('.mega-menu');
-          return {groups:columnGroups.flat(),columnGroups,columns:columnElements.map(rect),columnCount:Number(grid.dataset.columns),gap:style.columnGap,groupGap:getComputedStyle(columnElements[0]).gap,grid:rect(grid),panel:rect(panel),footer:rect(panel.querySelector('.mega-view-all'))};
+          const columnStyles=columnElements.map(column=>{const s=getComputedStyle(column);return {left:s.paddingLeft,right:s.paddingRight,border:s.borderLeftWidth,color:s.borderLeftColor};});
+          return {groups:columnGroups.flat(),columnGroups,columns:columnElements.map(rect),columnStyles,columnCount:Number(grid.dataset.columns),gap:style.columnGap,groupGap:getComputedStyle(columnElements[0]).gap,grid:rect(grid),panel:rect(panel),panelOverflow:panel.scrollWidth>panel.clientWidth,footer:rect(panel.querySelector('.mega-view-all'))};
         });
         assert.equal(layout.columnCount,columns);assert.equal(layout.columns.length,columns);
-        assert.equal(layout.gap,'14px');assert.equal(layout.groupGap,'20px');
+        assert.equal(layout.gap,'0px');assert.equal(layout.groupGap,'18px');
         const expectedSizes = columns===3 ? ({3:[1,1,1],4:[2,1,1],5:[2,2,1],6:[2,2,2],8:[3,3,2]})[count] : columns===2 ? [Math.ceil(count/2),Math.floor(count/2)] : [count];
         assert.deepEqual(layout.columnGroups.map(groups=>groups.length),expectedSizes);
         assert.deepEqual(layout.groups.map(g=>g.name),analytical.groups.map(g=>g.name),'Chunking preserves taxonomy order');
         for(let i=0;i<columns;i++) {
-          assert.equal(layout.columns[i].width,220);
+          assert.equal(layout.columns[i].width,230);
+          assert.equal(layout.columnStyles[i].left,i===0?'0px':'14px');
+          assert.equal(layout.columnStyles[i].right,i===columns-1?'0px':'14px');
+          assert.equal(layout.columnStyles[i].border,i===0?'0px':'1px');
           if(i) {
-            assert.equal(layout.columns[i].x-layout.columns[i-1].right,14);
+            assert.equal(layout.columnStyles[i].color,'rgb(10, 31, 51)');
+            assert.equal(layout.columns[i].x-layout.columns[i-1].right,0);
             assert.equal(layout.columns[i].y,layout.columns[0].y,'Independent columns align at the top');
           }
           const groups=layout.columnGroups[i];
-          for(let j=1;j<groups.length;j++) assert(Math.abs(groups[j].y-groups[j-1].bottom-20)<1,'Groups stack with exactly 20px separation');
+          assert.equal(layout.columns[i].bottom,groups.at(-1).bottom,'Separators stop at each column\'s content');
+          for(let j=1;j<groups.length;j++) assert(Math.abs(groups[j].y-groups[j-1].bottom-18)<1,'Groups stack with exactly 18px separation');
         }
-        assert.equal(layout.grid.width,columns*220+(columns-1)*14);
+        assert.equal(layout.grid.width,columns*230);
+        const panelInset=width>=1280?17:16;
+        assert.equal(layout.grid.x-layout.panel.x,panelInset);
+        assert.equal(layout.panel.right-layout.grid.right,panelInset,'Panel ends immediately after the last column');
+        assert.equal(layout.panel.width,layout.grid.width+2*panelInset,'Panel fits the active columns and padding');
+        assert(!layout.panelOverflow,'No horizontal scrolling inside the directory panel');
         assert.equal(layout.footer.x,layout.grid.x);assert.equal(layout.footer.width,layout.grid.width);
         if(width>=1280) {
-          assert(layout.grid.x-layout.panel.x>=28 && layout.grid.x-layout.panel.x<=35,'Desktop starts 28–35px inside the panel');
           if(count===originalGroups.length) {
             const instruments=layout.groups.find(g=>g.name==='Analytical Instruments');
             const spectroscopy=layout.groups.find(g=>g.name==='Spectroscopy');
             const materials=layout.groups.find(g=>g.name==='Materials & Physical Testing');
             assert.equal(spectroscopy.x,instruments.x);
-            assert(Math.abs(spectroscopy.y-instruments.bottom-20)<1);
+            assert(Math.abs(spectroscopy.y-instruments.bottom-18)<1);
             assert(spectroscopy.y<materials.bottom,'Spectroscopy does not wait for a taller neighboring column');
           }
         }
@@ -176,7 +186,7 @@ export async function validateBrowser(root, files) {
     assert.equal(await activeColumns().locator(':scope > .mega-directory-column').count(),3);
     await overflow(`Analytical directory at ${width}`);
     if(process.env.BENCHVALE_SCREENSHOT_DIR && [1366,1440,1600,1920].includes(width)) {
-      await page.screenshot({path:resolve(process.env.BENCHVALE_SCREENSHOT_DIR,`analytical-real-columns-${width}.png`)});
+      await page.screenshot({path:resolve(process.env.BENCHVALE_SCREENSHOT_DIR,`analytical-compact-panel-${width}.png`)});
     }
   }
   await page.setViewportSize({width:1440,height:1000});
