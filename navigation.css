@@ -75,20 +75,29 @@
 
 #product-sourcing-support, #documentation-support { scroll-margin-top:180px; }
 
-/* Grouped directories are opt-in taxonomy data; other mega menus keep their layout. */
+/* Flat taxonomy groups auto-place in source order; no column assignments. */
 .mega-menu-directory { padding:24px 28px 0; }
-.mega-directory-columns { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:36px; padding-bottom:22px; }
-.mega-directory-column { display:flex; flex-direction:column; gap:22px; min-width:0; }
-.mega-directory-group h3 { margin:0 0 8px; font-size:.95rem; line-height:1.4; font-weight:700; color:var(--navy-900); }
-.mega-directory-group ul { margin:0; padding:0; list-style:none; }
-.mega-directory-group a { display:block; padding:5px 0; color:#53616c; font-size:.875rem; line-height:1.45; }
-.mega-directory-group a:hover { color:var(--teal-600); text-decoration:underline; text-underline-offset:3px; }
-.mega-menu-directory .mega-view-all { padding-block:15px; }
+.mega-group-grid {
+ display:grid;
+ grid-template-columns:repeat(3, minmax(0, 1fr));
+ gap:28px 56px;
+ max-width:1160px;
+ margin-inline:auto;
+ padding-bottom:22px;
+ align-items:start;
+}
+.mega-group { min-width:0; margin:0; padding:0; }
+.mega-group h3 { margin:0 0 8px; font-size:.95rem; line-height:1.4; font-weight:700; color:var(--navy-900); }
+.mega-group ul { margin:0; padding:0; list-style:none; }
+.mega-group a { display:block; padding:5px 0; color:#53616c; font-size:.875rem; line-height:1.45; }
+.mega-group a:hover { color:var(--teal-600); text-decoration:underline; text-underline-offset:3px; }
+.mega-menu-directory .mega-view-all { max-width:1160px; margin-inline:auto; padding-block:15px; }
+/* Match the existing navigation's tablet and mobile breakpoints. */
 @media (max-width:1279px) {
  .mega-menu-directory { padding:20px 16px 0; }
- .mega-directory-columns { grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; }
- .mega-directory-group a { min-height:44px; display:flex; align-items:center; padding-block:8px; }
+ .mega-group-grid { grid-template-columns:repeat(2, minmax(0, 1fr)); }
+ .mega-group a { min-height:44px; display:flex; align-items:center; padding-block:8px; }
 }
 @media (max-width:767px) {
- .mega-directory-columns { grid-template-columns:1fr; gap:22px; }
+ .mega-group-grid { grid-template-columns:1fr; }
 }

@@ -1,7 +1,8 @@
 import { categories, categoryUrl, familyUrl, directoryUrl } from './taxonomy.mjs';
 const esc = (s) => s.replaceAll('&', '&amp;').replaceAll('"', '&quot;');
-const megaContent = (c, link) => c.directoryColumns
-  ? `<div class="mega-directory-columns">${c.directoryColumns.map(column => `<div class="mega-directory-column">${column.groups.map(group => `<div class="mega-directory-group"><h3>${esc(group.name)}</h3><ul>${group.links.map(topic => `<li><a href="${link(directoryUrl(c, topic))}">${esc(topic.name)}</a></li>`).join('')}</ul></div>`).join('')}</div>`).join('')}</div>`
+// Flat groups flow in document order; CSS alone determines columns and rows.
+const megaContent = (c, link) => Array.isArray(c.groups)
+  ? `<div class="mega-group-grid">${c.groups.map(group => `<section class="mega-group"><h3>${esc(group.name)}</h3><ul>${group.items.map(topic => `<li><a href="${link(directoryUrl(c, topic))}">${esc(topic.name)}</a></li>`).join('')}</ul></section>`).join('')}</div>`
   : `<div class="mega-content"><div class="mega-intro"><h2>${esc(c.name)}</h2><p>${esc(c.description)}</p></div><div class="mega-families"><h3>Product families</h3>${c.families.length ? `<ul>${c.families.map(f => `<li><a href="${link(familyUrl(c,f))}">${esc(f.name)}</a></li>`).join('')}</ul>` : '<p>No product families are currently listed.</p>'}</div></div>`;
 export function header(depth = '') {
   const link = (url) => esc(depth + url);
@@ -14,7 +15,7 @@ export function header(depth = '') {
   </div>
   <nav class="category-nav" id="primaryNav" aria-label="Primary"><ul class="category-nav-list">
   ${categories.map(c => `<li class="category-nav-item"><div class="category-nav-label"><a href="${link(categoryUrl(c))}">${esc(c.navLabel)}</a><button class="category-disclosure" type="button" aria-label="Show ${esc(c.name)} categories" aria-controls="mega-${c.anchor}" aria-expanded="false"><span aria-hidden="true">⌄</span></button></div>
-  <div class="mega-menu${c.directoryColumns ? ' mega-menu-directory' : ''}" id="mega-${c.anchor}" hidden>${megaContent(c, link)}<a class="mega-view-all" href="${link(categoryUrl(c))}">View All ${esc(c.name)} <span aria-hidden="true">→</span></a></div></li>`).join('\n')}
+  <div class="mega-menu${Array.isArray(c.groups) ? ' mega-menu-directory' : ''}" id="mega-${c.anchor}" hidden>${megaContent(c, link)}<a class="mega-view-all" href="${link(categoryUrl(c))}">View All ${esc(c.name)} <span aria-hidden="true">→</span></a></div></li>`).join('\n')}
   ${['Services','Promotions','About','Contact'].map(n=>`<li class="category-nav-item"><div class="category-nav-label"><a href="${depth}${n.toLowerCase()}.html">${n}</a></div></li>`).join('')}
   </ul></nav></header>`;
 }

@@ -46,13 +46,25 @@ link from looping back to its category card. Plain `?search=` is unchanged.
 Quote Cart links to the existing quote form and displays the count from the
 existing saved-product list. It adds no checkout or server-side behavior.
 
-## Analytical navigation directory
+## Grouped navigation directories
 
-The optional `directoryColumns` field in the shared taxonomy defines grouped
-navigation topics independently of verified catalogue `families`. Analytical
-uses three columns and six groups; other category menus keep their existing
-family layouts. `directoryUrl` uses a dedicated `page` if supplied, otherwise
-`products.html?category=analytical&search=<term>`, as requested. These links keep
-the category landing-page behavior described above; they do not add product
-records or change the general catalogue. Add real catalogue families separately
-when verified data becomes available.
+Any category can opt into the shared grouped menu by adding a flat `groups`
+array alongside its existing catalogue data. Each group has a `name` and an
+`items` array. Each item has a `name` and a `search` term, or a dedicated `page`.
+Categories without `groups` retain their existing `families` menu layout.
+
+To expand Analytical, append one object to its `groups` array in
+`tools/taxonomy.mjs`, then run `node tools/update-navigation.mjs` to refresh the
+static pages. No renderer or CSS edits are needed. The renderer creates one
+`section.mega-group` per object; CSS places those sections in source order,
+using three columns on desktop, two on tablet, and one on mobile. Desktop
+content is centered at a maximum of 1160px with a 56px column gap.
+
+Grouped navigation topics remain separate from verified catalogue `families`.
+`directoryUrl` uses a dedicated `page` if supplied, otherwise the category URL
+plus `search`. These links retain the category landing-page behavior described
+above and do not add product records. Add catalogue families only when verified
+data becomes available.
+
+Browser validation covers 3, 4, 6, and 8 groups using in-memory taxonomy fixtures;
+those fixtures are never written to the catalogue or generated site.

@@ -8,154 +8,96 @@ export const categories = [
     "description": "Product sourcing support for analytical laboratory workflows. Share your method, specifications, or preferred manufacturer.",
     "navLabel": "Analytical",
     "families": [],
-    "directoryColumns": [
+    "groups": [
       {
-        "groups": [
+        "name": "Analytical Instruments",
+        "items": [
           {
-            "name": "Analytical Instruments",
-            "links": [
-              {
-                "name": "Biochemistry Analyzers",
-                "search": "biochemistry"
-              },
-              {
-                "name": "Elemental Analysis",
-                "search": "elemental"
-              },
-              {
-                "name": "TOC Analyzers",
-                "search": "toc"
-              },
-              {
-                "name": "Moisture Analysis",
-                "search": "moisture"
-              },
-              {
-                "name": "Physical Property Testing",
-                "search": "physical property"
-              }
-            ]
+            "name": "Biochemistry Analyzers",
+            "search": "biochemistry"
           },
           {
-            "name": "Chemical & Petrochemical Testing",
-            "links": [
-              {
-                "name": "Automatic & Manual Titrators",
-                "search": "titrator"
-              },
-              {
-                "name": "Karl Fischer Moisture Meters",
-                "search": "karl fischer"
-              },
-              {
-                "name": "Combustion / IC Analyzers",
-                "search": "combustion"
-              },
-              {
-                "name": "Sulfur / Halogen / Chlorine Analysis",
-                "search": "sulfur halogen chlorine"
-              }
-            ]
+            "name": "Elemental Analysis",
+            "search": "elemental"
+          },
+          {
+            "name": "TOC Analyzers",
+            "search": "toc"
+          },
+          {
+            "name": "Moisture Analysis",
+            "search": "moisture"
           }
         ]
       },
       {
-        "groups": [
+        "name": "Chemical & Petrochemical Testing",
+        "items": [
           {
-            "name": "Materials & Physical Testing",
-            "links": [
-              {
-                "name": "Density Meters",
-                "search": "density"
-              },
-              {
-                "name": "Hardness / Viscosity / Flow Testers",
-                "search": "hardness viscosity flow"
-              },
-              {
-                "name": "Polarimeters",
-                "search": "polarimeter"
-              },
-              {
-                "name": "Powder & Particle Size Analysis",
-                "search": "particle size"
-              },
-              {
-                "name": "Refractometers",
-                "search": "refractometer"
-              },
-              {
-                "name": "Thermal Analyzers",
-                "search": "thermal"
-              }
-            ]
+            "name": "Automatic & Manual Titrators",
+            "search": "titrator"
           },
           {
-            "name": "Laboratory Gas & Purification",
-            "links": [
-              {
-                "name": "Laboratory Gas Generators",
-                "search": "gas generator"
-              },
-              {
-                "name": "Water Purification",
-                "search": "water purification"
-              }
-            ]
+            "name": "Karl Fischer Moisture Meters",
+            "search": "karl fischer"
+          },
+          {
+            "name": "Combustion / IC Analyzers",
+            "search": "combustion"
+          },
+          {
+            "name": "Sulfur / Halogen / Chlorine Analysis",
+            "search": "sulfur halogen chlorine"
           }
         ]
       },
       {
-        "groups": [
+        "name": "Materials & Physical Testing",
+        "items": [
           {
-            "name": "Reference Standards",
-            "links": [
-              {
-                "name": "Colour",
-                "search": "colour standard"
-              },
-              {
-                "name": "Density",
-                "search": "density standard"
-              },
-              {
-                "name": "Environmental",
-                "search": "environmental standard"
-              },
-              {
-                "name": "Petrochemical",
-                "search": "petrochemical standard"
-              },
-              {
-                "name": "Refractive Index",
-                "search": "refractive index standard"
-              },
-              {
-                "name": "Viscosity",
-                "search": "viscosity standard"
-              }
-            ]
+            "name": "Density Meters",
+            "search": "density"
           },
           {
-            "name": "Spectroscopy",
-            "links": [
-              {
-                "name": "Elemental Analysis",
-                "search": "elemental"
-              },
-              {
-                "name": "Fluorescence",
-                "search": "fluorescence"
-              },
-              {
-                "name": "FTIR",
-                "search": "ftir"
-              },
-              {
-                "name": "UV/Vis/NIR",
-                "search": "uv vis nir"
-              }
-            ]
+            "name": "Viscosity / Flow Testers",
+            "search": "viscosity flow"
+          },
+          {
+            "name": "Polarimeters",
+            "search": "polarimeter"
+          },
+          {
+            "name": "Particle Size Analysis",
+            "search": "particle size"
+          },
+          {
+            "name": "Refractometers",
+            "search": "refractometer"
+          },
+          {
+            "name": "Thermal Analyzers",
+            "search": "thermal"
+          }
+        ]
+      },
+      {
+        "name": "Spectroscopy",
+        "items": [
+          {
+            "name": "Elemental Analysis",
+            "search": "elemental"
+          },
+          {
+            "name": "Fluorescence",
+            "search": "fluorescence"
+          },
+          {
+            "name": "FTIR",
+            "search": "ftir"
+          },
+          {
+            "name": "UV/Vis/NIR",
+            "search": "uv vis nir"
           }
         ]
       }

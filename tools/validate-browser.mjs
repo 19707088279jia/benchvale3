@@ -4,6 +4,7 @@ import {readFileSync} from 'node:fs';
 import {extname, relative, resolve, sep} from 'node:path';
 import {createRequire} from 'node:module';
 import {categories, familyUrl, directoryUrl} from './taxonomy.mjs';
+import {header} from './site-navigation.mjs';
 
 // Install playwright locally or provide its package directory through NODE_PATH.
 export async function validateBrowser(root, files) {
@@ -78,19 +79,73 @@ export async function validateBrowser(root, files) {
   await page.locator('[data-product-filter="general-lab"]').click();assert.equal(await visible(),3);
   await page.locator('#productSearch').fill('vortex');assert.equal(await visible(),1);
   const analytical = categories.find(c=>c.anchor==='analytical');
-  const directoryTopics = analytical.directoryColumns.flatMap(column=>column.groups.flatMap(group=>group.links));
+  const directoryTopics = analytical.groups.flatMap(group=>group.items);
   await go('index.html');
   const directory = page.locator('#mega-analytical');
   await page.locator('[aria-controls="mega-analytical"]').hover();
   assert.equal(await directory.locator('.mega-intro, .mega-families').count(),0);
   assert(!(await directory.innerText()).includes('No product families are currently listed.'));
-  assert.deepEqual(await directory.locator('h3').allTextContents(),analytical.directoryColumns.flatMap(column=>column.groups.map(group=>group.name)));
-  assert.deepEqual(await directory.locator('.mega-directory-group a').evaluateAll(links=>links.map(a=>a.getAttribute('href'))),directoryTopics.map(topic=>directoryUrl(analytical,topic)));
+  assert.deepEqual(await directory.locator('h3').allTextContents(),analytical.groups.map(group=>group.name));
+  assert.deepEqual(await directory.locator('.mega-group a').evaluateAll(links=>links.map(a=>a.getAttribute('href'))),directoryTopics.map(topic=>directoryUrl(analytical,topic)));
   assert.equal(await directory.locator('.mega-view-all').getAttribute('href'),'products.html?category=analytical');
+  // Change only taxonomy objects in memory, then use the production renderer.
+  // This proves new groups require no column assignments, wrappers, or CSS edits.
+  const originalGroups = analytical.groups;
+  try {
+    for (const [width, columns] of [[320,1],[767,1],[768,2],[1024,2],[1279,2],[1280,3],[1440,3],[1920,3]]) {
+      await page.setViewportSize({width,height:1000});await go('index.html');
+      if(width<1280) {
+        await page.locator('#navToggle').click();
+        await page.locator('[aria-controls="mega-analytical"]').click();
+      } else await page.locator('[aria-controls="mega-analytical"]').hover();
+      for (const count of [3,4,6,8]) {
+        analytical.groups = originalGroups.slice(0,count);
+        while(analytical.groups.length<count) analytical.groups.push({name:`Validation group ${analytical.groups.length+1}`,items:[{name:'Density Meters',search:'density'}]});
+        await directory.evaluate((panel, renderedHeader)=>{
+          const parsed=new DOMParser().parseFromString(renderedHeader,'text/html');
+          panel.replaceChildren(...parsed.querySelector('#mega-analytical').childNodes);
+        }, header());
+        assert.equal(await directory.locator('.mega-group-grid > section.mega-group').count(),count);
+        const layout=await directory.evaluate(panel=>{
+          const grid=panel.querySelector('.mega-group-grid');const style=getComputedStyle(grid);
+          const groups=[...grid.children].map(group=>{const r=group.getBoundingClientRect();return {x:r.x,y:r.y,bottom:r.bottom};});
+          const g=grid.getBoundingClientRect(),p=panel.getBoundingClientRect();
+          return {groups,columns:style.gridTemplateColumns.split(' ').length,gap:style.columnGap,rowGap:style.rowGap,width:g.width,center:g.x+g.width/2,panelCenter:p.x+p.width/2};
+        });
+        assert.equal(layout.columns,columns);
+        assert.equal(layout.gap,'56px');assert.equal(layout.rowGap,'28px');
+        assert.equal(new Set(layout.groups.map(g=>Math.round(g.y))).size,Math.ceil(count/columns));
+        for(let i=0;i<count;i++) {
+          if(i%columns) assert(Math.abs(layout.groups[i].y-layout.groups[i-1].y)<1,'Groups share a row until all columns are occupied');
+          if(i>=columns) {
+            assert(Math.abs(layout.groups[i].x-layout.groups[i%columns].x)<1,'Groups auto-place in column order');
+            assert(layout.groups[i].y>=layout.groups[i-columns].bottom+27,'Next row follows previous row with the requested gap');
+          }
+        }
+        assert(layout.width<=1160);assert(Math.abs(layout.center-layout.panelCenter)<1,'Directory content is centered in the panel');
+        await overflow(`${count} groups at ${width}`);
+      }
+    }
+  } finally { analytical.groups=originalGroups; }
+  // Another category can opt in without changes to the renderer; families still work.
+  const chromatography=categories.find(c=>c.anchor==='chromatography');
+  const previousGroups=chromatography.groups;
+  try {
+    chromatography.groups=[{name:'Validation group',items:[{name:'Vials',search:'vial'}]}];
+    const result=await page.evaluate(rendered=>{
+      const parsed=new DOMParser().parseFromString(rendered,'text/html');
+      const panel=parsed.querySelector('#mega-chromatography');
+      return {groups:panel.querySelectorAll('.mega-group').length,href:panel.querySelector('.mega-group a').getAttribute('href'),familyFallback:!!parsed.querySelector('#mega-general-lab .mega-families')};
+    },header('../'));
+    assert.deepEqual(result,{groups:1,href:'../products.html?category=chromatography&search=vial',familyFallback:true});
+  } finally {
+    if(previousGroups===undefined) delete chromatography.groups; else chromatography.groups=previousGroups;
+  }
+  await page.setViewportSize({width:1440,height:1000});await go('index.html');
   for (const width of [1280,1440,1920]) {
     await page.setViewportSize({width,height:800});
     await page.locator('[aria-controls="mega-analytical"]').hover();
-    assert.equal(await directory.locator('.mega-directory-columns').evaluate(e=>getComputedStyle(e).gridTemplateColumns.split(' ').length),3);
+    assert.equal(await directory.locator('.mega-group-grid').evaluate(e=>getComputedStyle(e).gridTemplateColumns.split(' ').length),3);
     await overflow(`Analytical directory at ${width}`);
   }
   await page.setViewportSize({width:1440,height:1000});
