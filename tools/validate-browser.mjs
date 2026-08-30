@@ -208,10 +208,10 @@ export async function validateBrowser(root, files) {
       const label=panel.parentElement.querySelector('.category-nav-label').getBoundingClientRect();
       const groups=panel.querySelector('[data-columns="3"]');
       const firstLink=groups.querySelector('a').getBoundingClientRect();
-      return {top:r.top,bottom:r.bottom,left:r.left,right:r.right,width:r.width,labelCenter:label.left+label.width/2,navBottom:nav.bottom,navLeft:nav.left,viewportHeight:innerHeight,viewportWidth:innerWidth,position:getComputedStyle(panel).position,backdropContent:getComputedStyle(panel.parentElement,'::before').content,rowHeight:firstLink.height,columnBottoms:[...groups.children].map(c=>c.getBoundingClientRect().bottom),pageVisibleOutside:[[r.right+4,nav.bottom+4],[innerWidth-4,nav.bottom+4],[innerWidth-4,innerHeight-4],[r.left+20,innerHeight-8]].every(([x,y])=>!document.elementFromPoint(x,y)?.closest('.category-header')),panelCoversItsBottom:panel.contains(document.elementFromPoint(r.left+20,r.bottom-4))};
+      return {top:r.top,bottom:r.bottom,left:r.left,right:r.right,width:r.width,labelLeft:label.left,labelCenter:label.left+label.width/2,navBottom:nav.bottom,navLeft:nav.left,viewportHeight:innerHeight,viewportWidth:innerWidth,position:getComputedStyle(panel).position,backdropContent:getComputedStyle(panel.parentElement,'::before').content,rowHeight:firstLink.height,columnBottoms:[...groups.children].map(c=>c.getBoundingClientRect().bottom),pageVisibleOutside:[[r.right+4,nav.bottom+4],[innerWidth-4,nav.bottom+4],[innerWidth-4,innerHeight-4],[r.left+20,innerHeight-8]].every(([x,y])=>!document.elementFromPoint(x,y)?.closest('.category-header')),panelCoversItsBottom:panel.contains(document.elementFromPoint(r.left+20,r.bottom-4))};
     });
     assert.equal(overlay.position,'fixed');assert.equal(overlay.width,724);
-    if(category===analytical) assert.equal(overlay.left,overlay.navLeft,'Analytical position stays unchanged');
+    if(category===analytical) assert.equal(overlay.left,overlay.labelLeft,'Analytical stays aligned with its centered navigation label');
     assert(overlay.left>=overlay.navLeft && overlay.right<=overlay.viewportWidth-24,'Panel stays within the viewport');
     assert(overlay.labelCenter>=overlay.left && overlay.labelCenter<=overlay.right,'Panel sits below its parent label');
     assert.equal(overlay.top,overlay.navBottom);
