@@ -3,7 +3,7 @@ import {createServer} from 'node:http';
 import {readFileSync} from 'node:fs';
 import {extname, relative, resolve, sep} from 'node:path';
 import {createRequire} from 'node:module';
-import {categories, familyUrl, directoryUrl} from './taxonomy.mjs';
+import {categories, categoryUrl, familyUrl, directoryItem, directoryUrl} from './taxonomy.mjs';
 import {header, splitGroups} from './site-navigation.mjs';
 
 // Install playwright locally or provide its package directory through NODE_PATH.
@@ -187,7 +187,10 @@ export async function validateBrowser(root, files) {
   // Another category can opt in without changes to the renderer; families still work.
   const chromatography=categories.find(c=>c.anchor==='chromatography');
   const previousGroups=chromatography.groups;
+  const generalLab=categories.find(c=>c.anchor==='general-lab');
+  const previousGeneralGroups=generalLab.groups;
   try {
+    delete generalLab.groups;
     chromatography.groups=[{name:'Validation group',items:[{name:'Vials',search:'vial'}]}];
     const result=await page.evaluate(rendered=>{
       const parsed=new DOMParser().parseFromString(rendered,'text/html');
@@ -197,16 +200,21 @@ export async function validateBrowser(root, files) {
     assert.deepEqual(result,{groups:1,href:'../products.html?category=chromatography&search=vial',familyFallback:true,directoryFooter:false,familyFooter:true});
   } finally {
     if(previousGroups===undefined) delete chromatography.groups; else chromatography.groups=previousGroups;
+    generalLab.groups=previousGeneralGroups;
   }
-  const checkDesktopOverlay=async()=>{
-    const overlay=await directory.evaluate(panel=>{
+  const checkDesktopOverlay=async(panel=directory,category=analytical)=>{
+    const overlay=await panel.evaluate(panel=>{
       const r=panel.getBoundingClientRect(),nav=document.querySelector('#primaryNav').getBoundingClientRect();
+      const label=panel.parentElement.querySelector('.category-nav-label').getBoundingClientRect();
       const groups=panel.querySelector('[data-columns="3"]');
       const firstLink=groups.querySelector('a').getBoundingClientRect();
-      return {top:r.top,bottom:r.bottom,left:r.left,width:r.width,navBottom:nav.bottom,navLeft:nav.left,viewportHeight:innerHeight,position:getComputedStyle(panel).position,backdropContent:getComputedStyle(panel.parentElement,'::before').content,rowHeight:firstLink.height,columnBottoms:[...groups.children].map(c=>c.getBoundingClientRect().bottom),pageVisibleOutside:[[r.right+4,nav.bottom+4],[innerWidth-4,nav.bottom+4],[innerWidth-4,innerHeight-4],[r.left+20,innerHeight-8]].every(([x,y])=>!document.elementFromPoint(x,y)?.closest('.category-header')),panelCoversItsBottom:panel.contains(document.elementFromPoint(r.left+20,r.bottom-4))};
+      return {top:r.top,bottom:r.bottom,left:r.left,right:r.right,width:r.width,labelCenter:label.left+label.width/2,navBottom:nav.bottom,navLeft:nav.left,viewportHeight:innerHeight,viewportWidth:innerWidth,position:getComputedStyle(panel).position,backdropContent:getComputedStyle(panel.parentElement,'::before').content,rowHeight:firstLink.height,columnBottoms:[...groups.children].map(c=>c.getBoundingClientRect().bottom),pageVisibleOutside:[[r.right+4,nav.bottom+4],[innerWidth-4,nav.bottom+4],[innerWidth-4,innerHeight-4],[r.left+20,innerHeight-8]].every(([x,y])=>!document.elementFromPoint(x,y)?.closest('.category-header')),panelCoversItsBottom:panel.contains(document.elementFromPoint(r.left+20,r.bottom-4))};
     });
     assert.equal(overlay.position,'fixed');assert.equal(overlay.width,724);
-    assert.equal(overlay.left,overlay.navLeft);assert.equal(overlay.top,overlay.navBottom);
+    if(category===analytical) assert.equal(overlay.left,overlay.navLeft,'Analytical position stays unchanged');
+    assert(overlay.left>=overlay.navLeft && overlay.right<=overlay.viewportWidth-24,'Panel stays within the viewport');
+    assert(overlay.labelCenter>=overlay.left && overlay.labelCenter<=overlay.right,'Panel sits below its parent label');
+    assert.equal(overlay.top,overlay.navBottom);
     assert.equal(overlay.bottom,overlay.viewportHeight-24);
     assert(overlay.columnBottoms.every(bottom=>Math.abs(bottom-overlay.bottom)<1),'Dividers extend to the panel bottom');
     assert.equal(overlay.backdropContent,'none','No full-width white pseudo-element');
@@ -214,6 +222,59 @@ export async function validateBrowser(root, files) {
     assert(overlay.panelCoversItsBottom,'White coverage continues to the compact panel bottom');
     assert(overlay.rowHeight>=20 && overlay.rowHeight<=22,'Desktop link rows are approximately 20–22px');
   };
+  // Every category uses the same directory frame, including sparse two-group menus.
+  for(const [width,height] of [[320,1200],[375,1200],[768,1200],[1024,1200],[1279,1200],[1280,900],[1366,768],[1440,900],[1600,900],[1920,1080]]) {
+    for(const category of categories) {
+      await page.setViewportSize({width,height});await go('index.html');
+      const panel=page.locator(`#mega-${category.anchor}`);
+      const item=page.locator('.category-nav-item').filter({has:panel});
+      const label=item.locator('.category-nav-label');
+      if(width>=1280) {
+        await label.hover();await checkDesktopOverlay(panel,category);
+        const l=await label.boundingBox(),p=await panel.boundingBox();
+        await page.mouse.move(l.x+l.width/2,l.y+l.height-2);
+        await page.mouse.move(l.x+l.width/2,p.y+10,{steps:10});
+        assert(await panel.isVisible(),`Pointer can enter ${category.name} directly from its label`);
+        await page.mouse.move(l.x+l.width/2,l.y+l.height-2,{steps:10});
+        assert(await panel.isVisible(),'Pointer can return to its parent label');
+      } else {
+        await page.locator('#navToggle').click();await item.locator('.category-disclosure').click();
+        assert.equal(await panel.evaluate(e=>getComputedStyle(e).position),'static');
+      }
+      const columns=panel.locator('.mega-directory-columns:visible');
+      const columnCount=width>=1280?3:width>=768?2:1;
+      const topics=category.groups.flatMap(group=>group.items);
+      assert.equal(await columns.count(),1);
+      assert.equal(await columns.locator(':scope > .mega-directory-column').count(),columnCount);
+      assert.deepEqual(await columns.locator('h3').allTextContents(),category.groups.map(group=>group.name));
+      assert.deepEqual(await columns.locator('a').allTextContents(),topics.map(topic=>directoryItem(category,topic).name));
+      assert.deepEqual(await columns.locator('a').evaluateAll(links=>links.map(a=>a.getAttribute('href'))),topics.map(topic=>directoryUrl(category,topic)));
+      assert.equal(await panel.locator('.mega-intro, .mega-families, .mega-view-all').count(),0);
+      const frame=await columns.evaluate(grid=>[...grid.children].map(column=>({width:column.getBoundingClientRect().width,border:getComputedStyle(column).borderLeftWidth,bottom:column.getBoundingClientRect().bottom})));
+      assert(frame.every(c=>c.width===230 && Math.abs(c.bottom-frame[0].bottom)<1),'All columns, including empty ones, share the frame');
+      assert.deepEqual(frame.map(c=>c.border),Array.from({length:columnCount},(_,i)=>i?'1px':'0px'));
+      await overflow(`${category.name} directory at ${width}`);
+      if(process.env.BENCHVALE_SCREENSHOT_DIR && [375,1024,1440].includes(width)) {
+        const path=resolve(process.env.BENCHVALE_SCREENSHOT_DIR,`menu-${category.anchor}-${width}.png`);
+        if(width>=1280) await page.screenshot({path}); else await panel.screenshot({path});
+      }
+      if(width===1440) {
+        const savedGroups=category.groups;
+        try {
+          category.groups=[...savedGroups,{name:'Validation group',items:[savedGroups[0].items[0]]}];
+          await panel.evaluate((e,rendered)=>{
+            const parsed=new DOMParser().parseFromString(rendered,'text/html');
+            e.replaceChildren(...parsed.querySelector(`#${e.id}`).childNodes);
+          },header());
+          assert.equal(await columns.locator('h3').last().textContent(),'Validation group');
+          assert.equal(await columns.locator('.mega-group').count(),savedGroups.length+1);
+          await checkDesktopOverlay(panel,category);
+        } finally { category.groups=savedGroups; }
+      }
+      await Promise.all([page.waitForURL(`**/${categoryUrl(category)}`),label.locator('a').click()]);
+      await page.waitForLoadState('load');await checkCategory(category);
+    }
+  }
   for (const [width,height] of [[1280,800],[1366,768],[1440,900],[1600,900],[1920,1080]]) {
     await page.setViewportSize({width,height});await go('index.html');
     await page.locator('[aria-controls="mega-analytical"]').hover();
@@ -257,6 +318,7 @@ export async function validateBrowser(root, files) {
     await overflow('Long scrolling desktop directory');
   } finally { analytical.groups=originalGroups; }
   await page.setViewportSize({width:1024,height:900});
+  await page.waitForFunction(()=>!document.querySelector('.category-header').classList.contains('directory-overlay-open'));
   assert(!(await directory.isVisible()),'Crossing to tablet closes the desktop overlay');
   assert.equal(await page.locator('.category-header.directory-overlay-open').count(),0);
   await go('index.html');await page.locator('#navToggle').click();await page.locator('[aria-controls="mega-analytical"]').click();
@@ -319,7 +381,7 @@ export async function validateBrowser(root, files) {
   await touch.goto(base+'index.html');await touch.locator('#navToggle').tap();
   const disclosure=touch.locator('[aria-controls="mega-sample-preparation"]');
   await disclosure.tap();assert.equal(await disclosure.getAttribute('aria-expanded'),'true');
-  await Promise.all([touch.waitForURL('**/products/syringe-filters.html'), touch.locator('#mega-sample-preparation a').first().tap()]);await touch.waitForLoadState('load');
+  await Promise.all([touch.waitForURL('**/products/syringe-filters.html'), touch.locator('#mega-sample-preparation .mega-directory-columns:visible a').first().tap()]);await touch.waitForLoadState('load');
   assert(new URL(touch.url()).pathname.endsWith('/products/syringe-filters.html'));
   await touchContext.close();
   await page.setViewportSize({width:1440,height:1000});

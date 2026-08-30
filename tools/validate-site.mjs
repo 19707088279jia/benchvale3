@@ -1,4 +1,4 @@
-import { categories, categoryUrl, familyUrl } from "./taxonomy.mjs";
+import { categories, categoryUrl, familyUrl, directoryItem, directoryUrl } from "./taxonomy.mjs";
 import { header } from "./site-navigation.mjs";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { dirname, extname, resolve } from "node:path";
@@ -127,9 +127,16 @@ for (const c of categories) {
   if (!productsIndex.includes(`data-product-filter="${c.anchor}"`)) failures.push(`Missing ${c.name} filter`);
   for (const group of c.groups || []) {
     if (!group.name || !group.items.length) failures.push(`Empty directory group in ${c.name}`);
+    if ('column' in group) failures.push(`Manual directory column assignment in ${c.name}`);
     for (const topic of group.items) {
-      if (!topic.name || (!topic.page && !topic.search)) failures.push(`Missing directory destination in ${group.name}`);
+      const item = directoryItem(c, topic);
+      if (!item.name || (!item.page && !item.search)) failures.push(`Missing directory destination in ${group.name}`);
+      if (topic.family && directoryUrl(c, topic) !== familyUrl(c, item)) failures.push(`Changed family destination for ${item.name}`);
     }
+  }
+  if (c.families.length && Array.isArray(c.groups)) {
+    const referenced = new Set(c.groups.flatMap(group => group.items.map(topic => topic.family)));
+    if (c.families.some(family => !referenced.has(family.name))) failures.push(`Directory must retain every existing family in ${c.name}`);
   }
   for (const f of c.families) {
     if (!f.page && !f.search) failures.push(`Missing destination for ${f.name}`);

@@ -11,7 +11,14 @@ if (navToggle && primaryNav) {
     if (!header.classList.contains("directory-overlay-open")) return;
     const bounds = primaryNav.getBoundingClientRect();
     header.style.setProperty("--mega-menu-top", `${Math.max(0, bounds.bottom)}px`);
+    // Measure at the navigation edge first, so a previous viewport/label cannot constrain width.
     header.style.setProperty("--mega-menu-left", `${bounds.left}px`);
+    const item = primaryNav.querySelector(".directory-overlay-open");
+    const panelWidth = item.querySelector(".mega-menu-directory").getBoundingClientRect().width;
+    const labelLeft = item.querySelector(".category-nav-label").getBoundingClientRect().left;
+    const inset = parseFloat(getComputedStyle(primaryNav).paddingLeft);
+    const left = Math.max(bounds.left, Math.min(labelLeft - inset, innerWidth - panelWidth - 24));
+    header.style.setProperty("--mega-menu-left", `${left}px`);
   };
   const setOpen = (item, open) => {
     const button = item.querySelector(".category-disclosure");

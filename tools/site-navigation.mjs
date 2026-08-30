@@ -1,4 +1,4 @@
-import { categories, categoryUrl, familyUrl, directoryUrl } from './taxonomy.mjs';
+import { categories, categoryUrl, familyUrl, directoryItem, directoryUrl } from './taxonomy.mjs';
 const esc = (s) => s.replaceAll('&', '&amp;').replaceAll('"', '&quot;');
 // Split in source order; earlier columns receive the remainder (4 -> 2/1/1).
 export function splitGroups(groups, columnCount) {
@@ -12,7 +12,7 @@ export function splitGroups(groups, columnCount) {
     return column;
   });
 }
-const groupMarkup = (category, group, link) => `<section class="mega-group"><h3>${esc(group.name)}</h3><ul>${group.items.map(topic => `<li><a href="${link(directoryUrl(category, topic))}">${esc(topic.name)}</a></li>`).join('')}</ul></section>`;
+const groupMarkup = (category, group, link) => `<section class="mega-group"><h3>${esc(group.name)}</h3><ul>${group.items.map(topic => `<li><a href="${link(directoryUrl(category, topic))}">${esc(directoryItem(category, topic).name)}</a></li>`).join('')}</ul></section>`;
 // All responsive variants come from one taxonomy. CSS exposes just one variant,
 // so no browser-side regrouping or manual column assignments are necessary.
 const megaContent = (c, link) => Array.isArray(c.groups)

@@ -109,6 +109,10 @@ export const categories = [
     "icon": "vial",
     "description": "Vials, closures, and consumables for HPLC and GC sample-introduction workflows.",
     "navLabel": "Chromatography",
+    "groups": [
+      { "name": "Vials & Closures", "items": [{ "family": "Autosampler Vials" }, { "family": "Caps & Septa" }] },
+      { "name": "Chromatography Consumables", "items": [{ "family": "Chromatography Consumables" }] }
+    ],
     "families": [
       {
         "name": "Autosampler Vials",
@@ -138,6 +142,10 @@ export const categories = [
     "icon": "bottle",
     "description": "Containers and supplies for field sampling, water testing, and environmental workflows.",
     "navLabel": "Environmental & Water",
+    "groups": [
+      { "name": "Sample Containers", "items": [{ "family": "Sample Bottles" }, { "family": "Reagent Bottles" }] },
+      { "name": "Water Testing", "items": [{ "family": "Water Testing Supplies" }] }
+    ],
     "families": [
       {
         "name": "Sample Bottles",
@@ -167,6 +175,10 @@ export const categories = [
     "icon": "filter",
     "description": "Filtration and extraction formats selected around the sample and method.",
     "navLabel": "Sample Prep",
+    "groups": [
+      { "name": "Filtration", "items": [{ "family": "Syringe Filters" }, { "family": "Filtration" }] },
+      { "name": "Solid Phase Extraction", "items": [{ "family": "SPE Cartridges" }] }
+    ],
     "families": [
       {
         "name": "Syringe Filters",
@@ -196,6 +208,11 @@ export const categories = [
     "icon": "dish",
     "description": "Routine labware, mixing, stirring, and benchtop equipment for everyday laboratory work.",
     "navLabel": "General Lab",
+    "groups": [
+      { "name": "General Labware", "items": [{ "family": "Petri Dishes" }, { "family": "General Labware" }, { "family": "Lab Containers" }, { "family": "General Consumables" }] },
+      { "name": "Mixing & Stirring", "items": [{ "family": "Mixing & Stirring" }, { "family": "Mixers & Shakers" }, { "family": "Heating & Stirring" }] },
+      { "name": "Benchtop Equipment", "items": [{ "family": "Benchtop Equipment" }] }
+    ],
     "families": [
       {
         "name": "Petri Dishes",
@@ -256,6 +273,10 @@ export const categories = [
     "icon": "tube",
     "description": "Centrifuge tubes, microtubes, and related sample-handling formats.",
     "navLabel": "Life Science",
+    "groups": [
+      { "name": "Tubes & Sample Handling", "items": [{ "family": "Centrifuge Tubes" }, { "family": "Microtubes" }] },
+      { "name": "Sample Storage", "items": [{ "family": "Sample Storage" }] }
+    ],
     "families": [
       {
         "name": "Centrifuge Tubes",
@@ -283,6 +304,10 @@ export const categories = [
     "icon": "pipette",
     "description": "Pipettes, tips, and transfer products for routine liquid handling.",
     "navLabel": "Pipettes & Liquid Handling",
+    "groups": [
+      { "name": "Pipette Consumables", "items": [{ "family": "Pipette Tips" }] },
+      { "name": "Liquid Transfer", "items": [{ "family": "Serological Pipettes" }, { "family": "Liquid Transfer" }] }
+    ],
     "families": [
       {
         "name": "Pipette Tips",
@@ -310,5 +335,14 @@ export const categories = [
 export const categoryUrl = (category) => `products.html?category=${category.anchor}`;
 export const familyUrl = (category, family) => family.page || `products.html?filter=${category.anchor}&search=${encodeURIComponent(family.search)}`;
 
-// Directory topics guide navigation; they do not create verified product families or listings.
-export const directoryUrl = (category, topic) => topic.page || `${categoryUrl(category)}&search=${encodeURIComponent(topic.search)}`;
+// Family references reuse the canonical label and destination without duplicating catalogue data.
+export function directoryItem(category, topic) {
+  if (!topic.family) return topic;
+  const family = category.families.find(f => f.name === topic.family);
+  if (!family) throw new Error(`Unknown family "${topic.family}" in ${category.name}`);
+  return family;
+}
+// Sourcing topics retain category landing URLs; family references retain catalogue filters.
+export const directoryUrl = (category, topic) => topic.family
+  ? familyUrl(category, directoryItem(category, topic))
+  : topic.page || `${categoryUrl(category)}&search=${encodeURIComponent(topic.search)}`;

@@ -48,12 +48,23 @@ existing saved-product list. It adds no checkout or server-side behavior.
 
 ## Grouped navigation directories
 
-Any category can opt into the shared grouped menu by adding a flat `groups`
-array alongside its existing catalogue data. Each group has a `name` and an
-`items` array. Each item has a `name` and a `search` term, or a dedicated `page`.
-Categories without `groups` retain their existing `families` menu layout.
+All seven product categories use a flat `groups` array alongside their existing
+catalogue data. Each group has a `name` and an `items` array. Catalogue items
+reference an existing family by name, keeping its label, dedicated page, and
+search destination in one place:
 
-To expand Analytical, append one object to its `groups` array in
+```js
+{
+  name: 'Vials & Closures',
+  items: [{ family: 'Autosampler Vials' }, { family: 'Caps & Septa' }]
+}
+```
+
+`directoryItem` rejects unknown family references. Analytical's existing sourcing
+topics keep their direct `name` and `search`/`page` definitions unchanged. The
+renderer also retains its simpler `families` fallback for unmigrated inputs.
+
+To expand any category, append one object to its `groups` array in
 `tools/taxonomy.mjs`, then run `node tools/update-navigation.mjs` to refresh the
 static pages. No renderer or CSS edits are needed. The renderer creates one
 `section.mega-group` per object and distributes groups sequentially into real
@@ -62,6 +73,8 @@ column containers. Balanced chunking gives earlier columns the remainder:
 The same algorithm generates 3-, 2-, and 1-column variants. CSS displays only
 the variant matching the existing navigation breakpoint; inactive variants are
 hidden from both display and keyboard navigation. No runtime regrouping is needed.
+Categories with two groups use two populated desktop columns and leave the third
+empty; the shared three-column frame stays the same without inventing products.
 
 Groups stack at the top of each column. A short 144px navy rule with 6px of space
 above and below on desktop (9px on tablet/mobile) automatically separates adjacent
@@ -79,9 +92,11 @@ extends from the category navigation to 24px above the viewport bottom. White
 background exists only inside the compact panel: there is no separate backdrop,
 and the page remains visible to its right and below it. Columns stretch to fill
 the panel, extending their navy separators to its bottom; long directories
-scroll inside the panel. The shared navigation
-script measures the navigation's bottom and left edge on open, resize, header
-resize, and page scroll. Header backdrop blur is disabled only while the overlay
+scroll inside the panel. The shared navigation script measures the navigation's
+bottom and the active label on open, resize, header resize, and page scroll. The
+panel follows its label, clamped to the viewport with 24px right clearance, so
+the pointer can move directly into menus near the right end of the navigation.
+Analytical retains its original left position. Header backdrop blur is disabled only while the overlay
 is open so it cannot change the fixed positioning reference.
 
 Moving the pointer out (unless focus remains inside), clicking outside, or
@@ -90,14 +105,17 @@ keyboard navigation between categories remain available. Directory menus have
 no footer link or divider; their main navigation label links to the category page.
 Tablet and mobile variants use two and one real columns, with one vertical
 separator on tablet and none on mobile. The existing mobile accordion behavior
-is unchanged, including content-based height and 50px bottom padding. Other
-categories retain their family-menu layout and footer links.
+is unchanged, including content-based height and 50px bottom padding. All product
+categories share these styles and omit the footer link.
 
-Grouped navigation topics remain separate from verified catalogue `families`.
-`directoryUrl` uses a dedicated `page` if supplied, otherwise the category URL
-plus `search`. These links retain the category landing-page behavior described
-above and do not add product records. Add catalogue families only when verified
-data becomes available.
+Grouped sourcing topics remain separate from verified catalogue `families`.
+For direct topics, `directoryUrl` uses a dedicated `page` if supplied, otherwise
+the category URL plus `search`; Analytical's destinations are unchanged. For
+`{ family: '...' }` references, it delegates to `familyUrl`, preserving both the
+existing detail pages and `products.html?filter=...&search=...` catalogue links.
+Add catalogue families only when verified data becomes available.
 
 Browser validation covers 3, 4, 5, 6, and 8 groups using in-memory taxonomy fixtures;
-those fixtures are never written to the catalogue or generated site.
+those fixtures are never written to the catalogue or generated site. It also
+checks every category at desktop, tablet, and mobile widths, label-to-panel
+pointer travel, preserved family links, and taxonomy-only expansion in each menu.
