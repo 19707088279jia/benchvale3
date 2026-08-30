@@ -88,6 +88,24 @@ document.querySelectorAll("[data-year]").forEach((el) => {
   categoryLinks.forEach((link) => link.addEventListener("click", () => {
     selectCategory(link.dataset.categoryLink || "all");
   }));
+
+  // The homepage search is a native GET form, so shared search links work on GitHub Pages.
+  const initialQuery = new URLSearchParams(window.location.search).get("search");
+  if (initialQuery !== null) searchInput.value = initialQuery;
+  applyFilters();
+
+  // Bring visitors from a search link directly to their results, past the category overview.
+  if (initialQuery?.trim() && !window.location.hash) {
+    searchInput.focus({ preventScroll: true });
+    const catalogue = document.getElementById("catalogue");
+    const headerHeight = document.querySelector(".site-header")?.getBoundingClientRect().height || 0;
+    if (catalogue) {
+      window.scrollTo({
+        top: catalogue.getBoundingClientRect().top + window.scrollY - headerHeight,
+        behavior: "instant",
+      });
+    }
+  }
 })();
 
 // A small local quote list lets visitors carry products into the multi-product RFQ form.

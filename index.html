@@ -13,20 +13,38 @@
   <meta name="theme-color" content="#0a1f33" />
   <link rel="icon" href="images/favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="homepage-refresh.css" />
 </head>
 <body class="storefront-home">
   <a class="skip-link" href="#main">Skip to content</a>
 
-  <header class="site-header">
-    <div class="container header-inner">
+  <header class="site-header home-header">
+    <div class="container home-header-top">
       <a href="index.html" class="brand" aria-current="page">
         <svg class="brand-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="13" stroke="currentColor" stroke-width="1.4"/><path d="M20 2v7M20 31v7M2 20h7M31 20h7" stroke="currentColor" stroke-width="1.4"/><circle cx="20" cy="20" r="3" fill="#0f8a8a"/></svg>
         <span class="brand-text"><span class="brand-name">Benchvale Scientific</span><span class="brand-sub">Laboratory Products &amp; Equipment</span></span>
       </a>
-      <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="primaryNav" aria-label="Toggle navigation menu"><span></span><span></span><span></span></button>
-      <nav class="primary-nav" id="primaryNav" aria-label="Primary"><ul><li><a href="products.html">Products</a></li><li><a href="equipment.html">Equipment</a></li><li><a href="industries.html">Industries</a></li><li><a href="sourcing.html">Sourcing</a></li><li><a href="about.html">About</a></li><li><a href="contact.html">Contact</a></li><li class="nav-cta-mobile"><a href="quote.html" class="btn btn-primary btn-block">Request a Quote</a></li></ul></nav>
+      <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="primaryNav" aria-label="Toggle navigation menu"><span></span><span></span><span></span></button>
+      <form class="home-site-search" role="search" action="products.html" method="get">
+        <label class="home-visually-hidden" for="homeSearch">Search products, models, and applications</label>
+        <input id="homeSearch" name="search" type="search" placeholder="Search products, models, applications..." />
+        <button type="submit" aria-label="Search products"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>
+      </form>
       <div class="nav-actions"><a href="quote.html" class="btn btn-primary">Request a Quote</a></div>
     </div>
+    <nav class="primary-nav home-primary-nav" id="primaryNav" aria-label="Primary">
+      <div class="container">
+        <ul>
+          <li><a href="products.html">Products</a></li>
+          <li><a href="equipment.html">Equipment</a></li>
+          <li><a href="industries.html">Industries</a></li>
+          <li><a href="sourcing.html">Sourcing</a></li>
+          <li><a href="about.html">About</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li class="nav-cta-mobile"><a href="quote.html" class="btn btn-primary btn-block">Request a Quote</a></li>
+        </ul>
+      </div>
+    </nav>
   </header>
 
   <main id="main">
@@ -58,6 +76,120 @@
       <div class="home-slider-dots" role="group" aria-label="Choose featured banner"><button type="button" class="is-active" aria-label="Show banner 1" aria-current="true"></button><button type="button" aria-label="Show banner 2"></button><button type="button" aria-label="Show banner 3"></button><button type="button" aria-label="Show banner 4"></button></div>
     </section>
 
+    <div class="home-services-promotions">
+      <div class="container home-discovery-grid">
+        <section class="home-services" aria-labelledby="home-services-heading">
+          <div class="home-discovery-heading"><p class="eyebrow">Here to help</p><h2 id="home-services-heading">Services</h2></div>
+          <div class="home-service-list">
+            <article class="home-service-card">
+              <svg class="home-service-icon" viewBox="0 0 32 32" fill="none" aria-hidden="true"><circle cx="13" cy="13" r="8"/><path d="m19 19 9 9M13 9v8M9 13h8"/></svg>
+              <h3>Product Sourcing Support</h3>
+              <p>Share a model, specification, or application and Benchvale will review suitable product options.</p>
+              <a href="sourcing.html">Learn more <span aria-hidden="true">→</span><span class="home-visually-hidden"> about product sourcing support</span></a>
+            </article>
+            <article class="home-service-card">
+              <svg class="home-service-icon" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M11 5H6v24h20V5h-5M11 3h10v6H11zM11 15h10M11 20h10M11 25h6"/></svg>
+              <h3>Quote &amp; Procurement Support</h3>
+              <p>Pricing based on quantity, destination, required date, and configuration.</p>
+              <a href="quote.html">Request a quote <span aria-hidden="true">→</span></a>
+            </article>
+            <article class="home-service-card">
+              <svg class="home-service-icon" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M7 3h12l6 6v20H7zM19 3v7h6M12 15h8M12 20h8M12 25h5"/></svg>
+              <h3>Documentation Coordination</h3>
+              <p>Coordinate applicable datasheets, certificates, COAs, and supplier documentation.</p>
+              <a href="sourcing.html#quote-review-title">Learn more <span aria-hidden="true">→</span><span class="home-visually-hidden"> about documentation coordination</span></a>
+            </article>
+            <article class="home-service-card">
+              <svg class="home-service-icon" viewBox="0 0 32 32" fill="none" aria-hidden="true"><rect x="12" y="3" width="8" height="8" rx="1"/><rect x="3" y="21" width="8" height="8" rx="1"/><rect x="21" y="21" width="8" height="8" rx="1"/><path d="M16 11v6M7 21v-4h18v4"/></svg>
+              <h3>Supplier Coordination</h3>
+              <p>Coordinate product details and order requirements with selected manufacturers.</p>
+              <a href="sourcing.html">Learn more <span aria-hidden="true">→</span><span class="home-visually-hidden"> about supplier coordination</span></a>
+            </article>
+            <article class="home-service-card">
+              <svg class="home-service-icon" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M5 18v-3a11 11 0 0 1 22 0v9c0 3-4 5-8 5M5 14H3v9h5v-9zM27 14h2v9h-5v-9zM14 27h5v3h-5z"/></svg>
+              <h3>Post-Purchase Support</h3>
+              <p>Order tracking, warranty coordination, replacement-part assistance, and issue routing.</p>
+              <a href="contact.html">Contact support <span aria-hidden="true">→</span></a>
+            </article>
+            <article class="home-service-card">
+              <svg class="home-service-icon" viewBox="0 0 32 32" fill="none" aria-hidden="true"><path d="M5 7h22M5 16h22M5 25h22"/><rect x="10" y="3" width="5" height="8" rx="1"/><rect x="20" y="12" width="5" height="8" rx="1"/><rect x="8" y="21" width="5" height="8" rx="1"/></svg>
+              <h3>Specification Review</h3>
+              <p>Help translate workflow requirements into purchasing specifications.</p>
+              <a href="sourcing.html#quote-review-title">Learn more <span aria-hidden="true">→</span><span class="home-visually-hidden"> about specification review</span></a>
+            </article>
+          </div>
+        </section>
+
+        <section class="home-promotions" aria-labelledby="home-promotions-heading">
+          <div class="home-discovery-heading"><p class="eyebrow">Laboratory essentials</p><h2 id="home-promotions-heading">Featured Promotions</h2></div>
+          <div class="home-promotion-grid">
+            <article class="home-promotion-card">
+              <div class="home-promotion-visual technical-illustration" aria-hidden="true"><svg viewBox="0 0 120 120" fill="none"><g><rect x="39" y="20" width="42" height="18" rx="3"/><path d="M44 38v60c0 10 32 10 32 0V38M48 50h24M50 82h20"/></g></svg></div>
+              <div class="home-promotion-copy">
+                <span class="home-promotion-label">Promotional Pricing</span>
+                <p class="home-promotion-category">Chromatography</p>
+                <h3>2 mL HPLC/GC Autosampler Vials</h3>
+                <p>2 mL formats, with closure and configuration matched to your workflow.</p>
+                <a href="products/2ml-autosampler-vial.html">View product <span aria-hidden="true">→</span><span class="home-visually-hidden">: 2 mL HPLC/GC Autosampler Vials</span></a>
+              </div>
+            </article>
+            <article class="home-promotion-card">
+              <div class="home-promotion-visual technical-illustration" aria-hidden="true"><svg viewBox="0 0 120 120" fill="none"><g><circle cx="59" cy="60" r="24"/><circle cx="59" cy="60" r="15"/><path d="M14 60h21M83 60h23M23 53v14M96 53v14"/></g></svg></div>
+              <div class="home-promotion-copy">
+                <span class="home-promotion-label">Promotional Pricing</span>
+                <p class="home-promotion-category">Sample Preparation</p>
+                <h3>Syringe Filters</h3>
+                <p>Membrane and pore-size options selected for your sample and method.</p>
+                <a href="products/syringe-filters.html">View product <span aria-hidden="true">→</span><span class="home-visually-hidden">: Syringe Filters</span></a>
+              </div>
+            </article>
+            <article class="home-promotion-card">
+              <div class="home-promotion-visual technical-illustration" aria-hidden="true"><svg viewBox="0 0 120 120" fill="none"><g><path d="M20 42h80v42H20zM28 34h64v8M34 42v27M48 42v27M62 42v27M76 42v27M90 42v27M31 69l3 16 3-16M45 69l3 16 3-16M59 69l3 16 3-16M73 69l3 16 3-16M87 69l3 16 3-16"/></g></svg></div>
+              <div class="home-promotion-copy">
+                <span class="home-promotion-label">Promotional Pricing</span>
+                <p class="home-promotion-category">Liquid Handling · RUNLAB</p>
+                <h3>Racked Pipette Tips</h3>
+                <p>Selected 10 µL / 200 µL Rainin LTS-compatible configurations.</p>
+                <a href="products/pipette-tips.html">View product <span aria-hidden="true">→</span><span class="home-visually-hidden">: Racked Pipette Tips</span></a>
+              </div>
+            </article>
+            <article class="home-promotion-card">
+              <div class="home-promotion-visual technical-illustration" aria-hidden="true"><svg viewBox="0 0 120 120" fill="none"><g><path d="M42 18h36M46 18v62l14 24 14-24V18M49 42h22M50 58h20M52 74h16"/></g></svg></div>
+              <div class="home-promotion-copy">
+                <span class="home-promotion-label">Promotional Pricing</span>
+                <p class="home-promotion-category">Life Science</p>
+                <h3>15 mL Centrifuge Tubes</h3>
+                <p>15 mL formats selected for your performance and packaging needs.</p>
+                <a href="products/15ml-centrifuge-tube.html">View product <span aria-hidden="true">→</span><span class="home-visually-hidden">: 15 mL Centrifuge Tubes</span></a>
+              </div>
+            </article>
+            <article class="home-promotion-card">
+              <div class="home-promotion-visual technical-illustration" aria-hidden="true"><svg viewBox="0 0 120 120" fill="none"><g><ellipse cx="60" cy="44" rx="40" ry="12"/><path d="M20 44v30c0 16 80 16 80 0V44"/><ellipse cx="60" cy="74" rx="40" ry="12"/></g></svg></div>
+              <div class="home-promotion-copy">
+                <span class="home-promotion-label">Promotional Pricing</span>
+                <p class="home-promotion-category">General Lab · RUNLAB 55301</p>
+                <h3>90 × 15 mm Sterile Petri Dish</h3>
+                <p>High-transparency PS, EO sterile, triple vent. 10/pack, 500/case.</p>
+                <a href="products/90mm-petri-dish.html">View product <span aria-hidden="true">→</span><span class="home-visually-hidden">: 90 × 15 mm Sterile Petri Dish</span></a>
+              </div>
+            </article>
+            <article class="home-promotion-card">
+              <div class="home-promotion-visual technical-illustration" aria-hidden="true"><svg viewBox="0 0 120 120" fill="none"><g><path d="M25 52h70l7 50H18z"/><rect x="31" y="24" width="58" height="28" rx="2"/><circle cx="46" cy="78" r="6"/><circle cx="74" cy="78" r="6"/><path d="M40 38h40"/></g></svg></div>
+              <div class="home-promotion-copy">
+                <span class="home-promotion-label">Promotional Pricing</span>
+                <p class="home-promotion-category">Laboratory Equipment</p>
+                <h3>Hotplate Magnetic Stirrer</h3>
+                <p>Benchtop heating and stirring matched to vessel, control, and power needs.</p>
+                <a href="products/hotplate-magnetic-stirrer.html">View product <span aria-hidden="true">→</span><span class="home-visually-hidden">: Hotplate Magnetic Stirrer</span></a>
+              </div>
+            </article>
+          </div>
+          <p class="home-promotion-note">Request a Quote for promotional pricing on your required configuration and quantity.</p>
+          <div class="home-requirements-cta"><p>Can’t find the exact product or specification?</p><a href="quote.html" class="btn btn-primary">Send Requirements</a></div>
+        </section>
+      </div>
+    </div>
+
     <section class="home-shop-section" aria-labelledby="home-categories-heading">
       <div class="container">
         <div class="section-header reveal"><p class="eyebrow">Shop by Category</p><h2 id="home-categories-heading">Laboratory products organized around your workflow</h2><p>Browse seven consistent product categories, then request the exact configuration, pack size, and quantity you need.</p></div>
@@ -73,22 +205,6 @@
       </div>
     </section>
 
-    <section class="featured-products-section section-alt" aria-labelledby="featured-products-heading">
-      <div class="container">
-        <div class="section-header reveal"><p class="eyebrow">Featured Products</p><h2 id="featured-products-heading">Start with frequently requested laboratory essentials</h2><p>Product pages show confirmed facts where available and identify when the exact manufacturer configuration will be finalized with your quotation.</p></div>
-        <div class="featured-product-grid reveal">
-          <article class="featured-product-card"><div class="technical-illustration" aria-hidden="true"><svg viewBox="0 0 120 120" fill="none"><g><rect x="39" y="20" width="42" height="18" rx="3"/><path d="M44 38v60c0 10 32 10 32 0V38M48 50h24M50 82h20"/></g></svg></div><div class="featured-product-card-copy"><span class="product-card-category">Chromatography</span><h3>2 mL HPLC/GC Autosampler Vial</h3><p>Selected for the required instrument, closure, and workflow.</p><a href="products/2ml-autosampler-vial.html">View product →</a></div></article>
-          <article class="featured-product-card"><div class="technical-illustration" aria-hidden="true"><svg viewBox="0 0 120 120" fill="none"><g><circle cx="59" cy="60" r="24"/><circle cx="59" cy="60" r="15"/><path d="M14 60h21M83 60h23M23 53v14M96 53v14"/></g></svg></div><div class="featured-product-card-copy"><span class="product-card-category">Sample Preparation</span><h3>Syringe Filters</h3><p>Selected by membrane, pore size, sample, and downstream method.</p><a href="products/syringe-filters.html">View product →</a></div></article>
-          <article class="featured-product-card"><div class="technical-illustration" aria-hidden="true"><svg viewBox="0 0 120 120" fill="none"><g><path d="M48 16h24l-3 58-9 20-9-20zM44 16h32M49 36h22M51 66h18M56 94v12"/></g></svg></div><div class="featured-product-card-copy"><span class="product-card-category">Sample Preparation</span><h3>SPE Cartridges</h3><p>Solid-phase extraction formats selected around the method and matrix.</p><a href="products/spe-cartridges.html">View product →</a></div></article>
-          <article class="featured-product-card"><div class="technical-illustration" aria-hidden="true"><svg viewBox="0 0 120 120" fill="none"><g><ellipse cx="60" cy="44" rx="40" ry="12"/><path d="M20 44v30c0 16 80 16 80 0V44"/><ellipse cx="60" cy="74" rx="40" ry="12"/></g></svg></div><div class="featured-product-card-copy"><span class="product-card-category">General Lab · RUNLAB 55301</span><h3>90 × 15 mm Sterile Petri Dish</h3><p>High-transparency PS, EO sterile, triple vent, 10/pack, 500/case.</p><a href="products/90mm-petri-dish.html">View product →</a></div></article>
-          <article class="featured-product-card"><div class="technical-illustration" aria-hidden="true"><svg viewBox="0 0 120 120" fill="none"><g><path d="M42 18h36M46 18v62l14 24 14-24V18M49 42h22M50 58h20M52 74h16"/></g></svg></div><div class="featured-product-card-copy"><span class="product-card-category">Life Science</span><h3>15 mL Centrifuge Tube</h3><p>Selected by construction, performance, and packaging requirements.</p><a href="products/15ml-centrifuge-tube.html">View product →</a></div></article>
-          <article class="featured-product-card"><div class="technical-illustration" aria-hidden="true"><svg viewBox="0 0 120 120" fill="none"><g><path d="M20 42h80v42H20zM28 34h64v8M34 42v27M48 42v27M62 42v27M76 42v27M90 42v27M31 69l3 16 3-16M45 69l3 16 3-16M59 69l3 16 3-16M73 69l3 16 3-16M87 69l3 16 3-16"/></g></svg></div><div class="featured-product-card-copy"><span class="product-card-category">Liquid Handling · RUNLAB</span><h3>Rainin LTS-Compatible Racked Pipette Tips</h3><p>Selected 10 µL and 200 µL standard and filtered configurations.</p><a href="products/pipette-tips.html">View product →</a></div></article>
-          <article class="featured-product-card"><div class="technical-illustration" aria-hidden="true"><svg viewBox="0 0 120 120" fill="none"><g><path d="M44 16h32v16l8 10v60H36V42l8-10zM44 24h32M36 54h48M46 72h28"/></g></svg></div><div class="featured-product-card-copy"><span class="product-card-category">Environmental &amp; Water</span><h3>HDPE Sample / Reagent Bottles</h3><p>Selected by capacity, closure, packaging, and application.</p><a href="products/hdpe-bottles.html">View product →</a></div></article>
-          <article class="featured-product-card"><div class="technical-illustration" aria-hidden="true"><svg viewBox="0 0 120 120" fill="none"><g><path d="M25 52h70l7 50H18z"/><rect x="31" y="24" width="58" height="28" rx="2"/><circle cx="46" cy="78" r="6"/><circle cx="74" cy="78" r="6"/><path d="M40 38h40"/></g></svg></div><div class="featured-product-card-copy"><span class="product-card-category">Laboratory Equipment</span><h3>Hotplate Magnetic Stirrer</h3><p>Sourced to heating, stirring, vessel, control, and power needs.</p><a href="products/hotplate-magnetic-stirrer.html">View product →</a></div></article>
-        </div>
-        <p class="home-section-link"><a href="products.html" class="btn btn-secondary">View All Products</a></p>
-      </div>
-    </section>
 
     <section class="why-buy-section" aria-labelledby="why-buy-heading"><div class="container"><div class="section-header reveal"><p class="eyebrow">Why Buy from Benchvale</p><h2 id="why-buy-heading">Clear information for considered laboratory purchasing</h2></div><div class="why-buy-grid reveal"><article class="why-buy-item"><span>01</span><h3>Product-first browsing</h3><p>Consistent categories, searchable product records, and specifications organized for comparison.</p></article><article class="why-buy-item"><span>02</span><h3>Verified claims only</h3><p>Supplier-dependent details are not presented as confirmed until the applicable configuration is verified.</p></article><article class="why-buy-item"><span>03</span><h3>Quote to your requirements</h3><p>Quantity, destination, required date, documentation, and important specifications are reviewed together.</p></article><article class="why-buy-item"><span>04</span><h3>Canadian point of contact</h3><p>Product, shipping, and support questions are coordinated through Benchvale in Ontario.</p></article></div></div></section>
 
