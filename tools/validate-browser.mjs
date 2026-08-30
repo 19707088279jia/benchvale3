@@ -92,7 +92,7 @@ export async function validateBrowser(root, files) {
   // This proves new groups require no column assignments, wrappers, or CSS edits.
   const originalGroups = analytical.groups;
   try {
-    for (const [width, columns] of [[320,1],[767,1],[768,2],[1024,2],[1279,2],[1280,3],[1440,3],[1920,3]]) {
+    for (const [width, columns] of [[320,1],[767,1],[768,2],[1024,2],[1279,2],[1280,3],[1440,3],[1600,3],[1920,3]]) {
       await page.setViewportSize({width,height:1000});await go('index.html');
       if(width<1280) {
         await page.locator('#navToggle').click();
@@ -108,21 +108,32 @@ export async function validateBrowser(root, files) {
         assert.equal(await directory.locator('.mega-group-grid > section.mega-group').count(),count);
         const layout=await directory.evaluate(panel=>{
           const grid=panel.querySelector('.mega-group-grid');const style=getComputedStyle(grid);
-          const groups=[...grid.children].map(group=>{const r=group.getBoundingClientRect();return {x:r.x,y:r.y,bottom:r.bottom};});
+          const groups=[...grid.children].map(group=>{const r=group.getBoundingClientRect();return {x:r.x,y:r.y,bottom:r.bottom,width:r.width,right:r.right};});
           const g=grid.getBoundingClientRect(),p=panel.getBoundingClientRect();
-          return {groups,columns:style.gridTemplateColumns.split(' ').length,gap:style.columnGap,rowGap:style.rowGap,width:g.width,center:g.x+g.width/2,panelCenter:p.x+p.width/2};
+          return {groups,columns:style.gridTemplateColumns.split(' ').length,gap:style.columnGap,rowGap:style.rowGap,width:g.width,center:g.x+g.width/2,panelCenter:p.x+p.width/2,panelLeft:p.x,footerWidth:panel.querySelector(".mega-view-all").getBoundingClientRect().width,footerLeft:panel.querySelector(".mega-view-all").getBoundingClientRect().x};
         });
         assert.equal(layout.columns,columns);
-        assert.equal(layout.gap,'56px');assert.equal(layout.rowGap,'28px');
+        assert.equal(layout.gap,width>=1280?'44px':'56px');assert.equal(layout.rowGap,width>=1280?'24px':'28px');
         assert.equal(new Set(layout.groups.map(g=>Math.round(g.y))).size,Math.ceil(count/columns));
         for(let i=0;i<count;i++) {
           if(i%columns) assert(Math.abs(layout.groups[i].y-layout.groups[i-1].y)<1,'Groups share a row until all columns are occupied');
           if(i>=columns) {
             assert(Math.abs(layout.groups[i].x-layout.groups[i%columns].x)<1,'Groups auto-place in column order');
-            assert(layout.groups[i].y>=layout.groups[i-columns].bottom+27,'Next row follows previous row with the requested gap');
+            assert(layout.groups[i].y>=layout.groups[i-columns].bottom+parseFloat(layout.rowGap)-1,'Next row follows previous row with the requested gap');
           }
         }
-        assert(layout.width<=1160);assert(Math.abs(layout.center-layout.panelCenter)<1,'Directory content is centered in the panel');
+        if(width>=1280) {
+          const first=layout.groups[0],third=layout.groups[2];
+          assert(first.x-layout.panelLeft>=35 && first.x-layout.panelLeft<=50,'First column sits 35–50px inside the panel');
+          assert.equal(third.right-first.x,958,'Large screens must not spread the columns');
+          for(let i=0;i<3;i++) {
+            assert.equal(layout.groups[i].width,290);
+            if(i) assert.equal(layout.groups[i].x-layout.groups[i-1].right,44);
+          }
+          assert.equal(layout.footerLeft,first.x);assert.equal(layout.footerWidth,958);
+        } else {
+          assert(layout.width<=1160);assert(Math.abs(layout.center-layout.panelCenter)<1,'Tablet/mobile alignment remains unchanged');
+        }
         await overflow(`${count} groups at ${width}`);
       }
     }
@@ -142,11 +153,14 @@ export async function validateBrowser(root, files) {
     if(previousGroups===undefined) delete chromatography.groups; else chromatography.groups=previousGroups;
   }
   await page.setViewportSize({width:1440,height:1000});await go('index.html');
-  for (const width of [1280,1440,1920]) {
+  for (const width of [1280,1440,1600,1920]) {
     await page.setViewportSize({width,height:800});
     await page.locator('[aria-controls="mega-analytical"]').hover();
     assert.equal(await directory.locator('.mega-group-grid').evaluate(e=>getComputedStyle(e).gridTemplateColumns.split(' ').length),3);
     await overflow(`Analytical directory at ${width}`);
+    if(process.env.BENCHVALE_SCREENSHOT_DIR && [1440,1600,1920].includes(width)) {
+      await page.screenshot({path:resolve(process.env.BENCHVALE_SCREENSHOT_DIR,`analytical-spacing-${width}.png`)});
+    }
   }
   await page.setViewportSize({width:1440,height:1000});
   await page.locator('[aria-controls="mega-analytical"]').hover();

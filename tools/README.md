@@ -58,7 +58,9 @@ To expand Analytical, append one object to its `groups` array in
 static pages. No renderer or CSS edits are needed. The renderer creates one
 `section.mega-group` per object; CSS places those sections in source order,
 using three columns on desktop, two on tablet, and one on mobile. Desktop
-content is centered at a maximum of 1160px with a 56px column gap.
+content is left-aligned 35px inside the panel, with three bounded 240–290px
+columns and a 44px column gap. Its occupied width stays at 958px on large
+screens rather than expanding with the panel. Tablet/mobile spacing is unchanged.
 
 Grouped navigation topics remain separate from verified catalogue `families`.
 `directoryUrl` uses a dedicated `page` if supplied, otherwise the category URL
