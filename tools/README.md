@@ -63,8 +63,10 @@ The same algorithm generates 3-, 2-, and 1-column variants. CSS displays only
 the variant matching the existing navigation breakpoint; inactive variants are
 hidden from both display and keyboard navigation. No runtime regrouping is needed.
 
-Groups stack at the top of each column. A short 144px navy rule with 9px of space
-above and below automatically separates adjacent groups in the same column.
+Groups stack at the top of each column. A short 144px navy rule with 6px of space
+above and below on desktop (9px on tablet/mobile) automatically separates adjacent
+groups in the same column. Desktop links use approximately 21.5px rows, with
+tighter heading spacing; touch layouts retain their existing 44px minimum rows.
 Spectroscopy follows Analytical Instruments in the taxonomy and therefore
 immediately follows it in column one for the current four groups. No group has
 a column field or hardcoded position.
@@ -72,13 +74,22 @@ a column field or hardcoded position.
 Directory panels size to their content instead of spanning the navigation.
 Desktop content starts 17px inside the panel, with three 230px columns and no
 grid gap, occupying 690px inside a 724px panel. Navy separators and 14px inner
-column padding distinguish neighboring columns. Columns stretch to equal height,
-and 50px of bottom padding inside each column extends the navy separators through
-the bottom whitespace to the panel edge. Directory menus have no footer link or
-footer divider; their main navigation label still links to the category page.
+column padding distinguish neighboring columns. On desktop, the fixed directory
+extends from the category navigation to the viewport bottom. A separate white
+backdrop covers the underlying page across the viewport without widening the
+directory. Columns stretch to fill the overlay, extending their navy separators
+to the bottom; long directories scroll inside the panel. The shared navigation
+script measures the navigation's bottom and left edge on open, resize, header
+resize, and page scroll. Header backdrop blur is disabled only while the overlay
+is open so it cannot change the fixed positioning reference.
+
+Clicking the white backdrop or pressing Escape closes the overlay. Hover and
+keyboard navigation between categories remain available. Directory menus have
+no footer link or divider; their main navigation label links to the category page.
 Tablet and mobile variants use two and one real columns, with one vertical
 separator on tablet and none on mobile. The existing mobile accordion behavior
-is unchanged, and other categories retain their family-menu footer links.
+is unchanged, including content-based height and 50px bottom padding. Other
+categories retain their family-menu layout and footer links.
 
 Grouped navigation topics remain separate from verified catalogue `families`.
 `directoryUrl` uses a dedicated `page` if supplied, otherwise the category URL

@@ -99,6 +99,19 @@
 .mega-group ul { margin:0; padding:0; list-style:none; }
 .mega-group a { display:block; padding:5px 0; color:#53616c; font-size:.875rem; line-height:1.45; }
 .mega-group a:hover { color:var(--teal-600); text-decoration:underline; text-underline-offset:3px; }
+@media (min-width:1280px) {
+ /* A filtered ancestor would make fixed descendants relative to the header. */
+ .category-header.directory-overlay-open { backdrop-filter:none; background:#fff; }
+ /* Cover the page separately, without widening the compact directory itself. */
+ .category-nav-item.directory-overlay-open::before { content:""; position:fixed; top:var(--mega-menu-top); bottom:0; left:0; right:0; background:#fff; z-index:0; }
+ .mega-menu-directory { position:fixed; top:var(--mega-menu-top); bottom:0; left:var(--mega-menu-left); height:auto; max-height:none; border-bottom:0; box-shadow:none; overflow-y:auto; overscroll-behavior:contain; z-index:1; }
+ .mega-menu-directory:not([hidden]) { display:flex; flex-direction:column; }
+ .mega-directory-columns { flex:1 0 auto; }
+ .mega-group h3 { margin-bottom:5px; line-height:1.2; }
+ .mega-group a { padding:2px 0; line-height:1.25; }
+ .mega-group + .mega-group { margin-top:6px; }
+ .mega-group + .mega-group::before { margin-bottom:6px; }
+}
 /* Match the existing navigation breakpoints; inactive variants have no tab stops. */
 @media (max-width:1279px) {
  .mega-directory-columns { grid-template-columns:repeat(2, 230px); max-width:460px; }

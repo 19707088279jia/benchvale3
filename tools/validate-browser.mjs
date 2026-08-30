@@ -148,13 +148,14 @@ export async function validateBrowser(root, files) {
           assert.equal(layout.columns[i].bottom,layout.grid.bottom,'Every vertical separator reaches the bottom of the directory');
           assert.equal(groups[0].separator.content,'none','First group has no horizontal rule');
           for(let j=1;j<groups.length;j++) {
-            assert(Math.abs(groups[j].y-groups[j-1].bottom-9)<1,'Only 9px above each group separator');
+            const spacing=width>=1280?6:9;
+            assert(Math.abs(groups[j].y-groups[j-1].bottom-spacing)<1,'Compact spacing above each group separator');
             assert.equal(groups[j].separator.border,'1px');
             assert.equal(groups[j].separator.color,'rgb(10, 31, 51)');
             assert.equal(groups[j].separator.width,'144px');
             assert(144<groups[j].width,'Group separator remains shorter than the text column');
-            assert.equal(groups[j].separator.below,'9px');
-            assert(Math.abs(groups[j].headingY-groups[j].y-10)<1,'Heading follows the 1px rule and 9px spacing');
+            assert.equal(groups[j].separator.below,`${spacing}px`);
+            assert(Math.abs(groups[j].headingY-groups[j].y-spacing-1)<1,'Heading follows the short rule and compact spacing');
           }
         }
         assert.equal(layout.grid.width,columns*230);
@@ -164,15 +165,18 @@ export async function validateBrowser(root, files) {
         assert.equal(layout.panel.width,layout.grid.width+2*panelInset,'Panel fits the active columns and padding');
         assert(!layout.panelOverflow,'No horizontal scrolling inside the directory panel');
         assert.equal(layout.footerCount,0);
-        assert.equal(layout.panel.bottom-layout.grid.bottom,width>=1280?1:0,'No footer row or padding below the vertical dividers');
-        assert.equal(layout.grid.bottom-Math.max(...layout.groups.map(group=>group.bottom)),50,'Exactly 50px of clean space below the tallest content column');
+        assert(Math.abs(layout.panel.bottom-layout.grid.bottom)<1,'Vertical dividers reach the panel bottom');
+        const bottomSpace=layout.grid.bottom-Math.max(...layout.groups.map(group=>group.bottom));
+        if(width<1280) assert.equal(bottomSpace,50,'Mobile bottom spacing stays unchanged');
+        else assert(bottomSpace>=50,'Desktop columns fill the viewport, retaining minimum bottom space');
         if(width>=1280) {
+          assert.equal(layout.panel.bottom,1000,'Desktop overlay reaches the viewport bottom');
           if(count===originalGroups.length) {
             const instruments=layout.groups.find(g=>g.name==='Analytical Instruments');
             const spectroscopy=layout.groups.find(g=>g.name==='Spectroscopy');
             const materials=layout.groups.find(g=>g.name==='Materials & Physical Testing');
             assert.equal(spectroscopy.x,instruments.x);
-            assert(Math.abs(spectroscopy.headingY-instruments.bottom-19)<1);
+            assert(Math.abs(spectroscopy.headingY-instruments.bottom-13)<1);
             assert(spectroscopy.y<materials.bottom,'Spectroscopy does not wait for a taller neighboring column');
           }
         }
@@ -194,17 +198,74 @@ export async function validateBrowser(root, files) {
   } finally {
     if(previousGroups===undefined) delete chromatography.groups; else chromatography.groups=previousGroups;
   }
-  await page.setViewportSize({width:1440,height:1000});await go('index.html');
-  for (const width of [1280,1366,1440,1600,1920]) {
-    await page.setViewportSize({width,height:800});
+  const checkDesktopOverlay=async()=>{
+    const overlay=await directory.evaluate(panel=>{
+      const r=panel.getBoundingClientRect(),nav=document.querySelector('#primaryNav').getBoundingClientRect();
+      const backdrop=getComputedStyle(panel.parentElement,'::before');
+      const groups=panel.querySelector('[data-columns="3"]');
+      const firstLink=groups.querySelector('a').getBoundingClientRect();
+      return {top:r.top,bottom:r.bottom,left:r.left,width:r.width,navBottom:nav.bottom,navLeft:nav.left,viewportHeight:innerHeight,position:getComputedStyle(panel).position,backdrop:{position:backdrop.position,top:parseFloat(backdrop.top),bottom:backdrop.bottom,left:backdrop.left,right:backdrop.right,color:backdrop.backgroundColor},rowHeight:firstLink.height,columnBottoms:[...groups.children].map(c=>c.getBoundingClientRect().bottom),covered:[[4,nav.bottom+4],[innerWidth-4,nav.bottom+4],[4,innerHeight-4],[innerWidth-4,innerHeight-4],[r.left+20,innerHeight-4]].every(([x,y])=>!!document.elementFromPoint(x,y)?.closest('.category-nav-item.directory-overlay-open'))};
+    });
+    assert.equal(overlay.position,'fixed');assert.equal(overlay.width,724);
+    assert.equal(overlay.left,overlay.navLeft);assert.equal(overlay.top,overlay.navBottom);
+    assert.equal(overlay.bottom,overlay.viewportHeight);
+    assert(overlay.columnBottoms.every(bottom=>Math.abs(bottom-overlay.bottom)<1),'Dividers extend to viewport bottom');
+    const {top:backdropTop,...backdropStyle}=overlay.backdrop;
+    assert(Math.abs(backdropTop-overlay.navBottom)<1,'Backdrop starts at the measured navigation bottom');
+    assert.deepEqual(backdropStyle,{position:'fixed',bottom:'0px',left:'0px',right:'0px',color:'rgb(255, 255, 255)'});
+    assert(overlay.covered,'White overlay covers the underlying page across the viewport');
+    assert(overlay.rowHeight>=20 && overlay.rowHeight<=22,'Desktop link rows are approximately 20–22px');
+  };
+  for (const [width,height] of [[1280,800],[1366,768],[1440,900],[1600,900],[1920,1080]]) {
+    await page.setViewportSize({width,height});await go('index.html');
     await page.locator('[aria-controls="mega-analytical"]').hover();
     assert.equal(await activeColumns().locator(':scope > .mega-directory-column').count(),3);
+    await checkDesktopOverlay();
     await overflow(`Analytical directory at ${width}`);
     if(process.env.BENCHVALE_SCREENSHOT_DIR && [1366,1440,1600,1920].includes(width)) {
-      await page.screenshot({path:resolve(process.env.BENCHVALE_SCREENSHOT_DIR,`analytical-full-dividers-${width}.png`)});
+      await page.screenshot({path:resolve(process.env.BENCHVALE_SCREENSHOT_DIR,`analytical-overlay-${width}x${height}.png`)});
     }
+    await page.mouse.move(width-8,height-8);assert(await directory.isVisible(),'Moving across the backdrop keeps the overlay open');
+    await page.mouse.click(width-8,height-8);assert(!(await directory.isVisible()),'Clicking the backdrop closes the overlay');
+    assert.equal(await page.locator('.category-header.directory-overlay-open').count(),0);
   }
+  await go('index.html');await page.locator('[aria-controls="mega-analytical"]').focus();
+  await page.setViewportSize({width:1440,height:900});await checkDesktopOverlay();
+  await page.evaluate(()=>window.scrollTo({top:450,behavior:'instant'}));
+  await page.evaluate(()=>new Promise(requestAnimationFrame));await checkDesktopOverlay();
+  // Header height changes without a window resize must update the measured top.
+  await page.locator('.category-header-top').evaluate(e=>e.style.paddingBottom='40px');
+  await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+  await checkDesktopOverlay();
+  await page.keyboard.press('Escape');assert(!(await directory.isVisible()));
+  await go('index.html');await page.locator('[aria-controls="mega-analytical"]').hover();
+  await page.keyboard.press('Escape');assert(!(await directory.isVisible()),'Escape also closes a mouse-opened overlay');
+  // A long directory scrolls within the overlay; the page stays covered and stationary.
+  try {
+    analytical.groups=Array.from({length:24},(_,i)=>({name:`Validation group ${i+1}`,items:originalGroups[i%originalGroups.length].items}));
+    await page.setViewportSize({width:1366,height:500});await go('index.html');
+    await page.locator('[aria-controls="mega-analytical"]').hover();
+    await directory.evaluate((panel,rendered)=>{
+      const parsed=new DOMParser().parseFromString(rendered,'text/html');
+      panel.replaceChildren(...parsed.querySelector('#mega-analytical').childNodes);
+    },header());
+    assert(await directory.evaluate(e=>e.scrollHeight>e.clientHeight),'Future groups can overflow vertically');
+    await directory.hover();await page.mouse.wheel(0,10000);
+    await page.waitForFunction(()=>document.querySelector('#mega-analytical').scrollTop>0);
+    assert.equal(await page.evaluate(()=>scrollY),0,'Overlay scrolling does not scroll the underlying page');
+    await directory.evaluate(e=>e.scrollTop=e.scrollHeight);
+    assert(await activeColumns().locator('.mega-group a').last().evaluate(e=>e.getBoundingClientRect().bottom<=innerHeight));
+    await overflow('Long scrolling desktop directory');
+  } finally { analytical.groups=originalGroups; }
+  await page.setViewportSize({width:1024,height:900});
+  assert(!(await directory.isVisible()),'Crossing to tablet closes the desktop overlay');
+  assert.equal(await page.locator('.category-header.directory-overlay-open').count(),0);
+  await go('index.html');await page.locator('#navToggle').click();await page.locator('[aria-controls="mega-analytical"]').click();
+  assert.equal(await directory.evaluate(e=>getComputedStyle(e).position),'static','Tablet keeps the inline accordion');
+  assert(await activeColumns().locator('a').first().evaluate(e=>e.getBoundingClientRect().height>=44),'Tablet touch rows are unchanged');
+  assert.equal(await page.locator('.category-nav-item.directory-overlay-open').count(),0);
   await page.setViewportSize({width:1440,height:1000});
+  await go('index.html');
   await page.locator('[aria-controls="mega-analytical"]').hover();
   await Promise.all([page.waitForURL('**/products.html?category=analytical&search=density'),directory.getByRole('link',{name:'Density Meters',exact:true}).click()]);
   await page.waitForLoadState('load');await checkCategory(analytical);

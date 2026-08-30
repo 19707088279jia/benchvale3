@@ -6,6 +6,13 @@ const primaryNav = document.getElementById("primaryNav");
 if (navToggle && primaryNav) {
   const desktop = window.matchMedia("(min-width: 1280px)");
   const items = [...primaryNav.querySelectorAll(".category-nav-item")];
+  const header = primaryNav.closest(".category-header");
+  const updateDirectoryPosition = () => {
+    if (!header.classList.contains("directory-overlay-open")) return;
+    const bounds = primaryNav.getBoundingClientRect();
+    header.style.setProperty("--mega-menu-top", `${Math.max(0, bounds.bottom)}px`);
+    header.style.setProperty("--mega-menu-left", `${bounds.left}px`);
+  };
   const setOpen = (item, open) => {
     const button = item.querySelector(".category-disclosure");
     const panel = item.querySelector(".mega-menu");
@@ -13,6 +20,9 @@ if (navToggle && primaryNav) {
     button.setAttribute("aria-expanded", String(open));
     panel.hidden = !open;
     item.classList.toggle("is-open", open);
+    item.classList.toggle("directory-overlay-open", open && desktop.matches && panel.classList.contains("mega-menu-directory"));
+    header.classList.toggle("directory-overlay-open", !!primaryNav.querySelector(".directory-overlay-open"));
+    updateDirectoryPosition();
   };
   const closeAll = () => items.forEach(item => setOpen(item, false));
   const openOnly = (item) => { closeAll(); setOpen(item, true); };
@@ -29,6 +39,10 @@ if (navToggle && primaryNav) {
       const open = event.detail && pointerOpen !== null ? pointerOpen : button.getAttribute("aria-expanded") !== "true";
       pointerOpen = null;
       closeAll(); setOpen(item, open);
+    });
+    // The white backdrop belongs to this item, so crossing it keeps the menu open.
+    item.addEventListener("click", event => {
+      if (event.target === item && item.classList.contains("directory-overlay-open")) closeAll();
     });
     item.addEventListener("pointerenter", event => {
       if (desktop.matches && event.pointerType === "mouse") openOnly(item);
@@ -61,6 +75,15 @@ if (navToggle && primaryNav) {
       closeAll(); primaryNav.classList.remove("open"); navToggle.setAttribute("aria-expanded", "false");
     }
   });
+  document.addEventListener("keydown", event => {
+    if (event.key !== "Escape" || event.defaultPrevented || !header.classList.contains("directory-overlay-open")) return;
+    primaryNav.querySelector(".directory-overlay-open .category-disclosure")?.focus();
+    closeAll();
+    event.preventDefault();
+  });
+  window.addEventListener("resize", updateDirectoryPosition);
+  window.addEventListener("scroll", updateDirectoryPosition, { passive: true });
+  new ResizeObserver(updateDirectoryPosition).observe(header);
   desktop.addEventListener("change", () => {
     closeAll(); primaryNav.classList.remove("open"); navToggle.setAttribute("aria-expanded", "false");
   });
