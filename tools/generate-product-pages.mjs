@@ -2,18 +2,13 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { categories } from "./taxonomy.mjs";
+import { header } from "./site-navigation.mjs";
+
 const repositoryRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const productDirectory = resolve(repositoryRoot, "products");
 
-const categories = [
-  { name: "Chromatography", anchor: "chromatography", description: "Vials, closures, and consumables for HPLC and GC sample-introduction workflows.", subcategories: ["Autosampler vials", "Caps & septa", "Chromatography consumables"], icon: "vial" },
-  { name: "Sample Preparation", anchor: "sample-preparation", description: "Filtration and extraction formats selected around the sample and method.", subcategories: ["Syringe filters", "SPE cartridges", "Filtration supplies"], icon: "filter" },
-  { name: "Environmental & Water", anchor: "environmental-water", description: "Containers and supplies for field sampling, water testing, and environmental workflows.", subcategories: ["Sample bottles", "Reagent bottles", "Water-testing supplies"], icon: "bottle" },
-  { name: "General Lab", anchor: "general-lab", description: "Routine labware and bench supplies for everyday laboratory work.", subcategories: ["Petri dishes", "Lab containers", "General consumables"], icon: "dish" },
-  { name: "Life Science", anchor: "life-science", description: "Centrifuge tubes, microtubes, and related sample-handling formats.", subcategories: ["Centrifuge tubes", "Microtubes", "Sample storage"], icon: "tube" },
-  { name: "Pipettes & Liquid Handling", anchor: "liquid-handling", description: "Pipettes, tips, and transfer products for routine liquid handling.", subcategories: ["Pipette tips", "Serological pipettes", "Liquid transfer"], icon: "pipette" },
-  { name: "Laboratory Equipment", anchor: "laboratory-equipment", description: "Benchtop instruments and practical equipment sourced to application requirements.", subcategories: ["Mixers & shakers", "Heating & stirring", "Benchtop equipment"], icon: "equipment" },
-];
+
 
 const pending = {
   manufacturer: "Under supplier confirmation",
@@ -140,7 +135,7 @@ const products = [
     ...pending,
   },
   {
-    slug: "vortex-mixer", category: "Laboratory Equipment", categoryAnchor: "laboratory-equipment", subcategory: "Mixers & shakers", visual: "vortex",
+    slug: "vortex-mixer", category: "General Lab", categoryAnchor: "general-lab", subcategory: "Mixers & shakers", visual: "vortex",
     name: "Vortex Mixer", cardDescription: "Benchtop mixers sourced to vessel, operating, electrical, and accessory requirements.",
     description: "Benchtop vortex mixers sourced around tube or vessel format, operating mode, speed requirements, accessories, electrical compatibility, delivery, and support needs.",
     highlights: [["Type", "Vortex mixer"], ["Format", "Benchtop equipment"], ["Selection", "Application and power"]],
@@ -149,7 +144,7 @@ const products = [
     ...pending,
   },
   {
-    slug: "hotplate-magnetic-stirrer", category: "Laboratory Equipment", categoryAnchor: "laboratory-equipment", subcategory: "Heating & stirring", visual: "hotplate",
+    slug: "hotplate-magnetic-stirrer", category: "General Lab", categoryAnchor: "general-lab", subcategory: "Heating & stirring", visual: "hotplate",
     name: "Hotplate Magnetic Stirrer", cardDescription: "Benchtop heating and stirring equipment sourced to vessel, control, and power needs.",
     description: "Benchtop hotplate magnetic stirrers sourced around vessel size, heating and stirring requirements, plate surface, control needs, electrical compatibility, delivery, and support.",
     highlights: [["Type", "Hotplate magnetic stirrer"], ["Format", "Benchtop equipment"], ["Selection", "Heating, stirring, and power"]],
@@ -180,11 +175,9 @@ const illustration = (type, label = "") => {
   return `<div class="technical-illustration technical-illustration-${type}" aria-hidden="true"><svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg"><g>${drawings[type] || drawings.equipment}</g></svg>${label ? `<span>${escapeHtml(label)}</span>` : ""}</div>`;
 };
 
-const header = (depth = "", active = "products") => `<header class="site-header"><div class="container header-inner"><a href="${depth}index.html" class="brand"><svg class="brand-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="13" stroke="currentColor" stroke-width="1.4"/><path d="M20 2v7M20 31v7M2 20h7M31 20h7" stroke="currentColor" stroke-width="1.4"/><circle cx="20" cy="20" r="3" fill="#0f8a8a"/></svg><span class="brand-text"><span class="brand-name">Benchvale Scientific</span><span class="brand-sub">Laboratory Products &amp; Equipment</span></span></a><button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="primaryNav" aria-label="Toggle navigation menu"><span></span><span></span><span></span></button><nav class="primary-nav" id="primaryNav" aria-label="Primary"><ul><li><a href="${depth}products.html"${active === "products" ? ' aria-current="page"' : ""}>Products</a></li><li><a href="${depth}equipment.html">Equipment</a></li><li><a href="${depth}industries.html">Industries</a></li><li><a href="${depth}sourcing.html">Sourcing</a></li><li><a href="${depth}about.html">About</a></li><li><a href="${depth}contact.html">Contact</a></li><li class="nav-cta-mobile"><a href="${depth}quote.html" class="btn btn-primary btn-block">Request a Quote</a></li></ul></nav><div class="nav-actions"><a href="${depth}quote.html" class="btn btn-primary">Request a Quote</a></div></div></header>`;
-
 const footer = (depth = "") => `<footer class="site-footer"><div class="container"><div class="footer-grid"><div><span class="footer-brand-name">Benchvale Scientific</span><p>Laboratory Products &amp; Equipment</p><p>Ontario, Canada</p></div><div><span class="footer-heading">Contact</span><ul><li><a href="mailto:eric@benchvalescientific.com">eric@benchvalescientific.com</a></li><li><a href="mailto:quotes@benchvalescientific.com">quotes@benchvalescientific.com</a></li></ul></div><div><span class="footer-heading">Navigate</span><ul><li><a href="${depth}products.html">Products</a></li><li><a href="${depth}equipment.html">Equipment</a></li><li><a href="${depth}sourcing.html">Sourcing</a></li><li><a href="${depth}about.html">About</a></li><li><a href="${depth}contact.html">Contact</a></li><li><a href="${depth}shipping.html">Shipping</a></li><li><a href="${depth}returns.html">Returns &amp; RMA</a></li><li><a href="${depth}warranty.html">Warranty</a></li><li><a href="${depth}terms.html">Terms</a></li><li><a href="${depth}privacy.html">Privacy</a></li></ul></div></div><div class="footer-bottom"><span>&copy; <span data-year></span> Benchvale Scientific. Ontario, Canada.</span><span><a href="${depth}terms.html">Terms</a> · <a href="${depth}privacy.html">Privacy</a></span></div></div></footer>`;
 
-const categoryCard = (category) => `<article class="shop-category-card" id="${category.anchor}">${illustration(category.icon)}<div class="shop-category-card-copy"><h2>${escapeHtml(category.name)}</h2><p>${escapeHtml(category.description)}</p><ul>${category.subcategories.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul><a href="#catalogue" class="category-filter-link" data-category-link="${category.anchor}">View products <span aria-hidden="true">→</span></a></div></article>`;
+const categoryCard = (category) => `<article class="shop-category-card" id="${category.anchor}">${illustration(category.icon)}<div class="shop-category-card-copy"><h2>${escapeHtml(category.name)}</h2><p>${escapeHtml(category.description)}</p><ul>${category.families.map((item) => `<li>${escapeHtml(item.name)}</li>`).join("")}</ul><a href="#catalogue" class="category-filter-link" data-category-link="${category.anchor}">View products <span aria-hidden="true">→</span></a></div></article>`;
 
 const productCard = (product) => {
   const meta = product.verified
@@ -208,7 +201,7 @@ const productsIndexTemplate = () => `<!DOCTYPE html>
   <meta property="og:url" content="https://benchvalescientific.com/products.html" />
   <meta name="theme-color" content="#0a1f33" />
   <link rel="icon" href="images/favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css" /><link rel="stylesheet" href="navigation.css" />
 </head>
 <body class="products-page">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -243,13 +236,13 @@ const productTemplate = (product) => {
   <meta property="og:url" content="${canonical}" />
   <meta name="theme-color" content="#0a1f33" />
   <link rel="icon" href="../images/favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="../styles.css" />
+  <link rel="stylesheet" href="../styles.css" /><link rel="stylesheet" href="../navigation.css" />
 </head>
 <body class="product-detail-page">
   <a class="skip-link" href="#main">Skip to content</a>
   ${header("../")}
   <main id="main">
-    <div class="container"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../index.html">Home</a><span aria-hidden="true">/</span><a href="../products.html">Products</a><span aria-hidden="true">/</span><a href="../products.html#${product.categoryAnchor}">${escapeHtml(product.category)}</a><span aria-hidden="true">/</span><span aria-current="page">${escapeHtml(product.name)}</span></nav></div>
+    <div class="container"><nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../index.html">Home</a><span aria-hidden="true">/</span><a href="../products.html">Products</a><span aria-hidden="true">/</span><a href="../products.html?category=${product.categoryAnchor}">${escapeHtml(product.category)}</a><span aria-hidden="true">/</span><span aria-current="page">${escapeHtml(product.name)}</span></nav></div>
     <section class="product-detail-hero"><div class="container product-detail-layout"><div class="product-visual">${illustration(product.visual, product.subcategory)}<p class="visual-disclaimer">Technical product-class illustration</p></div><div class="product-detail-copy"><span class="product-status-line${product.verified ? " is-confirmed" : ""}">${escapeHtml(product.status)}</span><p class="eyebrow">${escapeHtml(product.category)} · ${escapeHtml(product.subcategory)}</p><h1>${escapeHtml(product.name)}</h1><p class="lede">${escapeHtml(product.description)}</p><dl class="pdp-key-specs">${highlights}</dl><dl class="product-identity-grid"><div class="product-identity-item"><dt>Manufacturer</dt><dd>${escapeHtml(product.manufacturer)}</dd></div><div class="product-identity-item"><dt>Manufacturer Cat.No.</dt><dd>${escapeHtml(product.catNo)}</dd></div><div class="product-identity-item"><dt>Benchvale SKU</dt><dd>${escapeHtml(product.sku)}</dd></div></dl><div class="product-price-status"><span>Price</span><strong>Request a Quote</strong></div><div class="product-purchase-actions"><a class="btn btn-primary" href="${quoteHref}">Request a Quote</a><button class="btn btn-secondary" type="button" data-add-to-quote data-product-name="${escapeHtml(product.name)}">Add to Quote</button></div><p class="purchase-note" data-quote-feedback aria-live="polite">Pricing and availability are confirmed by quotation. Online Add to Cart is not available; use Add to Quote to build a multi-product request.</p></div></div></section>
     <nav class="pdp-section-nav" aria-label="Product information sections"><div class="container"><a href="#description">Overview</a><a href="#specifications">Specifications</a><a href="#documents">Documents</a><a href="#ordering">Ordering &amp; Shipping</a><a href="#warranty">Warranty</a></div></nav>
     <section class="product-information-section"><div class="container product-information-layout"><div class="product-content-stack"><article class="product-info-block" id="description"><p class="product-section-label">Description</p><h2>Product overview</h2><p>${escapeHtml(product.description)}</p></article><article class="product-info-block" id="specifications"><p class="product-section-label">Specifications</p><h2>Technical information</h2><div class="table-scroll"><table class="product-spec-table"><tbody>${specs}</tbody></table></div></article><article class="product-info-block"><p class="product-section-label">Pack size</p><h2>Ordering unit</h2><p>${escapeHtml(product.pack)}</p></article><article class="product-info-block" id="documents"><p class="product-section-label">Documents / Datasheet</p><h2>Manufacturer documentation</h2><div class="document-status"><div><strong>Available on request</strong><p>${escapeHtml(product.documents)}</p><a href="${quoteHref}&request=documentation">Request documentation <span aria-hidden="true">→</span></a></div></div></article></div><aside class="product-service-stack" id="ordering" aria-label="Ordering and support information"><article class="product-service-card"><span class="product-service-kicker">Availability</span><h2>Confirmed with quotation</h2><p>Stock, lead time, minimum order quantity, and suitable alternatives are confirmed for the selected configuration.</p><a href="${quoteHref}">Check availability <span aria-hidden="true">→</span></a></article><article class="product-service-card"><span class="product-service-kicker">Shipping</span><h2>Quoted to destination</h2><p>Method and cost depend on quantity, destination postal code, product handling needs, and supplier conditions.</p><a href="../shipping.html">Shipping information <span aria-hidden="true">→</span></a></article><article class="product-service-card" id="warranty"><span class="product-service-kicker">Warranty</span><h2>Terms confirmed before order</h2><p>Applicable manufacturer or supplier terms are stated in the quotation. Troubleshooting, failure-cause assessment, and RMA review precede a repair or replacement decision.</p><a href="../warranty.html">Warranty framework <span aria-hidden="true">→</span></a></article></aside></div></section>
@@ -261,6 +254,15 @@ const productTemplate = (product) => {
 </html>`;
 };
 
+// Fail generation if product data drifts outside the shared taxonomy.
+for (const product of products) {
+  const category = categories.find(c => c.anchor === product.categoryAnchor);
+  if (!category) throw new Error(`Unknown category: ${product.categoryAnchor}`);
+  product.category = category.name;
+  if (!category.families.some(f => f.name.toLowerCase() === product.subcategory.toLowerCase())) {
+    throw new Error(`Add ${product.subcategory} to the shared taxonomy before generating ${product.slug}`);
+  }
+}
 mkdirSync(productDirectory, { recursive: true });
 for (const product of products) writeFileSync(resolve(productDirectory, `${product.slug}.html`), productTemplate(product), "utf8");
 writeFileSync(resolve(repositoryRoot, "products.html"), productsIndexTemplate(), "utf8");

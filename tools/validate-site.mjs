@@ -1,3 +1,5 @@
+import { categories, categoryUrl, familyUrl } from "./taxonomy.mjs";
+import { header } from "./site-navigation.mjs";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { dirname, extname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -41,15 +43,15 @@ for (const file of htmlFiles) {
     }
   }
 
-  if (!html.includes("Products</a>") || !html.includes("Request a Quote")) {
-    failures.push(`${relativeFile}: missing Products navigation or RFQ path`);
+  if (!html.includes(header(dirname(file) === resolve(root, "products") ? "../" : "")) || !html.includes("Request a Quote")) {
+    failures.push(`${relativeFile}: missing shared category navigation or RFQ path`);
   }
   if (!html.includes("Laboratory Products &amp; Equipment")) failures.push(`${relativeFile}: distributor identity missing`);
   if (html.includes("jiafeng@benchvalescientific.com")) failures.push(`${relativeFile}: outdated public email remains`);
 }
 
 const productsIndex = readFileSync(resolve(root, "products.html"), "utf8");
-const expectedCategories = ["chromatography", "sample-preparation", "environmental-water", "general-lab", "life-science", "liquid-handling", "laboratory-equipment"];
+const expectedCategories = categories.map(c => c.anchor);
 for (const category of expectedCategories) {
   if (!productsIndex.includes(`id="${category}"`)) failures.push(`products.html: missing fixed category ${category}`);
 }
@@ -116,13 +118,15 @@ for (const className of movedSections) {
 for (const content of ["<title>Explore Benchvale | Laboratory Products, Industries &amp; Sourcing</title>", "Products, purchasing support, and laboratory solutions", "Shop by Category", "Why Buy from Benchvale", "Laboratories Served", "Sourcing Support", '<footer class="site-footer">']) {
   if (!explore.includes(content)) failures.push(`explore.html: missing ${content}`);
 }
-for (const [name, html] of [["index.html", home], ["explore.html", explore]]) {
-  const nav = html.match(/<nav\b[^>]*id="primaryNav"[^>]*>([\s\S]*?)<\/nav>/)?.[1] || "";
-  const destinations = Array.from(nav.matchAll(/<a\s+href="([^"]+)"/g), (match) => match[1]);
-  if (destinations.join(",") !== "products.html,equipment.html,industries.html,sourcing.html,about.html,contact.html,quote.html") {
-    failures.push(`${name}: existing primary navigation destinations changed`);
+// Every family link is checked by the HTML link scan above. Validate taxonomy coverage too.
+for (const c of categories) {
+  if (!productsIndex.includes(`data-product-filter="${c.anchor}"`)) failures.push(`Missing ${c.name} filter`);
+  for (const f of c.families) {
+    if (!f.page && !f.search) failures.push(`Missing destination for ${f.name}`);
   }
 }
+if (productsIndex.includes('data-category="laboratory-equipment"')) failures.push("Equipment category remains");
+if (productsIndex.includes('data-category="analytical"')) failures.push("Analytical must not have invented initial listings");
 
 const petri = readFileSync(resolve(root, "products", "90mm-petri-dish.html"), "utf8");
 for (const fact of ["RUNLAB", "55301", "90 × 15 mm", "high-transparency PS", "EO sterile", "Triple vent", "10/pack; 500/case"]) {
@@ -144,4 +148,9 @@ if (failures.length) {
   process.exitCode = 1;
 } else {
   console.log(`PASS\n${notes.join("\n")}`);
+}
+
+if (process.argv.includes("--browser") && !failures.length) {
+  const {validateBrowser} = await import("./validate-browser.mjs");
+  await validateBrowser(root, htmlFiles);
 }

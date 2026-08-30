@@ -1,20 +1,68 @@
 /* Benchvale Scientific — shared navigation, catalogue, and static RFQ behavior */
 
-// Mobile nav toggle
+// Accessible disclosure navigation. Links navigate; buttons only expand menus.
 const navToggle = document.getElementById("navToggle");
 const primaryNav = document.getElementById("primaryNav");
-
 if (navToggle && primaryNav) {
+  const desktop = window.matchMedia("(min-width: 1280px)");
+  const items = [...primaryNav.querySelectorAll(".category-nav-item")];
+  const setOpen = (item, open) => {
+    const button = item.querySelector(".category-disclosure");
+    const panel = item.querySelector(".mega-menu");
+    if (!button || !panel) return;
+    button.setAttribute("aria-expanded", String(open));
+    panel.hidden = !open;
+    item.classList.toggle("is-open", open);
+  };
+  const closeAll = () => items.forEach(item => setOpen(item, false));
+  const openOnly = (item) => { closeAll(); setOpen(item, true); };
   navToggle.addEventListener("click", () => {
-    const isOpen = primaryNav.classList.toggle("open");
-    navToggle.setAttribute("aria-expanded", String(isOpen));
+    const open = primaryNav.classList.toggle("open");
+    navToggle.setAttribute("aria-expanded", String(open));
+    if (!open) closeAll();
   });
-
-  primaryNav.querySelectorAll("a").forEach((link) => {
-    link.addEventListener("click", () => {
+  items.forEach(item => {
+    const button = item.querySelector(".category-disclosure");
+    let pointerOpen = null;
+    button?.addEventListener("pointerdown", () => { pointerOpen = button.getAttribute("aria-expanded") !== "true"; });
+    button?.addEventListener("click", event => {
+      const open = event.detail && pointerOpen !== null ? pointerOpen : button.getAttribute("aria-expanded") !== "true";
+      pointerOpen = null;
+      closeAll(); setOpen(item, open);
+    });
+    item.addEventListener("pointerenter", event => {
+      if (desktop.matches && event.pointerType === "mouse") openOnly(item);
+    });
+    item.addEventListener("pointerleave", () => {
+      if (desktop.matches && !item.contains(document.activeElement)) setOpen(item, false);
+    });
+    item.addEventListener("focusin", event => {
+      if (desktop.matches && !item.contains(event.relatedTarget)) openOnly(item);
+    });
+    item.addEventListener("focusout", event => {
+      if (desktop.matches && !item.contains(event.relatedTarget)) setOpen(item, false);
+    });
+  });
+  primaryNav.addEventListener("keydown", event => {
+    if (event.key !== "Escape") return;
+    const item = event.target.closest(".category-nav-item");
+    if (item?.querySelector('.category-disclosure[aria-expanded="true"]')) {
+      item.querySelector(".category-disclosure").focus();
+      closeAll();
+    } else {
       primaryNav.classList.remove("open");
       navToggle.setAttribute("aria-expanded", "false");
-    });
+      navToggle.focus();
+    }
+    event.preventDefault();
+  });
+  document.addEventListener("pointerdown", event => {
+    if (!event.target.closest(".category-header")) {
+      closeAll(); primaryNav.classList.remove("open"); navToggle.setAttribute("aria-expanded", "false");
+    }
+  });
+  desktop.addEventListener("change", () => {
+    closeAll(); primaryNav.classList.remove("open"); navToggle.setAttribute("aria-expanded", "false");
   });
 }
 
@@ -90,12 +138,15 @@ document.querySelectorAll("[data-year]").forEach((el) => {
   }));
 
   // The homepage search is a native GET form, so shared search links work on GitHub Pages.
-  const initialQuery = new URLSearchParams(window.location.search).get("search");
+  const params = new URLSearchParams(window.location.search);
+  const initialQuery = params.get("search");
+  const requestedCategory = params.get("category");
+  const initialCategory = filterButtons.some(button => button.dataset.productFilter === requestedCategory) ? requestedCategory : "all";
   if (initialQuery !== null) searchInput.value = initialQuery;
-  applyFilters();
+  selectCategory(initialCategory);
 
   // Bring visitors from a search link directly to their results, past the category overview.
-  if (initialQuery?.trim() && !window.location.hash) {
+  if ((initialQuery?.trim() || requestedCategory) && !window.location.hash) {
     searchInput.focus({ preventScroll: true });
     const catalogue = document.getElementById("catalogue");
     const headerHeight = document.querySelector(".site-header")?.getBoundingClientRect().height || 0;

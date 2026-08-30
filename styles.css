@@ -3966,3 +3966,7 @@ section,
   transform: none !important;
 }
 .primary-nav a.btn-primary { color: #fff !important; }
+
+/* Allow customer-care grid content, including contact addresses, to fit 320px. */
+.content-layout > * { min-width:0; }
+.content-panel { overflow-wrap:anywhere; }
