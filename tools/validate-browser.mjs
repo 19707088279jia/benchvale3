@@ -408,8 +408,8 @@ export async function validateBrowser(root, files) {
       const boxes=await page.evaluate(()=>Object.fromEntries(['.category-support','.category-intro','.category-families','.category-nav','.category-nav-list'].map(selector=>{const b=document.querySelector(selector).getBoundingClientRect();return [selector,{x:b.x,y:b.y,width:b.width,right:b.right}];})));
       assert(boxes['.category-intro'].x>boxes['.category-support'].right);
       assert.equal(boxes['.category-intro'].x,boxes['.category-families'].x);
-      assert(boxes['.category-nav'].x>=24 && boxes['.category-nav'].right<=width-24);
-      assert(boxes['.category-nav'].width<=1480);
+      assert(boxes['.category-nav'].x>=80 && boxes['.category-nav'].right<=width-80);
+      assert(boxes['.category-nav'].width<=1560);
     }
    }
   }

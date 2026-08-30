@@ -101,8 +101,8 @@
 .mega-group a:hover { color:var(--teal-600); text-decoration:underline; text-underline-offset:3px; }
 @media (min-width:1280px) {
  /* Keep the label group centered; narrower desktops need less gap to avoid wrapping. */
- .category-nav { width:calc(100% - 120px); padding-inline:0; }
- .category-nav-list { justify-content:center; gap:clamp(20px, calc(12.5vw - 140px), 40px); }
+ .category-nav { width:calc(100% - 160px); max-width:1560px; padding-inline:0; }
+ .category-nav-list { justify-content:center; gap:clamp(15px, calc(12.5vw - 145px), 32px); }
  /* A filtered ancestor would make fixed descendants relative to the header. */
  .category-header.directory-overlay-open { backdrop-filter:none; background:#fff; }
  .mega-menu-directory { position:fixed; top:var(--mega-menu-top); bottom:24px; left:var(--mega-menu-left); right:auto; width:max-content; max-width:calc(100vw - var(--mega-menu-left) - 24px); height:auto; max-height:none; border-bottom:0; box-shadow:none; overflow-y:auto; overscroll-behavior:contain; z-index:1; }
