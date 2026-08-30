@@ -1,6 +1,7 @@
 import {readFileSync, writeFileSync, readdirSync} from 'node:fs';
 import {header} from './site-navigation.mjs';
 import {categories, categoryUrl} from './taxonomy.mjs';
+import {applyServiceLayout} from './service-layout.mjs';
 const root = new URL('../', import.meta.url);
 for (const dir of ['', 'products/']) for (const name of readdirSync(new URL(dir,root)).filter(n=>n.endsWith('.html'))) {
  const url = new URL(dir+name,root);
@@ -16,6 +17,6 @@ for (const dir of ['', 'products/']) for (const name of readdirSync(new URL(dir,
    }).join('\n');
    html=html.replace(/(<div class="home-category-grid reveal">)[\s\S]*?(<\/div>\s*<\/div>\s*<\/section>)/,'$1'+cards+'$2');
  }
- writeFileSync(url,html);
+ writeFileSync(url,applyServiceLayout(html,dir+name));
 }
-console.log('Updated shared headers and category links.');
+console.log('Updated shared headers, category links, and Services sidebars.');

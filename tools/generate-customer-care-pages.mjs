@@ -1,4 +1,5 @@
 import { header } from "./site-navigation.mjs";
+import { applyServiceLayout } from "./service-layout.mjs";
 import { writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -99,7 +100,7 @@ const pageTemplate = (page) => `<!DOCTYPE html>
 </html>`;
 
 for (const page of pages) {
-  writeFileSync(resolve(repositoryRoot, `${page.slug}.html`), pageTemplate(page), "utf8");
+  writeFileSync(resolve(repositoryRoot, `${page.slug}.html`), applyServiceLayout(pageTemplate(page), `${page.slug}.html`), "utf8");
 }
 
 console.log(`Generated ${pages.length} customer-care pages.`);
