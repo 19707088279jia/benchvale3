@@ -1,4 +1,4 @@
-BENCHVALE HOMEPAGE BANNERS — QUICK REPLACEMENT
+CHROMVALE HOMEPAGE BANNERS — QUICK REPLACEMENT
 
 The four current banner files are inside the images folder:
   banner-general-lab.svg

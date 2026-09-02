@@ -16,9 +16,9 @@ node tools/validate-site.mjs --browser
 ```
 
 The browser checks require Playwright and its Chromium browser. An installed
-Chrome or Edge can be selected with `BENCHVALE_BROWSER_CHANNEL=chrome` or
+Chrome or Edge can be selected with `CHROMVALE_BROWSER_CHANNEL=chrome` or
 `msedge`. `NODE_PATH` may point to an existing Playwright installation.
-`BENCHVALE_SCREENSHOT_DIR` optionally saves desktop and mobile screenshots.
+`CHROMVALE_SCREENSHOT_DIR` optionally saves desktop and mobile screenshots.
 
 The customer-care page generator also imports the shared header renderer.
 Run `update-navigation.mjs` after changing taxonomy to refresh all other pages.

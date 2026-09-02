@@ -1,4 +1,4 @@
-/* Benchvale Scientific — shared navigation, catalogue, and static RFQ behavior */
+/* ChromVale Scientific — shared navigation, catalogue, and static RFQ behavior */
 
 // Accessible disclosure navigation. Links navigate; buttons only expand menus.
 const navToggle = document.getElementById("navToggle");
@@ -192,7 +192,7 @@ document.querySelectorAll("[data-year]").forEach((el) => {
 })();
 
 // A small local quote list lets visitors carry products into the multi-product RFQ form.
-const quoteStorageKey = "benchvaleQuoteProducts";
+const quoteStorageKey = "chromvaleQuoteProducts";
 const readQuoteProducts = () => {
   try {
     const stored = JSON.parse(window.localStorage.getItem(quoteStorageKey) || "[]");

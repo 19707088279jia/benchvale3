@@ -9,7 +9,7 @@ export const categoryTemplates = (categories, illustration) => categories.map(ca
     <div class="category-landing-layout">
       <aside class="category-support" aria-label="Quote and product support">
         <h2>Need a quote for ${esc(category.name.toLowerCase())} products?</h2>
-        <ul><li><a href="quote.html">Request a Quote</a></li><li><a href="services.html#product-sourcing-support">Product Sourcing Support</a></li><li><a href="services.html#documentation-support">Documentation Support</a></li><li><a href="contact.html">Contact Benchvale</a></li></ul>
+        <ul><li><a href="quote.html">Request a Quote</a></li><li><a href="services.html#product-sourcing-support">Product Sourcing Support</a></li><li><a href="services.html#documentation-support">Documentation Support</a></li><li><a href="contact.html">Contact ChromVale</a></li></ul>
         <a href="quote.html" class="btn btn-primary">Request a Quote</a>
       </aside>
       <div class="category-content">

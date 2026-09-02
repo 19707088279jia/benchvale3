@@ -7,6 +7,9 @@ import { fileURLToPath } from "node:url";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const failures = [];
 const notes = [];
+const legacyBrand = "bench" + "vale";
+const legacyWebDomain = `${legacyBrand}scientific.com`;
+const siteOrigin = "https://chromvale.com";
 
 const walk = (directory) => readdirSync(directory).flatMap((entry) => {
   if (entry === ".git" || entry === "tools") return [];
@@ -20,6 +23,9 @@ const getIds = (html) => new Set(Array.from(html.matchAll(/\sid=["']([^"']+)["']
 for (const file of htmlFiles) {
   const html = readFileSync(file, "utf8");
   const relativeFile = file.slice(root.length + 1);
+  const sitePath = relativeFile.replaceAll("\\", "/");
+  const expectedCanonical = sitePath === "index.html" ? `${siteOrigin}/` : `${siteOrigin}/${sitePath}`;
+  const publicBranding = html.replaceAll(`@${legacyWebDomain}`, "");
   const references = Array.from(html.matchAll(/\s(?:href|src|action)=["']([^"']+)["']/g), (match) => match[1]);
   const seenIds = new Set();
   for (const [, id] of html.matchAll(/\sid=["']([^"']+)["']/g)) {
@@ -48,7 +54,12 @@ for (const file of htmlFiles) {
   }
   if (!html.includes("header-quote-cart") || !html.includes("data-quote-count")) failures.push(`${relativeFile}: missing Quote Cart`);
   if (!html.includes("Laboratory Products &amp; Equipment")) failures.push(`${relativeFile}: distributor identity missing`);
-  if (html.includes("jiafeng@benchvalescientific.com")) failures.push(`${relativeFile}: outdated public email remains`);
+  if (html.includes("jiafeng@")) failures.push(`${relativeFile}: outdated public email remains`);
+  if (publicBranding.toLowerCase().includes(legacyBrand)) failures.push(`${relativeFile}: legacy public branding or web domain remains`);
+  if (!html.includes('<span class="footer-brand-name">ChromVale Scientific</span>')) failures.push(`${relativeFile}: footer brand missing`);
+  if (!html.includes("&copy; 2026 ChromVale Scientific") || html.includes("data-year")) failures.push(`${relativeFile}: copyright is not fixed to 2026 ChromVale Scientific`);
+  if (!html.includes(`<link rel="canonical" href="${expectedCanonical}"`)) failures.push(`${relativeFile}: canonical URL must be ${expectedCanonical}`);
+  if (html.includes('property="og:url"') && !html.includes(`property="og:url" content="${expectedCanonical}"`)) failures.push(`${relativeFile}: og:url must be ${expectedCanonical}`);
 }
 
 const productsIndex = readFileSync(resolve(root, "products.html"), "utf8");
@@ -68,7 +79,7 @@ for (const internalPhrase of ["Catalogue status", "Product Architecture", "Initi
 
 const productFiles = htmlFiles.filter((path) => dirname(path) === resolve(root, "products"));
 if (productFiles.length !== 14) failures.push(`Expected 14 product pages; found ${productFiles.length}`);
-const requiredProductFields = ["Manufacturer", "Manufacturer Cat.No.", "Benchvale SKU", "Description", "Specifications", "Pack size", "Documents / Datasheet", "Availability", "Shipping", "Warranty", "Request a Quote", "Add to Quote", "Add to Cart"];
+const requiredProductFields = ["Manufacturer", "Manufacturer Cat.No.", "ChromVale SKU", "Description", "Specifications", "Pack size", "Documents / Datasheet", "Availability", "Shipping", "Warranty", "Request a Quote", "Add to Quote", "Add to Cart"];
 for (const productFile of productFiles) {
   const html = readFileSync(productFile, "utf8");
   for (const field of requiredProductFields) {
@@ -85,10 +96,10 @@ for (const field of ["name", "organization", "email", "product[]", "productQuant
   if (!quote.includes(`name="${field}"`)) failures.push(`quote.html: missing RFQ field ${field}`);
 }
 if (!readFileSync(resolve(root, "script.js"), "utf8").includes("mailto:quotes@benchvalescientific.com")) failures.push("script.js: RFQ mailto destination missing");
-for (const quoteFeature of ["benchvaleQuoteProducts", "data-product-card", "data-product-filter"]) {
+for (const quoteFeature of ["chromvaleQuoteProducts", "data-product-card", "data-product-filter"]) {
   if (!readFileSync(resolve(root, "script.js"), "utf8").includes(quoteFeature)) failures.push(`script.js: missing storefront behavior ${quoteFeature}`);
 }
-if (readFileSync(resolve(root, "CNAME"), "utf8").trim() !== "benchvalescientific.com") failures.push("CNAME: custom domain changed");
+if (readFileSync(resolve(root, "CNAME"), "utf8").trim() !== "chromvale.com") failures.push("CNAME: custom domain must be chromvale.com");
 
 const home = readFileSync(resolve(root, "index.html"), "utf8");
 for (const section of ["Featured Promotions", "Services"]) {
@@ -106,6 +117,7 @@ if (!/class="[^"]*\bhome-explore-link\b[^"]*"[^>]*>\s*<a href="explore.html">Exp
   failures.push("index.html: subtle Explore Products & Services link missing");
 }
 if (!home.includes('<footer class="site-footer">')) failures.push("index.html: normal site footer missing");
+if (!home.includes("<h1>HPLC Columns for Canadian Laboratories</h1>")) failures.push("index.html: required visible homepage H1 missing");
 if (!/<form[^>]*role="search"[^>]*action="products.html"[^>]*method="get"/.test(home) || !home.includes('name="search"')) {
   failures.push("index.html: homepage search must submit a search query to products.html");
 }
@@ -119,7 +131,7 @@ if (sectionClasses(explore).join(",") !== ["page-hero", ...movedSections].join("
 for (const className of movedSections) {
   if (home.includes(`class="${className}`)) failures.push(`index.html: moved ${className} section is duplicated on the homepage`);
 }
-for (const content of ["<title>Explore Benchvale | Laboratory Products, Industries &amp; Sourcing</title>", "Products, purchasing support, and laboratory solutions", "Shop by Category", "Why Buy from Benchvale", "Laboratories Served", "Sourcing Support", '<footer class="site-footer">']) {
+for (const content of ["<title>Explore ChromVale | Laboratory Products, Industries &amp; Sourcing</title>", "Products, purchasing support, and laboratory solutions", "Shop by Category", "Why Buy from ChromVale", "Laboratories Served", "Sourcing Support", '<footer class="site-footer">']) {
   if (!explore.includes(content)) failures.push(`explore.html: missing ${content}`);
 }
 // Every family link is checked by the HTML link scan above. Validate taxonomy coverage too.

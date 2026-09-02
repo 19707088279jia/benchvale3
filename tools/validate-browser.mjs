@@ -20,7 +20,7 @@ export async function validateBrowser(root, files) {
  await new Promise(r=>server.listen(0,'127.0.0.1',r));
  let browser;
  try {
-  browser=await chromium.launch({headless:true, ...(process.env.BENCHVALE_BROWSER_CHANNEL ? {channel:process.env.BENCHVALE_BROWSER_CHANNEL} : {})});
+  browser=await chromium.launch({headless:true, ...(process.env.CHROMVALE_BROWSER_CHANNEL ? {channel:process.env.CHROMVALE_BROWSER_CHANNEL} : {})});
   const page=await browser.newPage({viewport:{width:1440,height:1000}});
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   const base=`http://127.0.0.1:${server.address().port}/`;
@@ -258,8 +258,8 @@ export async function validateBrowser(root, files) {
       assert(frame.every(c=>c.width===230 && Math.abs(c.bottom-frame[0].bottom)<1),'All columns, including empty ones, share the frame');
       assert.deepEqual(frame.map(c=>c.border),Array.from({length:columnCount},(_,i)=>i?'1px':'0px'));
       await overflow(`${category.name} directory at ${width}`);
-      if(process.env.BENCHVALE_SCREENSHOT_DIR && [375,1024,1440].includes(width)) {
-        const path=resolve(process.env.BENCHVALE_SCREENSHOT_DIR,`menu-${category.anchor}-${width}.png`);
+      if(process.env.CHROMVALE_SCREENSHOT_DIR && [375,1024,1440].includes(width)) {
+        const path=resolve(process.env.CHROMVALE_SCREENSHOT_DIR,`menu-${category.anchor}-${width}.png`);
         if(width>=1280) await page.screenshot({path}); else await panel.screenshot({path});
       }
       if(width===1440) {
@@ -285,8 +285,8 @@ export async function validateBrowser(root, files) {
     assert.equal(await activeColumns().locator(':scope > .mega-directory-column').count(),3);
     await checkDesktopOverlay();
     await overflow(`Analytical directory at ${width}`);
-    if(process.env.BENCHVALE_SCREENSHOT_DIR && [1366,1440,1600,1920].includes(width)) {
-      await page.screenshot({path:resolve(process.env.BENCHVALE_SCREENSHOT_DIR,`analytical-compact-tall-${width}x${height}.png`)});
+    if(process.env.CHROMVALE_SCREENSHOT_DIR && [1366,1440,1600,1920].includes(width)) {
+      await page.screenshot({path:resolve(process.env.CHROMVALE_SCREENSHOT_DIR,`analytical-compact-tall-${width}x${height}.png`)});
     }
     await page.mouse.move(width-8,height-8);assert(!(await directory.isVisible()),'Leaving the menu restores normal page interaction');
     await page.locator('[aria-controls="mega-analytical"]').focus();assert(await directory.isVisible());
@@ -424,16 +424,16 @@ export async function validateBrowser(root, files) {
     }
    }
   }
-  if(process.env.BENCHVALE_SCREENSHOT_DIR) {
+  if(process.env.CHROMVALE_SCREENSHOT_DIR) {
    await page.setViewportSize({width:1440,height:1000});await go('products.html?category=general-lab');
-   await page.screenshot({path:resolve(process.env.BENCHVALE_SCREENSHOT_DIR,'category-desktop.png')});
+   await page.screenshot({path:resolve(process.env.CHROMVALE_SCREENSHOT_DIR,'category-desktop.png')});
    await page.setViewportSize({width:375,height:1000});await go('products.html?category=chromatography');
-   await page.screenshot({path:resolve(process.env.BENCHVALE_SCREENSHOT_DIR,'category-mobile.png')});
+   await page.screenshot({path:resolve(process.env.CHROMVALE_SCREENSHOT_DIR,'category-mobile.png')});
    await page.setViewportSize({width:1440,height:900});await go('index.html');await page.locator('[aria-controls="mega-analytical"]').hover();
    await settleMenu(directory);
-   await page.screenshot({path:resolve(process.env.BENCHVALE_SCREENSHOT_DIR,'analytical-directory-desktop.png')});
+   await page.screenshot({path:resolve(process.env.CHROMVALE_SCREENSHOT_DIR,'analytical-directory-desktop.png')});
    await page.setViewportSize({width:375,height:900});await go('index.html');await page.locator('#navToggle').click();await page.locator('[aria-controls="mega-analytical"]').click();
-   await page.screenshot({path:resolve(process.env.BENCHVALE_SCREENSHOT_DIR,'analytical-directory-mobile.png')});
+   await page.screenshot({path:resolve(process.env.CHROMVALE_SCREENSHOT_DIR,'analytical-directory-mobile.png')});
   }
   assert.deepEqual(errors,[],'Browser JS errors');
   console.log('PASS browser: seven category landing pages, family destinations, catalogue filters/search, Quote Cart, quote form, mega menus, keyboard/touch navigation, carousel, all pages and categories at 320–1920px.');
