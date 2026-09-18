@@ -569,6 +569,7 @@ if (quoteForm) {
   let current = 0;
   let timer = null;
   let touchStartX = null;
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
   const show = (index) => {
     current = (index + slides.length) % slides.length;
@@ -578,7 +579,17 @@ if (quoteForm) {
       const active = i === current;
       slide.classList.toggle('is-active', active);
       slide.setAttribute('aria-hidden', String(!active));
+      slide.querySelectorAll('a, button, input, select, textarea, [tabindex]').forEach((control) => {
+        if (!Object.hasOwn(control.dataset, 'sliderTabindex')) {
+          control.dataset.sliderTabindex = control.hasAttribute('tabindex') ? control.getAttribute('tabindex') : 'none';
+        }
+        if (!active) control.setAttribute('tabindex', '-1');
+        else if (control.dataset.sliderTabindex === 'none') control.removeAttribute('tabindex');
+        else control.setAttribute('tabindex', control.dataset.sliderTabindex);
+      });
     });
+
+    slider.classList.toggle('is-light-slide', slides[current].classList.contains('home-slide--light'));
 
     dots.forEach((dot, i) => {
       const active = i === current;
@@ -595,7 +606,7 @@ if (quoteForm) {
 
   const start = () => {
     stop();
-    if (slides.length > 1) {
+    if (slides.length > 1 && !reduceMotion.matches) {
       timer = window.setInterval(() => show(current + 1), 5000);
     }
   };
@@ -607,12 +618,20 @@ if (quoteForm) {
   next?.addEventListener('click', goNext);
   dots.forEach((dot, i) => dot.addEventListener('click', () => { show(i); start(); }));
 
-  // Keep autoplay running even when the mouse rests over the banner.
-  // Pause only while the tab is hidden, then resume when the user returns.
+  // Keep calls to action stable while the user points at or tabs through them.
+  slider.addEventListener('pointerenter', stop);
+  slider.addEventListener('pointerleave', start);
+  slider.addEventListener('focusin', stop);
+  slider.addEventListener('focusout', (event) => {
+    if (!slider.contains(event.relatedTarget)) start();
+  });
+
+  // Pause while the tab is hidden, then resume when the user returns.
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) stop();
     else start();
   });
+  reduceMotion.addEventListener?.('change', start);
 
   // Basic touch swipe on phones/tablets.
   slider.addEventListener('touchstart', (event) => {
