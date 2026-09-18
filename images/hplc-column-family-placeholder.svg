@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-labelledby="title description">
+  <title id="title">HPLC column illustration</title>
+  <desc id="description">Abstract chromatography column with a chromatogram trace</desc>
+  <rect width="960" height="540" fill="#eef3f4"/>
+  <path d="M0 108h960M0 216h960M0 324h960M0 432h960M192 0v540M384 0v540M576 0v540M768 0v540" stroke="#d7e1e3" stroke-width="1"/>
+  <path d="M94 393c74 0 81-37 124-37 50 0 52-145 111-145 55 0 48 101 91 101 49 0 50-67 104-67 37 0 45 48 92 48 58 0 59-104 127-104 46 0 54 56 124 56" fill="none" stroke="#0f8a8a" stroke-width="5" stroke-linecap="round"/>
+  <g transform="translate(235 98) rotate(-12 240 92)">
+    <rect x="60" y="62" width="54" height="66" rx="5" fill="#aebcc3" stroke="#6f7f89" stroke-width="3"/>
+    <rect x="112" y="47" width="388" height="96" rx="4" fill="#fdfefe" stroke="#8d9ca5" stroke-width="3"/>
+    <rect x="142" y="62" width="257" height="66" fill="#e1f0ef"/>
+    <path d="M144 96h253" stroke="#0f8a8a" stroke-width="5"/>
+    <text x="163" y="86" fill="#0a1f33" font-family="Arial, sans-serif" font-size="20" font-weight="700" letter-spacing="3">CHROMVALE</text>
+    <text x="164" y="116" fill="#0c6e6e" font-family="Arial, sans-serif" font-size="12" letter-spacing="2">HPLC COLUMN</text>
+    <rect x="499" y="62" width="54" height="66" rx="5" fill="#aebcc3" stroke="#6f7f89" stroke-width="3"/>
+  </g>
+</svg>

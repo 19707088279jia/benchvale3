@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 70" preserveAspectRatio="xMinYMid meet" role="img" aria-labelledby="title">
+  <title id="title">ChromVale Scientific</title>
+  <g transform="translate(5 0)" fill="none" stroke="#1598a1" stroke-width="3" stroke-linejoin="round">
+    <path d="m26 7 10 6v12l-10 6-10-6V13z"/>
+    <path d="m43 17 10 6v12l-10 6-10-6V23z"/>
+    <path d="m26 28 10 6v12l-10 6-10-6V34z"/>
+    <path d="m9 38 10 6v12l-10 6-10-6V44z"/>
+  </g>
+  <text x="70" y="31" fill="#102b4b" font-family="Segoe UI, Arial, sans-serif" font-size="24" font-weight="700" letter-spacing=".5">CHROMVALE</text>
+  <text x="71" y="51" fill="#1598a1" font-family="Segoe UI, Arial, sans-serif" font-size="14" font-weight="700" letter-spacing="4">SCIENTIFIC</text>
+</svg>
