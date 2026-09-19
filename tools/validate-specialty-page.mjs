@@ -21,7 +21,7 @@ assert(pageHtml.includes("Specialized chromatography solutions for alternative s
 assert(pageHtml.includes("Additional configurations and application-specific recommendations are available upon request."));
 assert(!pageHtml.includes("category-filter-panel"), "Specialty must not have a filter sidebar");
 assert(!pageHtml.includes("category-collection-features"), "Specialty must not have the main-series feature strip");
-assert(!/<main[\s\S]*?<img\b/i.test(pageHtml), "Specialty main content must not use product imagery");
+assert.equal((pageHtml.match(/class="category-collection-hero-photo"/g) || []).length, 1, "Specialty must use exactly one hero photo");
 assert(!/(?:Add to Cart|View Specifications|Part No\.|SKU|Shopify Variant|In Stock)/i.test(pageHtml + dataJs + pageJs), "Specialty must remain family-level and quote-only");
 
 const sandbox = { window: {} };
@@ -88,7 +88,7 @@ try {
   assert.equal(new URL(page.url()).pathname, "/products/specialty/index.html");
   assert.equal(await page.locator(".specialty-family-card").count(), 21);
   assert.equal(await page.getByRole("link", { name: /Request a quotation for/i }).count(), 21);
-  assert.equal(await page.locator("main img").count(), 0);
+  assert.equal(await page.locator("main img").count(), 1, "Specialty must contain only its single hero photo");
   assert.equal(await page.locator("aside, [class*='filter'], [class*='accordion']").count(), 0);
   const mainText = await page.locator("main").textContent();
   for (const forbidden of ["Add to Cart", "Part No.", "SKU", "In Stock", "View Specifications"]) assert(!mainText.includes(forbidden));

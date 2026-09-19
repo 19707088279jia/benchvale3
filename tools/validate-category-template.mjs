@@ -23,7 +23,8 @@ for (const slug of slugs) {
   assert(templateJs.includes(`${slug === "hilic-diol" ? '"hilic-diol"' : slug}:`), `Missing category config for ${slug}`);
 }
 assert(!templateHtml.includes("Add to Cart"), "Category template must not add directly to cart");
-assert(!/<main[\s\S]*?<img\b/i.test(templateHtml), "Category template must not contain product image areas");
+assert(templateHtml.includes('id="categoryHeroImage"'), "Category template must provide one hero image area");
+assert.equal((templateHtml.match(/class="category-collection-hero-photo"/g) || []).length, 1, "Category template must provide exactly one hero image area");
 assert(templateHtml.includes("View Specifications") === false, "Product actions must be data-rendered, not duplicated in HTML");
 assert(templateJs.includes("View Specifications →"), "Purchasable products need a View Specifications action");
 assert(templateJs.includes("Request Quote →"), "Quote-only products need a Request Quote action");
@@ -418,7 +419,7 @@ try {
   assert.equal(quoteUrl.searchParams.get("particleSize"), "3 μm");
   assert.equal(quoteUrl.searchParams.get("columnSize"), "4.6 mm I.D. × 250 mm");
   assert(quoteUrl.searchParams.get("product").includes("Part No. 00001-438"));
-  assert.equal(await page.locator("main img").count(), 0, "No product image or placeholder may appear");
+  assert.equal(await page.locator("main img").count(), 1, "Only the matching category hero photo may appear");
   assert(!(await page.locator("main").textContent()).includes("View Specifications"));
   assert(!(await page.locator("main").textContent()).includes("Unavailable"));
   assert(!(await page.locator("main").textContent()).includes("C$0"));
@@ -486,7 +487,7 @@ try {
   assert.deepEqual(await page.locator('[data-filter-key="columnId"]').evaluateAll((inputs) => inputs.map((input) => input.value)), ["4.6 mm", "10 mm", "20 mm", "30 mm", "50 mm"]);
   assert.deepEqual(await page.locator('[data-filter-key="columnLength"]').evaluateAll((inputs) => inputs.map((input) => input.value)), ["50 mm", "100 mm", "150 mm", "250 mm", "300 mm"]);
   assert.equal(await page.locator("#categoryProductCount").textContent(), "17 configurations");
-  assert.equal(await page.locator("main img").count(), 0);
+  assert.equal(await page.locator("main img").count(), 1);
   assert(!(await page.locator("main").textContent()).includes("View Specifications"));
   assert(!(await page.locator("main").textContent()).includes("Unavailable"));
   assert(!(await page.locator("main").textContent()).includes("C$0"));
@@ -530,7 +531,7 @@ try {
   assert.deepEqual(await page.locator('[data-filter-key="columnId"]').evaluateAll((inputs) => inputs.map((input) => input.value)), ["4.6 mm", "10 mm", "20 mm", "50 mm"]);
   assert.deepEqual(await page.locator('[data-filter-key="columnLength"]').evaluateAll((inputs) => inputs.map((input) => input.value)), ["50 mm", "100 mm", "150 mm", "250 mm", "300 mm"]);
   assert.equal(await page.locator("#categoryProductCount").textContent(), "17 configurations");
-  assert.equal(await page.locator("main img").count(), 0);
+  assert.equal(await page.locator("main img").count(), 1);
   assert(!(await page.locator("main").textContent()).includes("View Specifications"));
   assert(!(await page.locator("main").textContent()).includes("Unavailable"));
   assert(!(await page.locator("main").textContent()).includes("C$0"));
@@ -574,7 +575,7 @@ try {
   assert.deepEqual(await page.locator('[data-filter-key="columnId"]').evaluateAll((inputs) => inputs.map((input) => input.value)), ["4.6 mm", "10 mm", "20 mm", "30 mm", "50 mm"]);
   assert.deepEqual(await page.locator('[data-filter-key="columnLength"]').evaluateAll((inputs) => inputs.map((input) => input.value)), ["150 mm", "250 mm"]);
   assert.equal(await page.locator("#categoryProductCount").textContent(), "14 configurations");
-  assert.equal(await page.locator("main img").count(), 0);
+  assert.equal(await page.locator("main img").count(), 1);
   assert(!(await page.locator("main").textContent()).includes("View Specifications"));
   assert(!(await page.locator("main").textContent()).includes("Unavailable"));
   assert(!(await page.locator("main").textContent()).includes("C$0"));
@@ -618,7 +619,7 @@ try {
   assert.deepEqual(await page.locator('[data-filter-key="columnId"]').evaluateAll((inputs) => inputs.map((input) => input.value)), ["4.6 mm", "10 mm", "20 mm", "30 mm", "50 mm"]);
   assert.deepEqual(await page.locator('[data-filter-key="columnLength"]').evaluateAll((inputs) => inputs.map((input) => input.value)), ["150 mm", "250 mm"]);
   assert.equal(await page.locator("#categoryProductCount").textContent(), "21 configurations");
-  assert.equal(await page.locator("main img").count(), 0);
+  assert.equal(await page.locator("main img").count(), 1);
   assert(!(await page.locator("main").textContent()).includes("View Specifications"));
   assert(!(await page.locator("main").textContent()).includes("Unavailable"));
   assert(!(await page.locator("main").textContent()).includes("C$0"));
@@ -662,7 +663,7 @@ try {
   assert.deepEqual(await page.locator('[data-filter-key="columnId"]').evaluateAll((inputs) => inputs.map((input) => input.value)), ["4.6 mm", "10 mm", "20 mm", "30 mm", "50 mm"]);
   assert.deepEqual(await page.locator('[data-filter-key="columnLength"]').evaluateAll((inputs) => inputs.map((input) => input.value)), ["150 mm", "250 mm"]);
   assert.equal(await page.locator("#categoryProductCount").textContent(), "21 configurations");
-  assert.equal(await page.locator("main img").count(), 0);
+  assert.equal(await page.locator("main img").count(), 1);
   assert(!(await page.locator("main").textContent()).includes("View Specifications"));
   assert(!(await page.locator("main").textContent()).includes("Unavailable"));
   assert(!(await page.locator("main").textContent()).includes("C$0"));
@@ -706,7 +707,7 @@ try {
   assert.deepEqual(await page.locator('[data-filter-key="columnId"]').evaluateAll((inputs) => inputs.map((input) => input.value)), ["4.6 mm", "10 mm", "20 mm", "30 mm", "50 mm"]);
   assert.deepEqual(await page.locator('[data-filter-key="columnLength"]').evaluateAll((inputs) => inputs.map((input) => input.value)), ["150 mm", "250 mm"]);
   assert.equal(await page.locator("#categoryProductCount").textContent(), "21 configurations");
-  assert.equal(await page.locator("main img").count(), 0);
+  assert.equal(await page.locator("main img").count(), 1);
   assert(!(await page.locator("main").textContent()).includes("View Specifications"));
   assert(!(await page.locator("main").textContent()).includes("Unavailable"));
   assert(!(await page.locator("main").textContent()).includes("C$0"));
@@ -750,7 +751,7 @@ try {
   assert.deepEqual(await page.locator('[data-filter-key="columnId"]').evaluateAll((inputs) => inputs.map((input) => input.value)), ["4.6 mm", "10 mm", "20 mm", "30 mm", "50 mm"]);
   assert.deepEqual(await page.locator('[data-filter-key="columnLength"]').evaluateAll((inputs) => inputs.map((input) => input.value)), ["150 mm", "250 mm"]);
   assert.equal(await page.locator("#categoryProductCount").textContent(), "21 configurations");
-  assert.equal(await page.locator("main img").count(), 0);
+  assert.equal(await page.locator("main img").count(), 1);
   assert(!(await page.locator("main").textContent()).includes("View Specifications"));
   assert(!(await page.locator("main").textContent()).includes("Unavailable"));
   assert(!(await page.locator("main").textContent()).includes("C$0"));
@@ -801,7 +802,7 @@ try {
   assert.deepEqual(await page.locator('[data-filter-key="columnId"]').evaluateAll((inputs) => inputs.map((input) => input.value)), ["4.6 mm", "10 mm", "20 mm", "30 mm", "50 mm"]);
   assert.deepEqual(await page.locator('[data-filter-key="columnLength"]').evaluateAll((inputs) => inputs.map((input) => input.value)), ["150 mm", "250 mm"]);
   assert.equal(await page.locator("#categoryProductCount").textContent(), "21 configurations");
-  assert.equal(await page.locator("main img").count(), 0);
+  assert.equal(await page.locator("main img").count(), 1);
   assert(!(await page.locator("main").textContent()).includes("View Specifications"));
   assert(!(await page.locator("main").textContent()).includes("Unavailable"));
   assert(!(await page.locator("main").textContent()).includes("C$0"));
@@ -855,7 +856,7 @@ try {
   assert.deepEqual(await page.locator('[data-filter-key="columnId"]').evaluateAll((inputs) => inputs.map((input) => input.value)), ["4.6 mm", "10 mm", "20 mm", "30 mm", "50 mm"]);
   assert.deepEqual(await page.locator('[data-filter-key="columnLength"]').evaluateAll((inputs) => inputs.map((input) => input.value)), ["150 mm", "250 mm"]);
   assert.equal(await page.locator("#categoryProductCount").textContent(), "21 configurations");
-  assert.equal(await page.locator("main img").count(), 0);
+  assert.equal(await page.locator("main img").count(), 1);
   assert(!(await page.locator("main").textContent()).includes("View Specifications"));
   assert(!(await page.locator("main").textContent()).includes("Unavailable"));
   assert(!(await page.locator("main").textContent()).includes("C$0"));
@@ -902,7 +903,8 @@ try {
   assert.deepEqual(await page.locator('[data-filter-key="columnId"]').evaluateAll((inputs) => inputs.map((input) => input.value)), ["4.6 mm", "10 mm", "20 mm", "30 mm", "50 mm"]);
   assert.deepEqual(await page.locator('[data-filter-key="columnLength"]').evaluateAll((inputs) => inputs.map((input) => input.value)), ["150 mm", "250 mm"]);
   assert.equal(await page.locator("#categoryProductCount").textContent(), "21 configurations");
-  assert.equal(await page.locator("main img").count(), 0);
+  assert.equal(await page.locator("main img").count(), 1);
+  assert.equal(await page.locator("#categoryHeroImage:visible").count(), 0, "SIL must retain the original scientific line art until a matching SIL photo is supplied");
   assert(!(await page.locator("main").textContent()).includes("View Specifications"));
   assert(!(await page.locator("main").textContent()).includes("Unavailable"));
   assert(!(await page.locator("main").textContent()).includes("C$0"));
@@ -943,7 +945,7 @@ try {
   const liveC18aPurchasableSkus = await liveC18aAddButtons.evaluateAll((buttons) => buttons.map((button) => button.closest(".category-configuration-row")?.querySelector(".category-configuration-sku strong")?.textContent || "").filter(Boolean));
   console.log(`LIVE_C18A_PURCHASABLE_SKUS=${liveC18aPurchasableSkus.join(",") || "none"}`);
   assert.equal(await livePage.locator(".category-product-state").count(), 0);
-  assert.equal(await livePage.locator("main img").count(), 0);
+  assert.equal(await livePage.locator("main img").count(), 1);
 
   await livePage.goto(`${base}products/category.html?category=c18c`, { waitUntil: "networkidle", timeout: 30000 });
   assert.equal(await livePage.locator(".category-configuration-row").count(), 17);

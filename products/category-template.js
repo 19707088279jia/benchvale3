@@ -9,6 +9,8 @@
     c18a: {
       title: "C18A Columns",
       shortTitle: "C18A",
+      heroImage: "images/category-columns/c18a.jpg",
+      heroImageAlt: "HPLCONE C18A HPLC column packages with visible C18A product labels",
       description: "General-purpose reversed-phase columns for routine analytical and method-development work.",
       collectionHandle: "c18a-columns",
       match: /(?:^|[^a-z0-9])(?:\d+(?:\.\d+)?)?c18a(?:[^a-z0-9]|$)/i,
@@ -19,6 +21,8 @@
     c18c: {
       title: "HPLCONE® C18C HPLC Columns",
       shortTitle: "C18C",
+      heroImage: "images/category-columns/c18c.jpg",
+      heroImageAlt: "HPLCONE C18C HPLC column packages with visible C18C product labels",
       description: "High-density bonded and fully endcapped C18 columns designed for robust reversed-phase separations across a wide pH range.",
       collectionHandle: "c18c-columns",
       match: /(?:^|[^a-z0-9])(?:\d+(?:\.\d+)?)?c18c(?:[^a-z0-9]|$)/i,
@@ -28,6 +32,8 @@
     c18d: {
       title: "HPLCONE® C18D HPLC Columns",
       shortTitle: "C18D",
+      heroImage: "images/category-columns/c18d.jpg",
+      heroImageAlt: "HPLCONE C18D HPLC column packages with visible C18D product labels",
       description: "Aqueous-compatible C18 stationary phase designed for enhanced retention and selectivity of hydrophilic and polar compounds.",
       collectionHandle: "c18d-columns",
       match: /(?:^|[^a-z0-9])(?:\d+(?:\.\d+)?)?c18d(?:[^a-z0-9]|$)/i,
@@ -37,6 +43,8 @@
     c4c: {
       title: "HPLCONE® C4C HPLC Columns",
       shortTitle: "C4C",
+      heroImage: "images/category-columns/c4c.jpg",
+      heroImageAlt: "HPLCONE C4C HPLC column packages in laboratory storage",
       description: "Butyl-bonded reversed-phase column with enhanced acid and base resistance compared with conventional C4 phases.",
       collectionHandle: "c4c-columns",
       match: /(?:^|[^a-z0-9])(?:\d+(?:\.\d+)?)?c4c(?:[^a-z0-9]|$)/i,
@@ -46,6 +54,8 @@
     pfp: {
       title: "HPLCONE® PFP HPLC Columns",
       shortTitle: "PFP",
+      heroImage: "images/category-columns/pfp.jpg",
+      heroImageAlt: "HPLCONE PFP HPLC column packages with visible PFP product labels",
       description: "Pentafluorophenyl stationary phase providing hydrophobic, dipole and π-interaction selectivity for compounds requiring an alternative to conventional C18 or phenyl phases.",
       collectionHandle: "pfp-columns",
       match: /(?:^|[^a-z0-9])(?:\d+(?:\.\d+)?)?pfp(?:[^a-z0-9]|$)|pentafluorophenyl/i,
@@ -55,6 +65,8 @@
     pe: {
       title: "HPLCONE® PE HPLC Columns",
       shortTitle: "PE",
+      heroImage: "images/category-columns/pe.jpg",
+      heroImageAlt: "HPLCONE PE HPLC column packages with visible PE product labels",
       description: "Phenethyl-bonded stationary phase providing hydrophobic and π–π interaction selectivity for aromatic compounds and alternative reversed-phase separations.",
       collectionHandle: "pe-columns",
       match: /(?:^|[^a-z0-9])(?:\d+(?:\.\d+)?)?pe(?:[^a-z0-9]|$)|phenyl[ -]?embedded/i,
@@ -64,6 +76,8 @@
     nh: {
       title: "HPLCONE® NH HPLC Columns",
       shortTitle: "NH",
+      heroImage: "images/category-columns/nh.jpg",
+      heroImageAlt: "HPLCONE NH HPLC column package with a visible NH product label",
       description: "Aminopropyl-bonded column for polar compound separations and applications using HILIC or normal-phase conditions.",
       collectionHandle: "nh-columns",
       match: /(?:^|[^a-z0-9])(?:\d+(?:\.\d+)?)?nh2?(?:[^a-z0-9]|$)|amino/i,
@@ -73,6 +87,8 @@
     amide: {
       title: "HPLCONE® Amide HPLC Columns",
       shortTitle: "Amide",
+      heroImage: "images/category-columns/amide.jpg",
+      heroImageAlt: "HPLCONE Amide HPLC column packages with visible Amide product labels",
       description: "Amide-bonded HILIC stationary phase designed for separation of highly polar compounds.",
       collectionHandle: "amide-columns",
       match: /(?:^|[^a-z0-9])(?:\d+(?:\.\d+)?)?amide(?:[^a-z0-9]|$)/i,
@@ -82,6 +98,8 @@
     cn: {
       title: "HPLCONE® CN HPLC Columns",
       shortTitle: "CN",
+      heroImage: "images/category-columns/cn.jpg",
+      heroImageAlt: "HPLCONE CN HPLC column package with a visible CN product label",
       description: "Cyanopropyl-bonded silica column providing versatile selectivity for polar, non-polar and aromatic compounds in normal- or reversed-phase applications.",
       collectionHandle: "cn-columns",
       match: /(?:^|[^a-z0-9])(?:\d+(?:\.\d+)?)?cn(?:[^a-z0-9]|$)|cyano/i,
@@ -100,6 +118,8 @@
     "hilic-diol": {
       title: "HPLCONE® Diol HPLC Columns",
       shortTitle: "Diol",
+      heroImage: "images/category-columns/hilic-a.jpg",
+      heroImageAlt: "HPLCONE HILIC-A HPLC column package representing the HILIC and Diol category",
       description: "Diol-bonded stationary phase for polar compound separations, including peptides, proteins and polar pharmaceutical compounds.",
       collectionHandle: "hilic-diol-columns",
       match: /(?:^|[^a-z0-9])(?:\d+(?:\.\d+)?)?(?:hilic|diol)(?:[^a-z0-9]|$)/i,
@@ -181,6 +201,9 @@
     description: document.getElementById("categoryDescription"),
     breadcrumb: document.getElementById("categoryBreadcrumbCurrent"),
     chemistryMark: document.getElementById("categoryChemistryMark"),
+    heroVisual: document.getElementById("categoryHeroVisual"),
+    heroImage: document.getElementById("categoryHeroImage"),
+    scienceArt: document.getElementById("categoryScienceArt"),
     features: document.getElementById("categoryFeatures"),
     fixedSpecifications: document.getElementById("categoryFixedSpecifications"),
     filterGroups: document.getElementById("categoryFilterGroups"),
@@ -411,6 +434,19 @@
     elements.description.textContent = config.description;
     elements.breadcrumb.textContent = config.title;
     elements.chemistryMark.textContent = config.shortTitle;
+    if (config.heroImage && elements.heroImage && elements.heroVisual) {
+      const restoreScienceArt = () => {
+        elements.heroImage.hidden = true;
+        elements.heroVisual.classList.remove("has-photo");
+        elements.scienceArt?.removeAttribute("hidden");
+      };
+      elements.heroImage.addEventListener("error", restoreScienceArt, { once: true });
+      elements.heroImage.src = new URL(config.heroImage, siteRoot).href;
+      elements.heroImage.alt = config.heroImageAlt || `${config.title} product packaging`;
+      elements.heroImage.hidden = false;
+      elements.heroVisual.classList.add("has-photo");
+      elements.scienceArt?.setAttribute("hidden", "");
+    }
     document.title = `${config.title} | ChromVale Scientific`;
     const descriptionMeta = document.querySelector('meta[name="description"]');
     if (descriptionMeta) descriptionMeta.content = config.description;

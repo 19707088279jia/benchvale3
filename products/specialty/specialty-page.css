@@ -22,6 +22,10 @@
   min-height: 190px;
 }
 
+.specialty-page .specialty-science.has-photo {
+  min-height: 190px;
+}
+
 .specialty-page .specialty-science .specialty-molecule {
   position: absolute;
   right: 26px;
@@ -213,7 +217,9 @@
   }
 
   .specialty-page .specialty-science {
-    display: none;
+    display: block;
+    min-height: 178px;
+    margin-top: 18px;
   }
 
   .specialty-page .specialty-section-heading {

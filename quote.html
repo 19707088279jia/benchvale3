@@ -4,11 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Request an HPLC Column Quote | ChromVale Scientific</title>
-  <meta name="description" content="Request a quote from ChromVale Scientific for one or more HPLC columns. The static form prepares an email for your review." />
+  <meta name="description" content="Submit a quote request to ChromVale Scientific for one or more HPLC columns." />
   <link rel="canonical" href="https://chromvale.com/quote.html" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Request a Quote | ChromVale Scientific" />
-  <meta property="og:description" content="Prepare an email RFQ for HPLC columns." />
+  <meta property="og:description" content="Submit a request for quotation for ChromVale HPLC columns." />
   <meta property="og:url" content="https://chromvale.com/quote.html" />
   <meta name="theme-color" content="#0a1f33" />
   <link rel="icon" href="images/favicon.svg" type="image/svg+xml" />
@@ -37,7 +37,8 @@
       <div class="container">
         <div class="form-shell quote-cart-form-shell reveal">
           <div class="form-body">
-            <form id="quoteForm">
+            <form id="quoteForm" action="https://formspree.io/f/maennaka" method="post" data-formspree-form="quote">
+              <input type="hidden" name="_subject" value="ChromVale Request for Quote" />
               <div class="form-grid">
                 <div class="form-field full product-request-field">
                   <div class="product-request-heading">
@@ -61,21 +62,22 @@
                   </dialog>
                 </div>
 
-                <div class="form-field full quote-customer-heading"><h2>Customer information</h2><p>Fields marked with * are required. No information is sent until you review and send the prepared email.</p></div>
-                <div class="form-field"><label for="name">Name <span class="required-mark" aria-hidden="true">*</span></label><input id="name" name="name" type="text" autocomplete="name" required /></div>
-                <div class="form-field"><label for="organization">Organization <span class="required-mark" aria-hidden="true">*</span></label><input id="organization" name="organization" type="text" autocomplete="organization" required /></div>
-                <div class="form-field"><label for="email">Business email <span class="required-mark" aria-hidden="true">*</span></label><input id="email" name="email" type="email" autocomplete="email" required /></div>
-                <div class="form-field"><label for="phone">Phone <span class="optional">(optional)</span></label><input id="phone" name="phone" type="tel" autocomplete="tel" /></div>
-                <div class="form-field"><label for="postalCode">Postal code <span class="required-mark" aria-hidden="true">*</span></label><input id="postalCode" name="postalCode" type="text" autocomplete="postal-code" required /></div>
-                <div class="form-field"><label for="requiredDate">Required date <span class="required-mark" aria-hidden="true">*</span></label><input id="requiredDate" name="requiredDate" type="date" required /></div>
-                <div class="form-field full"><label for="notes">Notes / specifications <span class="optional">(optional)</span></label><textarea id="notes" name="notes" rows="7" placeholder="Include required material, dimensions, compatibility, method, preferred manufacturer/model, pack size, documentation, electrical requirements, delivery constraints, or acceptable alternatives."></textarea></div>
+                <div class="form-field full quote-customer-heading"><h2>Customer information</h2><p>Fields marked with * are required. The request is sent securely when you select Submit Quote Request.</p></div>
+                <div class="form-field"><label for="name">Contact name <span class="required-mark" aria-hidden="true">*</span></label><input id="name" name="Contact Name" type="text" autocomplete="name" required /></div>
+                <div class="form-field"><label for="organization">Company name <span class="required-mark" aria-hidden="true">*</span></label><input id="organization" name="Company Name" type="text" autocomplete="organization" required /></div>
+                <div class="form-field"><label for="email">Business email <span class="required-mark" aria-hidden="true">*</span></label><input id="email" name="Business Email" type="email" autocomplete="email" required /></div>
+                <div class="form-field"><label for="phone">Phone <span class="optional">(optional)</span></label><input id="phone" name="Phone" type="tel" autocomplete="tel" /></div>
+                <div class="form-field"><label for="postalCode">Postal code <span class="required-mark" aria-hidden="true">*</span></label><input id="postalCode" name="Postal Code" type="text" autocomplete="postal-code" required /></div>
+                <div class="form-field"><label for="requiredDate">Required date <span class="required-mark" aria-hidden="true">*</span></label><input id="requiredDate" name="Required Date" type="date" required /></div>
+                <div class="form-field full"><label for="notes">Message / application details <span class="optional">(optional)</span></label><textarea id="notes" name="Message / Application Details" rows="7" placeholder="Include the application, method, compatibility requirements, preferred configuration, documentation needs, delivery constraints, or acceptable alternatives."></textarea></div>
                 <div class="form-field full quote-business-confirmation">
-                  <label for="quoteBusinessPurchase"><input id="quoteBusinessPurchase" name="businessPurchase" type="checkbox" value="Confirmed" required /><span>I confirm that this request is on behalf of a business, laboratory, educational institution, government organization, or other professional organization, and not for personal, family, or household use.</span></label>
+                  <label for="quoteBusinessPurchase"><input id="quoteBusinessPurchase" name="Business Purchase Confirmation" type="checkbox" value="Confirmed" required /><span>I confirm that this request is on behalf of a business, laboratory, educational institution, government organization, or other professional organization, and not for personal, family, or household use.</span></label>
                   <p>ChromVale supplies business and institutional customers only. See the <a href="terms-of-sale.html">Terms of Sale</a>.</p>
                 </div>
               </div>
-              <div class="form-submit-row"><button type="submit" class="btn btn-primary">Prepare Email Request</button><p class="form-note">This opens your email application with the request addressed to quotes@chromvale.com. Review the email before sending.</p></div>
-              <div class="privacy-notice"><p>ChromVale Scientific does not use a server-side form processor on this website. Information entered here is composed into an email on your device. ChromVale receives it only if you send the email. See our <a href="privacy.html">Privacy Notice</a>.</p></div>
+              <div class="form-submit-row"><button type="submit" class="btn btn-primary">Submit Quote Request</button><p class="form-note">Your request will be sent securely to ChromVale. Please do not include confidential or regulated data.</p></div>
+              <p class="form-submission-status" id="quoteSubmissionStatus" role="status" aria-live="polite" hidden></p>
+              <div class="privacy-notice"><p>Information submitted through this form is processed by Formspree and delivered to ChromVale Scientific for quotation follow-up. See our <a href="privacy.html">Privacy Notice</a>.</p></div>
             </form>
           </div>
         </div>

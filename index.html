@@ -43,25 +43,109 @@
           <div class="home-slide-shade"></div>
           <div class="container home-slide-inner"><div class="home-slide-copy"><p class="home-slide-kicker">Ontario-based HPLC column supplier</p><h1>HPLC Columns for Canadian Laboratories</h1><p>Explore reversed-phase, HILIC, normal-phase and specialty HPLC columns with clear specifications and technical documentation.</p><div class="home-slide-actions"><a class="btn home-slide-primary" href="products.html">Browse HPLC Columns <span aria-hidden="true">→</span></a><a class="btn home-slide-secondary" href="quote.html">Request a Quote</a></div></div></div>
         </article>
-        <article class="home-slide" aria-hidden="true">
-          <img src="images/banner-analytical.svg" alt="Reversed-phase HPLC column families" class="home-slide-image" />
-          <div class="home-slide-shade"></div>
-          <div class="container home-slide-inner"><div class="home-slide-copy"><p class="home-slide-kicker">Reversed-Phase Selectivity</p><h2>Choose the C18 chemistry that fits the method</h2><p>Compare C18A, C18C and aqueous-compatible C18D families across analytical and preparative configurations.</p><div class="home-slide-actions"><a class="btn home-slide-primary" href="products/category.html?category=c18a">Explore C18A</a><a class="btn home-slide-secondary" href="products.html">Compare Families</a></div></div></div>
+        <article class="home-slide home-slide--selection home-slide--light" aria-hidden="true">
+          <div class="home-slide-shade" aria-hidden="true"></div>
+          <div class="home-slide-inner home-selection-inner">
+            <div class="home-slide-copy home-selection-copy">
+              <p class="home-slide-kicker">Method-based selection support</p>
+              <h2>From Your Method to the <strong>Right Column Options</strong></h2>
+              <p>Share key method details and review suitable HPLC column families before product evaluation.</p>
+              <div class="home-slide-actions">
+                <a class="btn home-slide-primary" href="product-sourcing.html?methodOption=C18" data-method-support-link>Explore Selection Support <span aria-hidden="true">→</span></a>
+                <a class="btn home-slide-secondary" href="quote.html?product=HPLC%20column%20selection%20support&amp;type=C18%20option&amp;request=method-selection" data-method-quote-link>Request a Quote</a>
+              </div>
+            </div>
+
+            <div class="home-method-workflow" data-home-method-selector>
+              <section class="home-method-card home-method-details" aria-labelledby="home-method-title">
+                <div class="home-method-card-heading">
+                  <span class="home-method-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M6 2h8l4 4v16H6z"/><path d="M14 2v5h5M9 11h6M9 15h6M9 19h4"/></svg></span>
+                  <h3 id="home-method-title">Your Method</h3>
+                </div>
+                <div class="home-method-fields">
+                  <label>Analyte<input type="text" name="home-analyte" autocomplete="off" placeholder="e.g. API, impurity" /></label>
+                  <label>Mobile Phase<input type="text" name="home-mobile-phase" autocomplete="off" placeholder="e.g. ACN / Water" /></label>
+                  <label>pH Range<input type="text" name="home-ph-range" inputmode="decimal" autocomplete="off" placeholder="e.g. 2–8" /></label>
+                  <label>Column Size<input type="text" name="home-column-size" autocomplete="off" placeholder="e.g. 4.6 × 150 mm" /></label>
+                </div>
+              </section>
+
+              <span class="home-method-flow" aria-hidden="true">→</span>
+
+              <section class="home-method-card home-method-options" aria-labelledby="home-options-title">
+                <div class="home-method-card-heading">
+                  <span class="home-method-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="m12 2 9 5-9 5-9-5zM3 12l9 5 9-5M3 17l9 5 9-5"/></svg></span>
+                  <h3 id="home-options-title">Column Options</h3>
+                </div>
+                <div class="home-method-option-list" role="group" aria-label="Choose a column family">
+                  <button class="home-method-option is-selected" type="button" data-method-option="C18" aria-pressed="true"><span class="home-method-option-mark" aria-hidden="true">C18</span><span><strong>C18 option</strong><small>Versatile reversed-phase separation</small></span></button>
+                  <button class="home-method-option" type="button" data-method-option="HILIC" aria-pressed="false"><span class="home-method-option-mark" aria-hidden="true">HILIC</span><span><strong>HILIC option</strong><small>Retention of polar compounds</small></span></button>
+                  <button class="home-method-option" type="button" data-method-option="Specialty" aria-pressed="false"><span class="home-method-option-mark" aria-hidden="true">ALT</span><span><strong>Specialty option</strong><small>Alternative selectivity</small></span></button>
+                </div>
+              </section>
+
+              <span class="home-method-flow" aria-hidden="true">→</span>
+
+              <section class="home-method-card home-method-evaluation" aria-labelledby="home-evaluation-title">
+                <div class="home-method-card-heading">
+                  <span class="home-method-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 20V12M10 20V7M16 20V3M22 20V10"/></svg></span>
+                  <h3 id="home-evaluation-title">Evaluation</h3>
+                </div>
+                <svg class="home-method-chromatogram" viewBox="0 0 260 100" role="img" aria-label="Example chromatogram line">
+                  <path class="home-method-chart-axis" d="M8 86h244"/>
+                  <path class="home-method-chart-line" d="M8 84h35c8 0 11-4 14-18l5-30 5 30c3 14 7 18 16 18h35c8 0 11-5 13-20l6-51 6 51c2 15 6 20 15 20h28c7 0 10-4 12-15l5-34 5 34c2 11 6 15 13 15h41"/>
+                </svg>
+                <div class="home-method-metrics" aria-hidden="true"><span>Flow rate</span><span>Pressure</span><span>Retention time</span><span>Peak shape</span><span>Resolution</span><span>Mobile phase</span></div>
+                <p class="home-method-status" data-method-status aria-live="polite">C18 option selected for review.</p>
+              </section>
+
+              <img class="home-method-product" src="images/home-method-selection-product.webp" alt="HPLCONE HPLC column and blue packaging box" loading="lazy" />
+            </div>
+          </div>
         </article>
-        <article class="home-slide" aria-hidden="true">
-          <img src="images/banner-liquid-handling.svg" alt="Polar-selectivity HPLC column families" class="home-slide-image" />
-          <div class="home-slide-shade"></div>
-          <div class="container home-slide-inner"><div class="home-slide-copy"><p class="home-slide-kicker">Alternative &amp; Polar Selectivity</p><h2>PFP, Phenethyl, NH, Amide, CN and Diol</h2><p>Review stationary phases for aromatic, polar, normal-phase and HILIC separations.</p><div class="home-slide-actions"><a class="btn home-slide-primary" href="products.html">Browse Column Families</a><a class="btn home-slide-secondary" href="product-sourcing.html">Selection Support</a></div></div></div>
-        </article>
-        <article class="home-slide" aria-hidden="true">
-          <img src="images/banner-procurement.svg" alt="HPLC column specification and purchasing support" class="home-slide-image" />
-          <div class="home-slide-shade"></div>
-          <div class="container home-slide-inner"><div class="home-slide-copy"><p class="home-slide-kicker">Configurations &amp; Special Requests</p><h2>Have a chemistry, dimension, or application in mind?</h2><p>ChromVale reviews column requirements, available configurations, documentation and commercial terms before an order proceeds.</p><div class="home-slide-actions"><a class="btn home-slide-primary" href="quote.html">Send Requirements</a><a class="btn home-slide-secondary" href="product-sourcing.html">Column Selection Support</a></div></div></div>
+        <article class="home-slide home-slide--documentation home-slide--light" aria-hidden="true">
+          <div class="home-slide-shade" aria-hidden="true"></div>
+          <div class="home-documentation-inner">
+            <div class="home-slide-copy home-documentation-copy">
+              <p class="home-slide-kicker">Manufacturer QC Documentation</p>
+              <h2>Technical Documents Prepared for Evaluation</h2>
+              <p>Review product specifications, test conditions, chromatogram performance, and supporting manufacturer documentation before purchase.</p>
+              <div class="home-slide-actions">
+                <a class="btn home-slide-primary" href="quote.html?product=HPLC%20column%20documentation&amp;request=documentation">Request Documentation <span aria-hidden="true">→</span></a>
+                <a class="btn home-slide-secondary" href="quote.html">Request a Quote <span aria-hidden="true">→</span></a>
+              </div>
+              <p class="home-documentation-trust" aria-hidden="true"><span>Quality</span><span>Reliability</span><span>Confidence</span></p>
+            </div>
+
+            <section class="home-qc-report" aria-label="Illustrative HPLC quality-control report preview">
+              <header class="home-qc-report-head">
+                <h3>HPLC QC Report</h3>
+                <p>Consistent performance<br />for a brighter tomorrow</p>
+              </header>
+              <div class="home-qc-report-meta">
+                <section><h4>Column Specification</h4><dl><div><dt>Product</dt><dd>Selected HPLC column</dd></div><div><dt>Configuration</dt><dd>Chemistry and dimensions</dd></div><div><dt>Identification</dt><dd>Product and lot details</dd></div></dl></section>
+                <section><h4>Test Conditions</h4><dl><div><dt>Method</dt><dd>Manufacturer QC method</dd></div><div><dt>Parameters</dt><dd>Flow, pressure and detection</dd></div><div><dt>Conditions</dt><dd>Documented with report</dd></div></dl></section>
+              </div>
+              <svg class="home-qc-chart" viewBox="0 0 760 190" role="img" aria-label="Illustrative chromatogram with three separated peaks">
+                <path class="home-qc-axis" d="M44 16v145h692M44 161h692" />
+                <path class="home-qc-grid" d="M44 126h692M44 91h692M44 56h692" />
+                <path class="home-qc-line" d="M44 156h125c13 0 20-3 25-25l7-35 7 35c5 22 12 25 27 25h86c12 0 18-4 22-20l7-91 8 91c4 16 10 20 23 20h86c12 0 19-4 23-19l7-63 8 63c4 15 10 19 23 19h187" />
+                <g class="home-qc-ticks" aria-hidden="true"><text x="40" y="180">0</text><text x="175" y="180">2</text><text x="310" y="180">4</text><text x="445" y="180">6</text><text x="580" y="180">8</text><text x="720" y="180">10 min</text></g>
+              </svg>
+              <div class="home-qc-table" role="table" aria-label="Example chromatogram performance fields">
+                <div class="home-qc-table-row home-qc-table-head" role="row"><span role="columnheader">Peak</span><span role="columnheader">Retention Time</span><span role="columnheader">Efficiency</span><span role="columnheader">Resolution</span><span role="columnheader">Asymmetry</span></div>
+                <div class="home-qc-table-row" role="row"><span role="cell">1</span><span role="cell">Reported</span><span role="cell">Reported</span><span role="cell">Reported</span><span role="cell">Reported</span></div>
+                <div class="home-qc-table-row" role="row"><span role="cell">2</span><span role="cell">Reported</span><span role="cell">Reported</span><span role="cell">Reported</span><span role="cell">Reported</span></div>
+                <div class="home-qc-table-row" role="row"><span role="cell">3</span><span role="cell">Reported</span><span role="cell">Reported</span><span role="cell">Reported</span><span role="cell">Reported</span></div>
+              </div>
+              <p class="home-qc-report-note">Illustrative report preview · document content varies by product, configuration, manufacturer, and lot.</p>
+            </section>
+          </div>
         </article>
       </div>
       <button class="home-slider-arrow home-slider-prev" type="button" aria-label="Previous banner">&#10094;</button>
       <button class="home-slider-arrow home-slider-next" type="button" aria-label="Next banner">&#10095;</button>
-      <div class="home-slider-dots" role="group" aria-label="Choose featured banner"><button type="button" class="is-active" aria-label="Show banner 1" aria-current="true"></button><button type="button" aria-label="Show banner 2"></button><button type="button" aria-label="Show banner 3"></button><button type="button" aria-label="Show banner 4"></button></div>
+      <div class="home-slider-dots" role="group" aria-label="Choose featured banner"><button type="button" class="is-active" aria-label="Show banner 1" aria-current="true"></button><button type="button" aria-label="Show banner 2"></button><button type="button" aria-label="Show banner 3"></button></div>
     </section>
 
     <div class="home-services-promotions">

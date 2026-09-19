@@ -363,7 +363,78 @@ document.querySelectorAll("[data-add-to-quote]").forEach((button) => {
   });
 });
 
-// Request for Quote form -> selectable cart plus structured mailto composition.
+const formspreeSuccessMessage = "Thank you. Your request has been received. Our team will respond by email.";
+const updateFormSubmissionStatus = (status, state, message) => {
+  if (!status) return;
+  status.hidden = false;
+  status.classList.remove("is-submitting", "is-success", "is-error");
+  status.classList.add(`is-${state}`);
+  status.textContent = message;
+};
+const submitFormspreeForm = async (form, status) => {
+  if (form.dataset.submitting === "true") return false;
+  if (!form.checkValidity()) {
+    form.reportValidity();
+    return false;
+  }
+
+  const submitButton = form.querySelector('button[type="submit"]');
+  const defaultButtonText = submitButton?.dataset.defaultText || submitButton?.textContent || "Submit";
+  if (submitButton) submitButton.dataset.defaultText = defaultButtonText;
+  form.dataset.submitting = "true";
+  form.setAttribute("aria-busy", "true");
+  if (submitButton) {
+    submitButton.disabled = true;
+    submitButton.textContent = "Submitting…";
+  }
+  updateFormSubmissionStatus(status, "submitting", "Submitting your request…");
+
+  try {
+    const submissionData = new FormData(form);
+    const replyAddress = form.querySelector('input[type="email"]')?.value.trim();
+    if (replyAddress) submissionData.set("_replyto", replyAddress);
+    const response = await fetch(form.action, {
+      method: "POST",
+      body: submissionData,
+      headers: { Accept: "application/json" },
+    });
+    if (!response.ok) {
+      let message = "We couldn't send your request. Please review the form and try again.";
+      try {
+        const result = await response.json();
+        const details = Array.isArray(result.errors) ? result.errors.map((error) => error.message).filter(Boolean).join(" ") : "";
+        if (details) message = details;
+      } catch {
+        // Formspree can return an empty error response. The friendly message above remains useful.
+      }
+      throw new Error(message);
+    }
+    updateFormSubmissionStatus(status, "success", formspreeSuccessMessage);
+    return true;
+  } catch (error) {
+    updateFormSubmissionStatus(status, "error", error instanceof Error && error.message
+      ? error.message
+      : "We couldn't send your request. Please try again or contact ChromVale directly.");
+    return false;
+  } finally {
+    form.dataset.submitting = "false";
+    form.removeAttribute("aria-busy");
+    if (submitButton) {
+      submitButton.disabled = false;
+      submitButton.textContent = defaultButtonText;
+    }
+  }
+};
+
+document.querySelectorAll('[data-formspree-form="contact"]').forEach((form) => {
+  const status = form.querySelector(".form-submission-status");
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (await submitFormspreeForm(form, status)) form.reset();
+  });
+});
+
+// Request for Quote form -> selectable cart plus a structured Formspree submission.
 const quoteForm = document.getElementById("quoteForm");
 
 if (quoteForm) {
@@ -378,6 +449,7 @@ if (quoteForm) {
   const pickerList = document.getElementById("productPickerList");
   const pickerStatus = document.getElementById("productPickerStatus");
   const closePickerButton = document.getElementById("closeProductPicker");
+  const submissionStatus = document.getElementById("quoteSubmissionStatus");
   const escapeQuoteHtml = (value) => String(value)
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
@@ -390,9 +462,9 @@ if (quoteForm) {
       const inputId = `product-quantity-${index + 1}`;
       const meta = [product.sku && `Part No. ${product.sku}`, product.needsConfirmation ? "Catalogue reference requires confirmation" : ""].filter(Boolean).join(" · ");
       return `<tr data-product-row data-product-id="${escapeQuoteHtml(product.id)}" data-product-sku="${escapeQuoteHtml(product.sku)}">
-        <td data-label="Product"><strong class="quote-product-name">${escapeQuoteHtml(product.name)}</strong>${meta ? `<span class="quote-product-meta">${escapeQuoteHtml(meta)}</span>` : ""}<input name="product[]" type="hidden" value="${escapeQuoteHtml([product.name, product.specification, product.sku && `Part No. ${product.sku}`].filter(Boolean).join(" — "))}" /></td>
+        <td data-label="Product"><strong class="quote-product-name">${escapeQuoteHtml(product.name)}</strong>${meta ? `<span class="quote-product-meta">${escapeQuoteHtml(meta)}</span>` : ""}<input name="Product Name[]" type="hidden" value="${escapeQuoteHtml(product.name)}" /><input name="Part Number[]" type="hidden" value="${escapeQuoteHtml(product.sku || "To be confirmed")}" /><input name="Product Specification[]" type="hidden" value="${escapeQuoteHtml(product.specification)}" /></td>
         <td data-label="Specification"><span class="quote-product-specification">${escapeQuoteHtml(product.specification)}</span></td>
-        <td data-label="Quantity"><label class="nav-sr-only" for="${inputId}">Quantity for ${escapeQuoteHtml(product.name)}</label><input class="quote-quantity-input" id="${inputId}" name="productQuantity[]" data-quote-quantity type="number" min="1" step="1" inputmode="numeric" value="${product.quantity}" required /></td>
+        <td data-label="Quantity"><label class="nav-sr-only" for="${inputId}">Quantity for ${escapeQuoteHtml(product.name)}</label><input class="quote-quantity-input" id="${inputId}" name="Quantity[]" data-quote-quantity type="number" min="1" step="1" inputmode="numeric" value="${product.quantity}" required /></td>
         <td data-label="Remove"><button type="button" class="product-remove-button" data-remove-product aria-label="Remove ${escapeQuoteHtml(product.name)}">Remove</button></td>
       </tr>`;
     }).join("");
@@ -494,19 +566,22 @@ if (quoteForm) {
   writeQuoteProducts(initialProducts);
   renderCart();
 
-  const notesField = params.get("request") === "documentation" && quoteForm.querySelector('[name="notes"]');
-  if (notesField && !notesField.value) {
+  const notesField = quoteForm.querySelector('[name="Message / Application Details"]');
+  const requestedMethodNotes = (params.get("methodNotes") || "").trim();
+  if (notesField && !notesField.value && params.get("request") === "documentation") {
     notesField.value = "Please include the applicable manufacturer documentation / datasheet with the quotation.";
+  } else if (notesField && !notesField.value && params.get("request") === "method-selection" && requestedMethodNotes) {
+    notesField.value = `Homepage method-selection details:\n${requestedMethodNotes}`;
   }
 
   window.addEventListener("storage", (event) => {
     if (event.key === quoteStorageKey || event.key === null) renderCart();
   });
 
-  quoteForm.addEventListener("submit", (event) => {
+  quoteForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     const productItems = Array.from(productList.querySelectorAll("[data-product-row]")).map((row) => ({
-      product: row.querySelector('input[name="product[]"]')?.value || "",
+      product: row.querySelector('input[name="Product Name[]"]')?.value || "",
       specification: row.querySelector(".quote-product-specification")?.textContent || "",
       sku: row.dataset.productSku || "",
       quantity: row.querySelector("[data-quote-quantity]")?.value || "",
@@ -522,34 +597,11 @@ if (quoteForm) {
       return;
     }
 
-    const data = new FormData(quoteForm);
-    const get = (field) => (data.get(field) || "").toString().trim();
-    const subjectProduct = productItems.length === 1 ? productItems[0].product : "Multiple HPLC Columns";
-    const productLines = productItems.flatMap((item, index) => [
-      `Product ${index + 1}: ${item.product}`,
-      `Specification ${index + 1}: ${item.specification}`,
-      `Part No. ${index + 1}: ${item.sku || "To be confirmed"}`,
-      `Quantity ${index + 1}: ${item.quantity}`,
-    ]);
-    const bodyLines = [
-      "REQUEST FOR QUOTE",
-      "",
-      `Name: ${get("name")}`,
-      `Organization: ${get("organization")}`,
-      `Business email: ${get("email")}`,
-      `Phone: ${get("phone") || "Not provided"}`,
-      `Postal code: ${get("postalCode")}`,
-      `Required date: ${get("requiredDate")}`,
-      `Business purchase confirmation: ${get("businessPurchase")}`,
-      "",
-      "PRODUCTS REQUESTED",
-      ...productLines,
-      "",
-      "NOTES / SPECIFICATIONS",
-      get("notes") || "None provided",
-    ];
-    const mailto = `mailto:quotes@chromvale.com?subject=${encodeURIComponent(`Request for Quote — ${subjectProduct}`)}&body=${encodeURIComponent(bodyLines.join("\n"))}`;
-    window.location.href = mailto;
+    if (await submitFormspreeForm(quoteForm, submissionStatus)) {
+      writeQuoteProducts([]);
+      renderCart();
+      quoteForm.reset();
+    }
   });
 }
 
@@ -649,4 +701,69 @@ if (quoteForm) {
 
   show(0);
   start();
+})();
+
+// Homepage method-selection banner — keep the visual controls keyboard-operable
+// and carry entered details into the existing sourcing / quote flows.
+(() => {
+  const selector = document.querySelector('[data-home-method-selector]');
+  if (!selector) return;
+
+  const options = Array.from(selector.querySelectorAll('[data-method-option]'));
+  const inputs = Array.from(selector.querySelectorAll('input'));
+  const status = selector.querySelector('[data-method-status]');
+  const supportLink = document.querySelector('[data-method-support-link]');
+  const quoteLink = document.querySelector('[data-method-quote-link]');
+  let selectedOption = options.find((option) => option.classList.contains('is-selected'))?.dataset.methodOption || 'C18';
+
+  const detailFields = [
+    ['home-analyte', 'Analyte'],
+    ['home-mobile-phase', 'Mobile phase'],
+    ['home-ph-range', 'pH range'],
+    ['home-column-size', 'Column size'],
+  ];
+
+  const updateLinks = () => {
+    const details = detailFields.map(([name, label]) => {
+      const value = selector.querySelector(`[name="${name}"]`)?.value.trim() || '';
+      return { name, label, value };
+    });
+
+    if (supportLink) {
+      const supportParams = new URLSearchParams({ methodOption: selectedOption });
+      details.forEach(({ name, value }) => {
+        if (value) supportParams.set(name.replace('home-', ''), value);
+      });
+      supportLink.href = `product-sourcing.html?${supportParams.toString()}`;
+    }
+
+    if (quoteLink) {
+      const quoteParams = new URLSearchParams({
+        product: 'HPLC column selection support',
+        type: `${selectedOption} option`,
+        request: 'method-selection',
+      });
+      const columnSize = details.find(({ name }) => name === 'home-column-size')?.value;
+      if (columnSize) quoteParams.set('columnSize', columnSize);
+      const summary = [`Preferred family: ${selectedOption}`, ...details.filter(({ value }) => value).map(({ label, value }) => `${label}: ${value}`)].join('\n');
+      quoteParams.set('methodNotes', summary);
+      quoteLink.href = `quote.html?${quoteParams.toString()}`;
+    }
+  };
+
+  options.forEach((option) => {
+    option.addEventListener('click', () => {
+      selectedOption = option.dataset.methodOption || 'C18';
+      options.forEach((candidate) => {
+        const selected = candidate === option;
+        candidate.classList.toggle('is-selected', selected);
+        candidate.setAttribute('aria-pressed', String(selected));
+      });
+      if (status) status.textContent = `${selectedOption} option selected for review.`;
+      updateLinks();
+    });
+  });
+
+  inputs.forEach((input) => input.addEventListener('input', updateLinks));
+  updateLinks();
 })();

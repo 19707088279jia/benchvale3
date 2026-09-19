@@ -209,10 +209,68 @@
 }
 
 .terms-accordion {
+  display: grid;
+  gap: 18px;
+}
+
+.terms-group {
   overflow: hidden;
+  border: 1px solid var(--terms-border);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 4px 16px rgba(10, 31, 51, 0.04);
+}
+
+.terms-group-header {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding: 15px 18px;
+  border-bottom: 1px solid #cae1e5;
+  background: #edf8fa;
+}
+
+.terms-group-number {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--terms-teal);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.terms-group-header h2 {
+  margin: 0;
+  color: var(--terms-navy);
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.terms-group-header p {
+  margin: 3px 0 0;
+  color: var(--terms-muted);
+  font-size: 0.7rem;
+  line-height: 1.4;
+}
+
+.terms-subgroup + .terms-subgroup {
   border-top: 1px solid var(--terms-border);
-  border-bottom: 1px solid var(--terms-border);
-  background: rgba(255, 255, 255, 0.88);
+}
+
+.terms-subgroup-heading {
+  margin: 0;
+  padding: 10px 18px 8px 48px;
+  color: #557180;
+  background: #fbfdfe;
+  font-size: 0.67rem;
+  font-weight: 800;
+  line-height: 1.3;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
 }
 
 .terms-item {
@@ -227,7 +285,7 @@
   display: grid;
   width: 100%;
   min-height: 67px;
-  grid-template-columns: 31px minmax(0, 1fr) 24px;
+  grid-template-columns: 38px minmax(0, 1fr) 24px;
   align-items: center;
   gap: 13px;
   padding: 10px 8px 10px 4px;
@@ -252,10 +310,10 @@
 
 .terms-number {
   display: grid;
-  width: 27px;
+  width: 34px;
   height: 27px;
   place-items: center;
-  border-radius: 50%;
+  border-radius: 999px;
   color: #2b6680;
   background: #dff1f5;
   font-size: 0.68rem;
@@ -473,7 +531,7 @@
 
   .terms-trigger {
     min-height: 76px;
-    grid-template-columns: 29px minmax(0, 1fr) 21px;
+    grid-template-columns: 36px minmax(0, 1fr) 21px;
     gap: 10px;
     padding-right: 5px;
   }
@@ -481,6 +539,14 @@
   .terms-panel-inner {
     margin: 0 35px 14px 42px;
     padding: 13px 14px;
+  }
+
+  .terms-group-header {
+    padding: 14px;
+  }
+
+  .terms-subgroup-heading {
+    padding-left: 42px;
   }
 
   .terms-footer-grid {

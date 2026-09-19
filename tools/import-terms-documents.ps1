@@ -24,6 +24,11 @@ $termDocumentMap = [ordered]@{
   16 = 'Limitation of Liability.docx'
   17 = 'Laboratory and Analytical Use.docx'
   18 = 'Force Majeure and Governing Law.docx'
+  19 = 'Order Cancellation and Modification.docx'
+  20 = 'Quotations and Volume Pricing.docx'
+  21 = 'Decontamination and Safe Returns.docx'
+  22 = 'Default, Suspension and Termination.docx'
+  23 = 'Force Majeure and Governing Law.docx'
 }
 
 if (-not (Test-Path -LiteralPath $SourceDirectory -PathType Container)) {
@@ -111,12 +116,20 @@ function Set-TermWebsitePolicyOverrides {
               <p>Receipt of an order, payment, or an automated “order received” acknowledgement confirms only that ChromVale has received the order and does not constitute acceptance. An order will be considered accepted only when ChromVale sends an explicit order-acceptance confirmation or ships the applicable products, whichever occurs first.</p>
 '@.TrimEnd("`r", "`n")
     }
+    3 {
+      $termOldHtml = @'
+              <p>Prices shown on ChromVale’s website are subject to change without notice before an order is accepted. Prices stated in an accepted written quotation will remain valid for the period specified in that quotation. If no validity period is stated, ChromVale may require updated pricing before accepting the order.</p>
+'@.TrimEnd("`r", "`n")
+      $termNewHtml = @'
+              <p>Prices shown on ChromVale’s website are subject to change without notice before an order is accepted. Unless otherwise stated in writing, a quotation is valid for thirty (30) days from its date of issue. Prices stated in an accepted written quotation will remain valid for the period specified in that quotation.</p>
+'@.TrimEnd("`r", "`n")
+    }
     10 {
       $termOldHtml = @'
               <p>Risk of loss or damage during transportation will be handled in accordance with the applicable shipping arrangement, carrier terms, and any express terms stated in the order confirmation or quotation. Nothing in this section prevents ChromVale from assisting the Customer with a carrier claim where appropriate.</p>
 '@.TrimEnd("`r", "`n")
       $termNewHtml = @'
-              <p>Unless otherwise agreed in writing, risk of loss or damage remains with ChromVale until the shipment is delivered to the Customer’s designated delivery address. If the Customer arranges or selects its own carrier, risk passes to the Customer when the shipment is delivered to that carrier. Nothing in this section prevents ChromVale from assisting the Customer with a carrier claim where appropriate.</p>
+              <p>Title and risk of loss are governed by the separate Title and Risk of Loss section of these Terms.</p>
 '@.TrimEnd("`r", "`n")
     }
     12 {
@@ -149,7 +162,29 @@ try {
     $termDocument = $termWord.Documents.Open($termSourcePath, $false, $true)
     try {
       $termBodyHtml = Convert-TermParagraphsToHtml -Document $termDocument -SectionNumber $termSectionNumber
+      if ($termSectionNumber -eq 18 -or $termSectionNumber -eq 23) {
+        $termLegalMarker = '              <p>These Terms and any dispute arising out of or relating to a transaction with ChromVale will be governed by the laws of the Province of Ontario'
+        $termLegalIndex = $termBodyHtml.IndexOf($termLegalMarker, [System.StringComparison]::Ordinal)
+        if ($termLegalIndex -lt 0) {
+          throw "Force Majeure and Governing Law split marker was not found for section $termSectionNumber"
+        }
+        if ($termSectionNumber -eq 18) {
+          $termBodyHtml = $termBodyHtml.Substring(0, $termLegalIndex).TrimEnd()
+        } else {
+          $termBodyHtml = $termBodyHtml.Substring($termLegalIndex).Trim()
+        }
+      }
       $termBodyHtml = Set-TermWebsitePolicyOverrides -Html $termBodyHtml -SectionNumber $termSectionNumber
+      if ($termSectionNumber -eq 3) {
+        $termMovedParagraphs = @(
+          '              <p>Payment is due in accordance with the payment terms stated on the applicable quotation, invoice, checkout page, or order confirmation. ChromVale may require full or partial payment before processing, procuring, or shipping an order.</p>',
+          '              <p>ChromVale reserves the right to suspend order processing or shipment where payment has not been received, has been declined, reversed, disputed, or otherwise remains outstanding.</p>',
+          "              <p>Any bank charges, payment-processing charges, currency-conversion costs, wire-transfer fees, or similar charges imposed by the Customer’s financial institution or payment provider are the responsibility of the Customer unless otherwise agreed in writing.</p>"
+        )
+        foreach ($termMovedParagraph in $termMovedParagraphs) {
+          $termBodyHtml = $termBodyHtml.Replace($termMovedParagraph, '').TrimEnd()
+        }
+      }
     } finally {
       $termDocument.Close($false)
       [System.Runtime.InteropServices.Marshal]::FinalReleaseComObject($termDocument) | Out-Null
