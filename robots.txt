@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://chromvale.com/sitemap.xml
+Sitemap: https://chromvale.ca/sitemap.xml

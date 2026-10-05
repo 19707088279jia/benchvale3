@@ -19,7 +19,7 @@ for (const file of htmlFiles) {
   assert(/<title>.+<\/title>/i.test(html), `${relative} must have a title`);
   if (!/noindex/i.test(html)) {
     if (!/<meta name="description" content="[^"]+"/i.test(html)) failures.push(`${relative}: missing description`);
-    if (!/<link rel="canonical" href="https:\/\/chromvale\.com\//i.test(html)) failures.push(`${relative}: missing canonical`);
+    if (!/<link rel="canonical" href="https:\/\/chromvale\.ca\//i.test(html)) failures.push(`${relative}: missing canonical`);
   }
   for (const [, href] of html.matchAll(/\shref=["']([^"']+)["']/g)) {
     if (/^(?:https?:|mailto:|tel:|data:|javascript:|#)/i.test(href)) continue;

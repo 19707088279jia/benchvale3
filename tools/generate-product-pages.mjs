@@ -195,11 +195,11 @@ const productsIndexTemplate = () => `<!DOCTYPE html>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Laboratory Products | ChromVale Scientific</title>
   <meta name="description" content="Browse laboratory consumables, sample-preparation products, liquid-handling supplies, and benchtop equipment from ChromVale Scientific in Canada." />
-  <link rel="canonical" href="https://chromvale.com/products.html" />
+  <link rel="canonical" href="https://chromvale.ca/products.html" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Laboratory Products | ChromVale Scientific" />
   <meta property="og:description" content="Browse ChromVale laboratory products by category, application, manufacturer reference, or specification." />
-  <meta property="og:url" content="https://chromvale.com/products.html" />
+  <meta property="og:url" content="https://chromvale.ca/products.html" />
   <meta name="theme-color" content="#0a1f33" />
   <link rel="icon" href="images/favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="styles.css" /><link rel="stylesheet" href="navigation.css" />
@@ -226,7 +226,7 @@ const productTemplate = (product) => {
   const specs = product.specs.map(([label, value]) => `<tr><th scope="row">${escapeHtml(label)}</th><td>${escapeHtml(value)}</td></tr>`).join("\n");
   const highlights = product.highlights.map(([label, value]) => `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`).join("");
   const quoteHref = `../quote.html?product=${encodeURIComponent(product.name)}`;
-  const canonical = `https://chromvale.com/products/${product.slug}.html`;
+  const canonical = `https://chromvale.ca/products/${product.slug}.html`;
   return `<!DOCTYPE html>
 <html lang="en-CA">
 <head>

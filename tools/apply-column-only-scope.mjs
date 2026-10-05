@@ -65,7 +65,7 @@ for (const file of retiredPages) {
   const depth = depthFor(file);
   html = html.replace(/\s*<meta name="robots"[^>]*>/gi, "");
   html = html.replace(/\s*<meta http-equiv="refresh"[^>]*data-column-only-redirect[^>]*>/gi, "");
-  html = html.replace(/\s*<link rel="canonical"[^>]*>/i, `\n  <link rel="canonical" href="https://chromvale.com/products.html" />`);
+  html = html.replace(/\s*<link rel="canonical"[^>]*>/i, `\n  <link rel="canonical" href="https://chromvale.ca/products.html" />`);
   html = html.replace("</head>", `  <meta name="robots" content="noindex, nofollow" />\n  <meta http-equiv="refresh" content="0; url=${depth}products.html" data-column-only-redirect />\n</head>`);
   writeFileSync(path, html);
 }
