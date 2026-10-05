@@ -1,6 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="8" fill="#0a1f33"/>
-  <circle cx="32" cy="32" r="20" fill="none" stroke="#ffffff" stroke-width="2.4"/>
-  <path d="M32 4v10M32 50v10M4 32h10M50 32h10" stroke="#ffffff" stroke-width="2.4"/>
-  <circle cx="32" cy="32" r="5" fill="#0f8a8a"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="ChromVale Scientific">
+  <g fill="none" stroke="#1598a1" stroke-width="3.5" stroke-linejoin="round">
+    <path d="m29.3 5.5 9.3 5.4v10.7L29.3 27l-9.2-5.4V10.9z"/>
+    <path d="m42 13.6 9.3 5.4v10.7L42 35.1l-9.2-5.4V19z"/>
+    <path d="m29.3 21.6 9.3 5.4v10.7l-9.3 5.4-9.2-5.4V27z"/>
+    <path d="m16.6 29.7 9.3 5.4v10.7l-9.3 5.4-9.2-5.4V35.1z"/>
+  </g>
 </svg>
