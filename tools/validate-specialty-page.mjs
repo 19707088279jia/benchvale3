@@ -27,8 +27,8 @@ assert(!/(?:Add to Cart|View Specifications|Part No\.|SKU|Shopify Variant|In Sto
 const sandbox = { window: {} };
 runInNewContext(dataJs, sandbox);
 const families = sandbox.window.CHROMVALE_SPECIALTY_FAMILIES;
-assert.equal(families.length, 21, "Specialty catalogue must contain exactly 21 families");
-assert.equal(new Set(families.map(({ name }) => name)).size, 21, "Specialty family names must be unique");
+assert.equal(families.length, 20, "Specialty catalogue must contain exactly 20 currently offered families");
+assert.equal(new Set(families.map(({ name }) => name)).size, 20, "Specialty family names must be unique");
 for (const family of families) {
   assert.equal(Object.keys(family).sort().join(","), "description,name", `${family.name} must contain only family-level copy`);
   assert(family.name && family.description);
@@ -86,10 +86,10 @@ try {
   await specialtyCard.click();
   await page.waitForLoadState("networkidle");
   assert.equal(new URL(page.url()).pathname, "/products/specialty/index.html");
-  assert.equal(await page.locator(".specialty-family-card").count(), 21);
-  assert.equal(await page.getByRole("link", { name: /Request a quotation for/i }).count(), 21);
+  assert.equal(await page.locator(".specialty-family-card").count(), 20);
+  assert.equal(await page.getByRole("link", { name: /Request a quotation for/i }).count(), 20);
   assert.equal(await page.locator("main img").count(), 1, "Specialty must contain only its single hero photo");
-  assert.equal(await page.locator("aside, [class*='filter'], [class*='accordion']").count(), 0);
+  assert.equal(await page.locator("main aside, main [class*='filter'], main [class*='accordion']").count(), 0);
   const mainText = await page.locator("main").textContent();
   for (const forbidden of ["Add to Cart", "Part No.", "SKU", "In Stock", "View Specifications"]) assert(!mainText.includes(forbidden));
 
@@ -104,7 +104,7 @@ try {
   assert.equal(new URL(page.url()).pathname, "/products/specialty/index.html", "The legacy Specialty query must resolve to the single final overview");
 
   await page.goto(firstQuoteUrl.href, { waitUntil: "networkidle" });
-  const quotedProduct = await page.locator('[data-product-row] input[name="product[]"]').last().inputValue();
+  const quotedProduct = await page.locator('[data-product-row] input[name="Product Name[]"]').last().inputValue();
   assert(quotedProduct.includes("HPLCONE® C18(NA)"));
   assert(quotedProduct.includes("Source: Specialty Columns"));
 
@@ -114,13 +114,13 @@ try {
 
   await page.setViewportSize({ width: 375, height: 900 });
   await page.goto(`${base}products/specialty/`, { waitUntil: "networkidle" });
-  assert.equal(await page.locator(".specialty-family-card").count(), 21);
+  assert.equal(await page.locator(".specialty-family-card").count(), 20);
   assert.equal(await page.locator(".specialty-family-grid").evaluate((grid) => getComputedStyle(grid).gridTemplateColumns.split(" ").length), 1);
   assert(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), "Specialty page must not overflow at 375px");
   await page.screenshot({ path: resolve(tmpdir(), "chromvale-specialty-mobile.png"), fullPage: true });
   assert.deepEqual(errors, [], `Browser errors: ${errors.join(" | ")}`);
   await context.close();
-  console.log("PASS Specialty Columns: 21 family-level quote-only cards, no second-level catalogue UI, complete quote context, and responsive 3/2/1-column layout.");
+  console.log("PASS Specialty Columns: 20 family-level quote-only cards, no second-level catalogue UI, complete quote context, and responsive 3/2/1-column layout.");
 } finally {
   await browser?.close();
   await new Promise((closed) => server.close(closed));

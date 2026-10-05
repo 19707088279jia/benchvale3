@@ -10,7 +10,6 @@ const pages = [
   { file: "services.html", heading: "If there is a quality issue, we will make it right.", selector: "service-card", count: 5 },
   { file: "product-sourcing.html", heading: "Product Sourcing Support", selector: "sourcing-card", count: 6 },
   { file: "documentation-support.html", heading: "Documentation Support", selector: "documentation-node", count: 6 },
-  { file: "shipping-returns.html", heading: "Shipping &amp; Returns", selector: "shipping-info-card", count: 4 },
 ];
 
 for (const page of pages) {
@@ -27,8 +26,11 @@ for (const page of pages) {
 const documentation = read("documentation-support.html");
 for (const copy of ["Manufacturer QC Documentation", "Test Chromatograms", "Certificates of Analysis", "Product Specifications", "Lot &amp; Serial Traceability", "Column Care &amp; Usage Information"]) assert(documentation.includes(copy), `Documentation page missing ${copy}`);
 const shipping = read("shipping-returns.html");
-for (const copy of ["Shipping Damage", "Missing or Incorrect Items", "Returns &amp; Replacements", "How to Request Support"]) assert(shipping.includes(copy), `Shipping page missing ${copy}`);
-assert(shipping.includes("shipping-info-card--priority"), "Shipping Damage must remain visually prioritized");
+for (const href of ["terms-of-sale.html", "returns.html", "shipping-returns.html", "privacy.html"]) assert(shipping.includes(`href="${href}"`), `Shipping policy navigation missing ${href}`);
+assert(shipping.includes('href="shipping-returns.html" aria-current="page"'), "Shipping Policy must be the active policy row");
+assert(shipping.includes(">Shipping Policy</h1>"), "Shipping Policy heading is incorrect");
+assert.equal((shipping.match(/class="terms-group policy-group"/g) || []).length, 12, "Shipping Policy must contain the approved twelve-section structure");
+for (const copy of ["Order Acceptance and Product Availability", "Shipping Charges and Methods", "Processing and Delivery Estimates", "Title and Risk of Loss", "Inspection, Damage, Shortages and Incorrect Items", "Events Outside ChromVale’s Control"]) assert(shipping.includes(copy), `Shipping Policy missing ${copy}`);
 
 const quote = read("quote.html");
 const shared = read("script.js");
@@ -37,4 +39,4 @@ assert(!quote.includes("demo-hplc-products") && !shared.includes("CHROMVALE_DEMO
 assert(!quote.includes("Estimated Subtotal") && !quote.includes("Unit Price"), "Quote-only catalogue must not fabricate pricing");
 for (const feature of ["chromvaleQuoteProducts", "data-select-catalogue-product", "data-quote-quantity", "requestedPartNo"]) assert(shared.includes(feature), `Quote behavior missing ${feature}`);
 
-console.log("PASS current services and RFQ architecture: consistent sidebars, current content modules, confirmed catalogue selection, structured Part No. prefill, and no demo pricing.");
+console.log("PASS current services, policy, and RFQ architecture: consistent sidebars, a twelve-section Shipping Policy, confirmed catalogue selection, structured Part No. prefill, and no demo pricing.");

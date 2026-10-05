@@ -224,6 +224,11 @@
     window.location.replace(new URL("specialty/index.html", legacyScriptUrl).href);
     return;
   }
+  if (requestedSlug === "pfp") {
+    const retiredCategoryScriptUrl = new URL(document.currentScript?.src || "category-template.js", window.location.href);
+    window.location.replace(new URL("../products.html", retiredCategoryScriptUrl).href);
+    return;
+  }
   const slug = Object.hasOwn(CATEGORY_CONFIG, requestedSlug) ? requestedSlug : "c18a";
   const config = CATEGORY_CONFIG[slug];
   const familyCatalog = window.CHROMVALE_COLUMN_FAMILIES?.[slug] || null;
@@ -231,8 +236,6 @@
   const activeFilters = isConfigurationPage ? CONFIGURATION_FILTERS : DEFAULT_FILTERS;
   const scriptUrl = new URL(document.currentScript?.src || "category-template.js", window.location.href);
   const siteRoot = new URL("../", scriptUrl);
-  let shopifyCartStore = null;
-  let pendingVariantId = "";
   const state = {
     products: [],
     filters: Object.fromEntries(activeFilters.map(({ key }) => [key, new Set()])),
@@ -271,6 +274,7 @@
   const positiveValue = (value) => /^(?:yes|true|1|available|confirmed)$/i.test(String(value || "").trim());
   const validPrice = (variant) => Number.isFinite(Number(variant?.price?.amount)) && Number(variant.price.amount) > 0;
   const isQuoteOnly = (product) => (product.tags || []).some((tag) => /^(?:quote[- ]?only|request[- ]?quote)$/i.test(String(tag).trim()));
+  const inquiryOnlyMode = window.CHROMVALE_INQUIRY_ONLY !== false;
 
   const metafieldsByKey = (product) => {
     const result = {};
@@ -307,13 +311,13 @@
     const variants = Array.isArray(product.variants?.nodes) ? product.variants.nodes : [];
     const specs = metafieldsByKey(product);
     const pricedVariants = variants.filter((variant) => variant.availableForSale && validPrice(variant));
-    const purchasable = pricedVariants.length > 0 && !isQuoteOnly(product);
+    const purchasable = !inquiryOnlyMode && pricedVariants.length > 0 && !isQuoteOnly(product);
     const primaryVariant = pricedVariants[0] || variants.find((variant) => variant.sku) || variants[0] || null;
     const phValues = (specs.ph_range || []).filter(validPhRange);
     const aqueousConfirmed = (specs.aqueous_compatibility || []).length > 0 || /(?:aqueous compatible|highly aqueous|100% water)/i.test(product.description || "");
     const taggedFeatured = (product.tags || []).some((tag) => /^featured(?: product)?$/i.test(String(tag).trim()));
     const detailPath = config.detailPages[product.handle];
-    const detailUrl = detailPath ? new URL(detailPath, scriptUrl).href : (product.onlineStoreUrl || "");
+    const detailUrl = detailPath ? new URL(detailPath, scriptUrl).href : (inquiryOnlyMode ? "" : (product.onlineStoreUrl || ""));
 
     return {
       id: product.id || `shopify-${index}`,
@@ -366,17 +370,6 @@
     signature: String(record.title || ""),
   });
 
-  const formatMoney = (amount, currency = "CAD") => {
-    const numericAmount = Number(amount);
-    if (!Number.isFinite(numericAmount) || numericAmount <= 0) return "";
-    const formatted = new Intl.NumberFormat("en-CA", {
-      style: "currency",
-      currency,
-      currencyDisplay: "narrowSymbol",
-    }).format(numericAmount);
-    return currency === "CAD" ? formatted.replace(/^\$/, "C$") : formatted;
-  };
-
   const normalizeFamilyConfigurations = (shopifyProducts) => {
     const fixed = familyCatalog.fixedSpecifications;
     const variantsBySku = new Map();
@@ -386,7 +379,7 @@
       for (const variant of product.variants?.nodes || []) {
         const sku = String(variant.sku || "").trim().toUpperCase();
         if (!sku) continue;
-        const candidate = { product, variant, purchasable: variant.availableForSale && validPrice(variant) && !productQuoteOnly };
+        const candidate = { product, variant, purchasable: !inquiryOnlyMode && variant.availableForSale && validPrice(variant) && !productQuoteOnly };
         const current = variantsBySku.get(sku);
         if (!current || (!current.purchasable && candidate.purchasable)) variantsBySku.set(sku, candidate);
       }
@@ -407,6 +400,8 @@
         available: purchasable,
         price: purchasable ? Number(variant.price.amount) : null,
         currency: variant?.price?.currencyCode || "CAD",
+        displayPrice: Number.isFinite(Number(record.displayPrice)) && Number(record.displayPrice) > 0 ? Number(record.displayPrice) : null,
+        displayCurrency: String(record.displayCurrency || "CAD").trim().toUpperCase(),
         variantId: purchasable ? variant.id : "",
         needsConfirmation: Boolean(record.needsConfirmation),
         columnType: [record.columnType],
@@ -519,7 +514,7 @@
 
   const matchesCategory = (product) => config.match.test(product.signature);
   const valuesForFilter = (product, key) => key === "availability"
-    ? [product.available ? "Available to Order" : "Request Quote"]
+    ? [product.available ? "Available to Order" : "Inquiry Only"]
     : product[key] || [];
 
   const productMatchesSelections = (product, ignoredKey = "") => activeFilters.every(({ key }) => {
@@ -586,9 +581,13 @@
     const specs = familyCatalog.configurationSpecificationRows
       .map(([label, key]) => specBlock(label, product[key] || []))
       .join("");
-    const action = product.available && product.variantId
-      ? `<p class="category-configuration-price">${escapeHtml(formatMoney(product.price, product.currency))}</p><button class="category-row-button category-row-button-solid" type="button" data-family-add-to-cart="${escapeHtml(product.variantId)}">Add to Cart</button>`
-      : `<p class="category-configuration-pricing">Contact for pricing</p><a class="category-row-button category-row-button-outline" href="${escapeHtml(quoteHref(product))}">Request a Quotation →</a>`;
+    const hasDisplayPrice = Number.isFinite(product.displayPrice) && product.displayPrice > 0;
+    const directPrice = hasDisplayPrice
+      ? `${product.displayCurrency} $${product.displayPrice.toLocaleString("en-CA", { maximumFractionDigits: 2 })}`
+      : "";
+    const action = hasDisplayPrice
+      ? `<p class="category-configuration-price"><strong>${escapeHtml(directPrice)}</strong> <span>EACH</span></p>`
+      : `<p class="category-configuration-pricing">Availability and pricing confirmed by quotation</p><a class="category-row-button category-row-button-outline" href="${escapeHtml(quoteHref(product))}">Request Availability →</a>`;
     return `<article class="category-product-row category-configuration-row" data-product-id="${escapeHtml(product.id)}">
       <div class="category-product-copy">
         <div class="category-product-heading-line"><h2>${escapeHtml(product.title)}</h2></div>
@@ -615,7 +614,7 @@
       specBlock("pH Range", product.phRange),
     ].filter(Boolean).join("");
     const summaryBits = [product.productType || "HPLC Column", product.description].filter(Boolean).map((value) => `<span>${escapeHtml(value)}</span>`).join("");
-    const canViewSpecifications = product.available && product.detailUrl;
+    const canViewSpecifications = Boolean(product.detailUrl);
     const actionHref = canViewSpecifications ? product.detailUrl : quoteHref(product);
     const actionLabel = canViewSpecifications ? "View Specifications →" : "Request Quote →";
     const actionClass = canViewSpecifications ? "category-row-button-solid" : "category-row-button-outline";
@@ -626,7 +625,7 @@
         ${specs ? `<dl class="category-product-specs">${specs}</dl>` : ""}
       </div>
       <div class="category-product-actions">
-        <p class="category-product-state${product.available ? "" : " is-quote"}">${product.available ? "Available" : "Request Quote"}</p>
+        <p class="category-product-state${product.available ? "" : " is-quote"}">${product.available ? "Available" : "Pilot Inquiry"}</p>
         <p class="category-product-sku">${product.sku ? `Part No. ${escapeHtml(product.sku)}` : ""}</p>
         <a class="category-row-button ${actionClass}" href="${escapeHtml(actionHref)}">${actionLabel}</a>
       </div>
@@ -651,12 +650,6 @@
     elements.empty.hidden = Boolean(visibleProducts.length);
   };
 
-  const setActionFeedback = (message, isError = false) => {
-    elements.productsStatus.textContent = message;
-    elements.productsStatus.classList.remove("is-ready");
-    elements.productsStatus.classList.toggle("is-error", isError);
-  };
-
   const setFilterDrawer = (open) => {
     const shouldOpen = Boolean(open) && window.matchMedia("(max-width: 700px)").matches;
     document.body.classList.toggle("is-filter-open", shouldOpen);
@@ -664,31 +657,6 @@
     elements.filterScrim.hidden = !shouldOpen;
     if (shouldOpen) elements.filterPanel.querySelector("button")?.focus();
   };
-
-  elements.productList.addEventListener("click", async (event) => {
-    const button = event.target.closest("[data-family-add-to-cart]");
-    if (!button || pendingVariantId || !shopifyCartStore) return;
-    const variantId = button.dataset.familyAddToCart;
-    const configuration = state.products.find((product) => product.variantId === variantId);
-    if (!configuration?.available) return;
-
-    pendingVariantId = variantId;
-    button.disabled = true;
-    button.setAttribute("aria-busy", "true");
-    button.textContent = "Adding…";
-    setActionFeedback(`Adding Part No. ${configuration.sku} to your Shopify Cart…`);
-    try {
-      await shopifyCartStore.addLines([{ merchandiseId: variantId, quantity: 1 }]);
-      setActionFeedback(`Part No. ${configuration.sku} was added to your Shopify Cart.`);
-    } catch (error) {
-      setActionFeedback(error instanceof Error ? error.message : "Unable to update the Shopify Cart. Please try again.", true);
-    } finally {
-      button.disabled = false;
-      button.removeAttribute("aria-busy");
-      button.textContent = "Add to Cart";
-      pendingVariantId = "";
-    }
-  });
 
   elements.filterGroups.addEventListener("change", (event) => {
     const input = event.target.closest("[data-filter-key]");
@@ -729,8 +697,7 @@
       elements.productsStatus.classList.add("is-error");
     }
     try {
-      const { client, cartStore } = await window.ChromValeShopifyReady;
-      shopifyCartStore = cartStore;
+      const { client } = await window.ChromValeShopifyReady;
       const data = await client.request(PRODUCT_QUERY, { collectionHandle: config.collectionHandle });
       const collectionProducts = Array.isArray(data.collection?.products?.nodes) ? data.collection.products.nodes : null;
       const fallbackProducts = Array.isArray(data.products?.nodes) ? data.products.nodes : [];
@@ -748,10 +715,10 @@
       renderProducts();
       if (requestedSlug === slug) {
         elements.productsStatus.textContent = isConfigurationPage
-          ? `${familyCatalog.configurations.length} confirmed catalogue configurations loaded; purchasable SKUs matched to Shopify by Part No.`
+          ? `${familyCatalog.configurations.length} catalogue configurations are open for pilot availability requests. No online payment is collected.`
           : (data.collection
-            ? `Products loaded from Shopify collection “${config.collectionHandle}”.`
-            : `Shopify collection “${config.collectionHandle}” is not published; matching published Shopify products are shown.`);
+            ? `Current product information is shown for inquiry. Availability and final pricing are confirmed in writing.`
+            : `Current matching product information is shown for inquiry. Availability and final pricing are confirmed in writing.`);
         elements.productsStatus.classList.add("is-ready");
       }
     } catch (error) {
@@ -760,7 +727,7 @@
         : (QUOTE_CATALOG[slug] || []).map(normalizeQuoteProduct).filter((product) => product.title);
       renderProducts();
       elements.productsStatus.textContent = isConfigurationPage
-        ? `The ${familyCatalog.configurations.length} confirmed catalogue configurations are shown. Live Shopify purchasing is temporarily unavailable.`
+        ? `The ${familyCatalog.configurations.length} catalogue configurations are shown for inquiry. Online payment is disabled.`
         : (error instanceof Error ? error.message : "Unable to load current Shopify products.");
       elements.productsStatus.classList.remove("is-ready");
       elements.productsStatus.classList.add("is-error");

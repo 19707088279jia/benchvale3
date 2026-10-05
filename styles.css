@@ -55,6 +55,115 @@
   --transition: 180ms ease;
 }
 
+/* Inquiry-only pilot mode. */
+html[data-sales-mode="inquiry-only"] .header-direct-cart,
+html[data-sales-mode="inquiry-only"] .header-account,
+html[data-sales-mode="inquiry-only"] [data-family-add-to-cart] {
+  display: none !important;
+}
+
+.pilot-availability-notice {
+  position: relative;
+  z-index: 12;
+  color: #123c4c;
+  background: #e9f5f4;
+  border-bottom: 1px solid #badad7;
+}
+
+.pilot-availability-notice-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  min-height: 48px;
+  padding-top: .65rem;
+  padding-bottom: .65rem;
+}
+
+.pilot-availability-notice p {
+  margin: 0;
+  font-size: .78rem;
+  line-height: 1.5;
+}
+
+.pilot-availability-notice strong {
+  color: var(--navy-900);
+}
+
+.pilot-availability-notice a {
+  flex: 0 0 auto;
+  color: #086b70;
+  font-size: .75rem;
+  font-weight: 800;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.pilot-availability-notice a:hover,
+.pilot-availability-notice a:focus-visible {
+  text-decoration: underline;
+}
+
+.pilot-inquiry-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1.5rem;
+  margin: 0 0 1.25rem;
+  padding: 1.25rem 1.4rem;
+  color: #163e4d;
+  background: #f1f8f7;
+  border: 1px solid #bfdcd9;
+  border-radius: 10px;
+}
+
+.pilot-inquiry-card h1,
+.pilot-inquiry-card h2 {
+  margin: 0 0 .35rem;
+  color: var(--navy-900);
+  font-size: clamp(1.25rem, 2.5vw, 1.65rem);
+}
+
+.pilot-inquiry-card p {
+  max-width: 75ch;
+  margin: 0;
+  font-size: .86rem;
+  line-height: 1.65;
+}
+
+.pilot-inquiry-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: .35rem .7rem;
+  color: #086b70;
+  background: #fff;
+  border: 1px solid #9dcfcb;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: .65rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+@media (max-width: 700px) {
+  .pilot-availability-notice-inner,
+  .pilot-inquiry-card {
+    display: block;
+  }
+
+  .pilot-availability-notice a {
+    display: inline-block;
+    margin-top: .35rem;
+  }
+
+  .pilot-inquiry-badge {
+    margin-top: .85rem;
+  }
+}
+
 /* ---------- 2. Reset ---------- */
 * {
   box-sizing: border-box;
@@ -3014,10 +3123,31 @@ section,
   line-height: 1.05;
   letter-spacing: -.035em;
 }
+.home-slide--hplcone .home-price-lead,
+.home-slide--hplcone .home-product-lead {
+  display: block;
+}
+.home-slide--hplcone .home-price-lead {
+  color: #067b83;
+  font-size: .92em;
+  font-weight: 850;
+  letter-spacing: -.045em;
+}
+.home-slide--hplcone .home-product-lead {
+  margin-top: .08em;
+}
 .home-slide--hplcone .home-slide-copy > p:not(.home-slide-kicker) {
   max-width: 56ch;
   color: #425775;
   font-size: clamp(1rem, 1.25vw, 1.16rem);
+}
+.home-slide--hplcone .home-slide-copy > .home-pilot-terms {
+  margin-top: -.35rem;
+  color: #31556b;
+  font-family: var(--font-mono);
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .025em;
 }
 .home-slide--hplcone .home-slide-actions {
   gap: 1rem;

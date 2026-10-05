@@ -2,6 +2,9 @@
 (() => {
   "use strict";
 
+  // Fail closed: direct ordering can run only after commerce is explicitly re-enabled in both controls.
+  if (window.CHROMVALE_INQUIRY_ONLY !== false || window.CHROMVALE_SHOPIFY_CONFIG?.commerceEnabled !== true) return;
+
   const scriptUrl = new URL(document.currentScript?.src || "direct-order.js", window.location.href);
   const siteRoot = new URL("./", scriptUrl);
   const businessCheckoutUrl = new URL("checkout.html", siteRoot).href;

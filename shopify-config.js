@@ -6,4 +6,6 @@ window.CHROMVALE_SHOPIFY_CONFIG = Object.freeze({
   storeDomain: "ubtqyk-kk.myshopify.com",
   apiVersion: "2026-07",
   publicStorefrontToken: window.CHROMVALE_SHOPIFY_PUBLIC_TOKEN || "a219e1174ba8044ce3f3cef91148c9a5",
+  salesMode: "inquiry-only",
+  commerceEnabled: false,
 });

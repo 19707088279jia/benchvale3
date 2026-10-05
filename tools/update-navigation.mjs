@@ -2,10 +2,10 @@ import {readFileSync, writeFileSync, readdirSync} from 'node:fs';
 import {header} from './site-navigation.mjs';
 import {categories, categoryUrl} from './taxonomy.mjs';
 const root = new URL('../', import.meta.url);
-for (const dir of ['', 'products/']) for (const name of readdirSync(new URL(dir,root)).filter(n=>n.endsWith('.html'))) {
+for (const [dir, depth] of [['', ''], ['products/', '../'], ['products/specialty/', '../../']]) for (const name of readdirSync(new URL(dir,root)).filter(n=>n.endsWith('.html'))) {
  const url = new URL(dir+name,root);
- let html = readFileSync(url,'utf8').replace(/<header class="site-header[\s\S]*?<\/header>/,header(dir ? '../' : ''));
- if (!html.includes('href="'+(dir?'../':'')+'navigation.css"')) html = html.replace('</head>',`  <link rel="stylesheet" href="${dir?'../':''}navigation.css" />\n</head>`);
+ let html = readFileSync(url,'utf8').replace(/<header class="site-header[\s\S]*?<\/header>/,header(depth));
+ if (!html.includes('href="'+depth+'navigation.css"')) html = html.replace('</head>',`  <link rel="stylesheet" href="${depth}navigation.css" />\n</head>`);
  html = html.replace(/products.html#(chromatography|sample-preparation|environmental-water|general-lab|life-science|liquid-handling|laboratory-equipment)/g, (_,c)=>'products.html?category='+ (c==='laboratory-equipment'?'general-lab':c));
  if (name==='explore.html') {
    const existing = [...html.matchAll(/<a href="products.html\?category=[\s\S]*?<\/a>/g)].map(m=>m[0]).filter(m=>m.includes('home-category-card'));

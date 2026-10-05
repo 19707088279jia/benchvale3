@@ -63,7 +63,7 @@
 .home-primary-nav a { display: block; padding: var(--sp-3) 0; font-size: .93rem; font-weight: 600; }
 .home-primary-nav a:hover { color: var(--teal-600); border-bottom-color: var(--teal-600); }
 
-/* Six taller service cards, alongside a two-row, three-column product showcase. */
+/* Compact service grid followed by a full-width, product-led family showcase. */
 .home-services-promotions {
   padding: 32px 0 48px;
   background: var(--gray-50);
@@ -72,15 +72,15 @@
 .home-services-promotions > .container { max-width: 1440px; }
 .home-discovery-grid {
   display: grid;
-  grid-template-columns: minmax(0, .32fr) minmax(0, .68fr);
-  gap: var(--sp-8);
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sp-10);
 }
 .home-services,
 .home-promotions { min-width: 0; padding: 0; }
 .home-discovery-heading { margin-bottom: 16px; }
 .home-discovery-heading .eyebrow { margin-bottom: var(--sp-2); }
 .home-discovery-heading h2 { margin-bottom: 0; font-size: clamp(1.5rem, 2.2vw, 1.85rem); }
-.home-service-list { display: grid; gap: var(--sp-3); }
+.home-service-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-3); }
 .home-service-card {
   display: grid;
   grid-template-columns: 38px minmax(0, 1fr);
@@ -111,7 +111,7 @@
 .home-promotion-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  grid-template-rows: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, auto);
   gap: var(--sp-5);
   flex: 1;
 }
@@ -119,7 +119,7 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
-  min-height: 445px;
+  min-height: 390px;
   overflow: hidden;
   border: var(--border);
   border-radius: var(--radius-md);
@@ -129,9 +129,11 @@
 .home-promotion-card:hover,
 .home-promotion-card:focus-within { border-color: var(--teal-600); box-shadow: var(--shadow-md); }
 .home-promotion-visual {
-  flex: 1;
-  min-height: 190px;
-  padding: var(--sp-6);
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  min-height: 170px;
+  padding: var(--sp-4);
   color: var(--navy-700);
   background:
     linear-gradient(rgba(10, 31, 51, .035) 1px, transparent 1px),
@@ -140,13 +142,30 @@
   background-size: 24px 24px, 24px 24px, auto;
   border-bottom: var(--border);
 }
-.home-promotion-visual svg { width: 100%; height: 160px; max-width: 185px; }
-.home-promotion-visual svg g { stroke-width: 1.45; }
+.home-promotion-visual svg { width: 100%; height: 145px; max-width: none; }
+.home-family-diagram svg {
+  overflow: visible;
+  color: var(--navy-700);
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.home-family-diagram .home-family-column { stroke-width: 2; }
+.home-family-diagram .home-family-accent { stroke: var(--teal-600); stroke-width: 2.5; }
+.home-family-diagram .home-family-pores { stroke: var(--teal-600); fill: none; }
+.home-family-diagram text {
+  fill: var(--navy-900);
+  stroke: none;
+  font-family: var(--font-sans);
+  font-size: 22px;
+  font-weight: 800;
+}
 .home-promotion-copy {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  min-height: 285px;
+  min-height: 220px;
   padding: var(--sp-5);
 }
 .home-promotion-label {
@@ -169,7 +188,7 @@
   line-height: 1.5;
 }
 .home-promotion-copy h3 { margin-bottom: var(--sp-3); font-size: 1.08rem; line-height: 1.35; }
-.home-promotion-copy p { font-size: .82rem; line-height: 1.6; }
+.home-promotion-copy p { margin-bottom: var(--sp-4); font-size: .82rem; line-height: 1.6; }
 .home-promotion-copy a {
   display: inline-flex;
   align-items: center;
@@ -181,6 +200,85 @@
   font-weight: 700;
 }
 .home-promotion-copy a:hover { color: var(--teal-600); text-decoration: underline; text-underline-offset: 3px; }
+.home-promotion-card--featured {
+  position: relative;
+  display: block;
+  grid-column: span 2;
+  min-height: 390px;
+  border-color: var(--teal-600);
+  isolation: isolate;
+}
+.home-promotion-featured-image {
+  position: absolute;
+  z-index: 0;
+  top: 2%;
+  right: -3%;
+  width: 72%;
+  height: 96%;
+  object-fit: contain;
+  object-position: right center;
+  filter: drop-shadow(0 16px 20px rgba(9, 46, 68, .11));
+}
+.home-promotion-featured-shade {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background: linear-gradient(90deg, #fff 0%, #fff 38%, rgba(255,255,255,.93) 48%, rgba(255,255,255,.28) 66%, rgba(255,255,255,0) 82%);
+  pointer-events: none;
+}
+.home-promotion-featured-copy {
+  position: relative;
+  z-index: 2;
+  width: 52%;
+  min-height: 390px;
+  padding: 28px;
+}
+.home-promotion-featured-copy h3 {
+  margin-bottom: var(--sp-3);
+  font-size: clamp(1.45rem, 2.3vw, 2rem);
+}
+.home-promotion-featured-copy > p:not(.home-promotion-price):not(.home-promotion-spec) {
+  max-width: 34ch;
+}
+.home-promotion-featured-copy .home-promotion-price {
+  display: flex;
+  align-items: baseline;
+  gap: .55rem;
+  margin: .2rem 0 .45rem;
+  color: var(--teal-600);
+  font-family: var(--font-mono);
+}
+.home-promotion-price strong {
+  font-family: var(--font-sans);
+  font-size: clamp(1.65rem, 2.8vw, 2.35rem);
+  line-height: 1;
+  letter-spacing: -.035em;
+}
+.home-promotion-price span {
+  font-size: .7rem;
+  font-weight: 800;
+  letter-spacing: .12em;
+}
+.home-promotion-featured-copy .home-promotion-spec {
+  margin: 0 0 var(--sp-4);
+  color: var(--gray-600);
+  font-size: .78rem;
+}
+.home-promotion-card--featured .home-promotion-copy a {
+  min-height: 46px;
+  padding: 11px 16px;
+  border: 1px solid var(--teal-600);
+  border-radius: var(--radius-sm);
+  color: #fff;
+  background: var(--teal-600);
+  text-decoration: none;
+}
+.home-promotion-card--featured .home-promotion-copy a:hover {
+  border-color: var(--navy-900);
+  color: #fff;
+  background: var(--navy-900);
+  text-decoration: none;
+}
 .home-promotion-note { max-width: none; margin: var(--sp-4) 0; font-size: .77rem; }
 .home-requirements-cta {
   display: flex;
@@ -200,11 +298,11 @@
 
 @media (max-width: 1100px) {
   .home-header-top { gap: var(--sp-5); }
-  .home-promotion-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(3, minmax(0, 1fr)); }
-  .home-service-list { flex: 1; grid-auto-rows: 1fr; }
-  .home-services { display: flex; flex-direction: column; }
+  .home-promotion-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: none; }
+  .home-service-list { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 1fr; }
+  .home-services { display: block; }
   .home-service-card { align-content: center; }
-  .home-promotion-copy { min-height: 260px; }
+  .home-promotion-copy { min-height: 220px; }
   .home-requirements-cta { flex-wrap: wrap; }
 }
 
@@ -229,8 +327,23 @@
   .home-header .brand-mark { width: 30px; height: 30px; }
   .home-site-search input { padding-inline: var(--sp-3); font-size: .86rem; }
   .home-site-search button { flex-basis: 44px; }
+  .home-service-list { grid-template-columns: 1fr; }
   .home-promotion-grid { grid-template-columns: 1fr; grid-template-rows: none; }
   .home-promotion-card { min-height: 0; }
+  .home-promotion-card--featured { grid-column: span 1; min-height: 520px; }
+  .home-promotion-featured-image {
+    top: auto;
+    right: 0;
+    bottom: -2%;
+    width: 100%;
+    height: 51%;
+    object-position: center bottom;
+  }
+  .home-promotion-featured-shade {
+    background: linear-gradient(180deg, #fff 0%, #fff 48%, rgba(255,255,255,.84) 57%, rgba(255,255,255,0) 78%);
+  }
+  .home-promotion-featured-copy { width: 100%; min-height: 520px; padding: var(--sp-6); }
+  .home-promotion-featured-copy > p:not(.home-promotion-price):not(.home-promotion-spec) { max-width: 42ch; }
   .home-promotion-visual { flex: none; min-height: 210px; }
   .home-promotion-copy { flex: 1; min-height: 0; padding: var(--sp-6); }
   .home-promotion-copy h3 { font-size: 1.18rem; }

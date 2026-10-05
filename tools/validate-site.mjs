@@ -38,8 +38,8 @@ assert(!allSource.includes("CV-DEMO-"), "Demo SKUs must be removed");
 const quoteAndCatalogueSource = ["quote.html", "script.js", "products/category-template.js", "products/column-family-configurations.js"].map((file) => readFileSync(resolve(root, file), "utf8")).join("\n");
 assert(!/C\$0(?:\.00)?/.test(quoteAndCatalogueSource), "Zero-dollar catalogue or quotation prices must not be published");
 const products = readFileSync(resolve(root, "products.html"), "utf8");
-assert.equal((products.match(/products\/category\.html\?category=/g) || []).length, 11);
+assert.equal((products.match(/products\/category\.html\?category=/g) || []).length, 10);
 assert(products.includes('href="products/specialty/index.html"'));
 if (failures.length) throw new Error(failures.join("\n"));
 
-console.log(`PASS release gate: ${htmlFiles.length} HTML pages checked, local links resolve, indexable pages have SEO metadata, 12 product-family entries exist, and no demo SKU or zero-price data remains.`);
+console.log(`PASS release gate: ${htmlFiles.length} HTML pages checked, local links resolve, indexable pages have SEO metadata, 11 product-family entries exist, and no demo SKU or zero-price data remains.`);

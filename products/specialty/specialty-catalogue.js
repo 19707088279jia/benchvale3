@@ -8,7 +8,6 @@ window.CHROMVALE_SPECIALTY_FAMILIES = Object.freeze([
   { name: "HPLCONE® C8A", description: "Octyl-bonded reversed-phase phase for compounds requiring lower retention than conventional C18." },
   { name: "HPLCONE® C8C", description: "Octyl-bonded phase with enhanced acid and base resistance." },
   { name: "HPLCONE® PE-6", description: "Phenyl-hexyl stationary phase providing aromatic and π–π interaction selectivity." },
-  { name: "HPLCONE® C18/PFP", description: "Mixed-selectivity stationary phase combining reversed-phase and fluorophenyl interactions." },
   { name: "HPLCONE® C18/PE", description: "Mixed C18 and aromatic selectivity for alternative reversed-phase separations." },
   { name: "HPLCONE® SCX", description: "Strong cation-exchange column for ionic and charged analyte separations." },
   { name: "HPLCONE® SAX", description: "Strong anion-exchange column for negatively charged analyte separations." },

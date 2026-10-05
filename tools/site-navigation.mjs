@@ -2,10 +2,10 @@ const escapeHtml = (value) => value.replaceAll("&", "&amp;").replaceAll('"', "&q
 
 export const navigationItems = [
   { label: "HPLC Columns", href: "products.html" },
-  { label: "Services", href: "services.html" },
+  { label: "Quality & QC", href: "quality-qc.html" },
+  { label: "Shipping & Returns", href: "shipping-returns.html" },
   { label: "About", href: "about.html" },
   { label: "Contact", href: "contact.html" },
-  { label: "Terms of Sale", href: "terms-of-sale.html" },
 ];
 
 export function header(depth = "") {

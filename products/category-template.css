@@ -619,8 +619,24 @@
 
 .category-collection-page .category-configuration-price {
   color: #08756e;
-  font-size: 1.03rem;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.category-collection-page .category-configuration-price strong {
+  display: block;
+  color: #071d42;
+  font-size: 1.45rem;
+  font-weight: 850;
+  letter-spacing: -.02em;
+}
+
+.category-collection-page .category-configuration-price span {
+  display: inline-block;
+  margin-top: 5px;
+  font-size: .72rem;
   font-weight: 820;
+  letter-spacing: .11em;
 }
 
 .category-collection-page .category-configuration-pricing {

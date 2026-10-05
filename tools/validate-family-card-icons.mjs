@@ -7,12 +7,12 @@ import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const html = readFileSync(resolve(root, "products.html"), "utf8");
-const expected = ["C18A", "C18C", "C18D", "C4C", "PFP", "PE", "NH", "Amide", "CN", "HILIC-A / Diol", "SIL", "Specialty"];
+const expected = ["C18A", "C18C", "C18D", "C4C", "PE", "NH", "Amide", "CN", "HILIC-A / Diol", "SIL", "Specialty"];
 for (const family of expected) assert(html.includes(`${family} Columns`), `Missing ${family} Columns card`);
-assert.equal((html.match(/products\/category\.html\?category=/g) || []).length, 11, "All 11 standard families use the shared template");
+assert.equal((html.match(/products\/category\.html\?category=/g) || []).length, 10, "All 10 currently offered standard families use the shared template");
 assert(html.includes('href="products/specialty/index.html"'), "Specialty has one direct overview link");
 assert.equal((html.match(/class="featured-family-card"/g) || []).length, 1, "C18A remains the single featured card");
-assert.equal((html.match(/class="column-family-card phase-family-card"/g) || []).length, 11, "The remaining families use 11 consistent cards");
+assert.equal((html.match(/class="column-family-card phase-family-card"/g) || []).length, 10, "The remaining families use 10 consistent cards");
 
 const mime = { ".html": "text/html", ".css": "text/css", ".js": "text/javascript", ".svg": "image/svg+xml", ".webp": "image/webp" };
 const server = createServer((request, response) => {
@@ -36,14 +36,14 @@ try {
   const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
   const base = `http://127.0.0.1:${server.address().port}/`;
   await page.goto(`${base}products.html`, { waitUntil: "networkidle" });
-  assert.equal(await page.locator(".featured-family-card, .phase-family-card").count(), 12);
+  assert.equal(await page.locator(".featured-family-card, .phase-family-card").count(), 11);
   await page.goto(`${base}products.html?search=00001-255`, { waitUntil: "networkidle" });
   assert.equal(await page.locator(".featured-family-card:not([hidden]), .phase-family-card:not([hidden])").count(), 1, "Part No. search identifies C18A");
   assert((await page.locator(".product-directory-search-status").textContent()).includes("1 column family"));
   await page.setViewportSize({ width: 320, height: 900 });
   await page.goto(`${base}products.html`, { waitUntil: "networkidle" });
   assert(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), "No horizontal overflow at 320px");
-  console.log("PASS Products directory: 12 complete family entries, shared routing, Part No. search, and responsive layout.");
+  console.log("PASS Products directory: 11 offered family entries, shared routing, Part No. search, and responsive layout.");
 } finally {
   await browser?.close();
   await new Promise((closed) => server.close(closed));

@@ -6,14 +6,21 @@ document.querySelectorAll(".brand-sub, .site-footer p").forEach((element) => {
 });
 const sharedScriptUrl = new URL(document.currentScript?.src || "script.js", window.location.href);
 const brandLogoUrl = new URL("images/chromvale-scientific-logo.svg", sharedScriptUrl).href;
+const inquiryOnlyMode = true;
+const unavailableFamilySlugs = new Set(["pfp"]);
+window.CHROMVALE_INQUIRY_ONLY = inquiryOnlyMode;
+document.documentElement.dataset.salesMode = inquiryOnlyMode ? "inquiry-only" : "commerce";
 
-// The purchase Cart is backed by Shopify and remains separate from Quote Cart.
+// Direct checkout is intentionally disabled while ChromVale validates its pilot supply route.
+// Shopify remains available as a read-only catalogue source; Quote Cart is the only public workflow.
 const shopifyCartStorageKey = "chromvaleShopifyCartId";
 const updateDirectCartCount = (cart = null) => {
   const count = Number.isInteger(Number(cart?.totalQuantity)) ? Number(cart.totalQuantity) : 0;
   document.querySelectorAll("[data-direct-cart-count]").forEach((element) => { element.textContent = `(${count})`; });
 };
 document.querySelectorAll(".header-quote-actions").forEach((actions) => {
+  actions.querySelectorAll(".header-direct-cart, .header-account").forEach((element) => element.remove());
+  if (inquiryOnlyMode) return;
   let cartLink = actions.querySelector(".header-direct-cart");
   if (!cartLink) {
     cartLink = document.createElement("a");
@@ -33,6 +40,9 @@ document.querySelectorAll(".header-quote-actions").forEach((actions) => {
     actions.insertBefore(accountLink, cartLink);
   }
 });
+if (inquiryOnlyMode) {
+  document.querySelectorAll(".header-quote").forEach((link) => { link.textContent = "Request Availability"; });
+}
 
 const loadSharedScript = (url) => new Promise((resolve, reject) => {
   const script = document.createElement("script");
@@ -47,16 +57,29 @@ const initializeShopify = async () => {
   if (!window.ChromValeShopify) await loadSharedScript(new URL("shopify-storefront.js", sharedScriptUrl).href);
   const client = window.ChromValeShopify.createStorefrontClient(window.CHROMVALE_SHOPIFY_CONFIG);
   const cartStore = window.ChromValeShopify.createCartStore(client);
-  const cart = await cartStore.restore();
+  const cart = inquiryOnlyMode ? null : await cartStore.restore();
   return Object.freeze({ client, cartStore, cart });
 };
 window.ChromValeShopifyReady = initializeShopify();
-window.ChromValeShopifyReady.then(({ cart }) => updateDirectCartCount(cart), () => updateDirectCartCount());
-window.addEventListener("chromvale:shopify-cart-updated", (event) => updateDirectCartCount(event.detail?.cart));
-window.addEventListener("storage", (event) => {
-  if (event.key !== shopifyCartStorageKey && event.key !== null) return;
-  window.ChromValeShopifyReady.then(({ cartStore }) => cartStore.restore({ force: true }).then(updateDirectCartCount, () => updateDirectCartCount()));
-});
+if (!inquiryOnlyMode) {
+  window.ChromValeShopifyReady.then(({ cart }) => updateDirectCartCount(cart), () => updateDirectCartCount());
+  window.addEventListener("chromvale:shopify-cart-updated", (event) => updateDirectCartCount(event.detail?.cart));
+  window.addEventListener("storage", (event) => {
+    if (event.key !== shopifyCartStorageKey && event.key !== null) return;
+    window.ChromValeShopifyReady.then(({ cartStore }) => cartStore.restore({ force: true }).then(updateDirectCartCount, () => updateDirectCartCount()));
+  });
+}
+
+if (inquiryOnlyMode) {
+  const siteHeader = document.querySelector(".site-header");
+  if (siteHeader && !document.querySelector(".pilot-availability-notice")) {
+    const notice = document.createElement("aside");
+    notice.className = "pilot-availability-notice";
+    notice.setAttribute("aria-label", "Quotation request notice");
+    notice.innerHTML = `<div class="container pilot-availability-notice-inner"><p><strong>Quotation requests are open:</strong> ChromVale is now accepting HPLC column quotation requests. Online checkout is paused and no payment is collected. Availability, documentation, delivery timing, and final pricing are confirmed in writing before an order is accepted.</p><a href="${new URL("quote.html", sharedScriptUrl).href}">Request a quote <span aria-hidden="true">&rarr;</span></a></div>`;
+    siteHeader.insertAdjacentElement("afterend", notice);
+  }
+}
 
 document.querySelectorAll("a.brand").forEach((brand) => {
   const logo = document.createElement("img");
@@ -81,8 +104,9 @@ document.querySelectorAll(".category-nav-list").forEach((list) => {
   list.innerHTML = publicNavigation.map(([label, href]) => {
     const pageName = window.location.pathname.split("/").filter(Boolean).at(-1) || "index.html";
     const inProducts = label === "HPLC Columns" && (pageName === "products.html" || window.location.pathname.includes("/products/"));
-    const inServices = label === "Services" && ["services.html", "product-sourcing.html", "documentation-support.html", "shipping-returns.html", "quality-qc.html"].includes(pageName);
-    const isCurrent = currentLabels.has(label) || pageName === href || inProducts || inServices;
+    const inServices = label === "Services" && ["services.html", "product-sourcing.html", "documentation-support.html", "quality-qc.html"].includes(pageName);
+    const inPolicies = label === "Terms of Sale" && ["terms-of-sale.html", "returns.html", "shipping-returns.html", "privacy.html"].includes(pageName);
+    const isCurrent = currentLabels.has(label) || pageName === href || inProducts || inServices || inPolicies;
     const current = isCurrent ? ' aria-current="page"' : "";
     return `<li class="category-nav-item"><div class="category-nav-label"><a href="${new URL(href, sharedScriptUrl).href}"${current}>${label}</a></div></li>`;
   }).join("");
@@ -233,7 +257,7 @@ document.querySelectorAll("[data-year]").forEach((el) => {
   }
 })();
 
-// Products-directory search. Supports family names, chemistry copy, and confirmed catalogue Part Nos.
+// Products-directory search. Supports family names, chemistry copy, and listed catalogue Part Nos.
 (() => {
   const directory = document.querySelector(".hplc-directory-page #families");
   if (!directory) return;
@@ -244,7 +268,7 @@ document.querySelectorAll("[data-year]").forEach((el) => {
   const normalizedQuery = query.toLocaleLowerCase("en-CA");
   let skuFamilySlug = "";
   if (normalizedQuery) {
-    for (const [slug, family] of Object.entries(window.CHROMVALE_COLUMN_FAMILIES || {})) {
+    for (const [slug, family] of Object.entries(window.CHROMVALE_COLUMN_FAMILIES || {}).filter(([familySlug]) => !unavailableFamilySlugs.has(familySlug))) {
       if ((family.configurations || []).some(({ partNo }) => String(partNo).toLocaleLowerCase("en-CA").includes(normalizedQuery))) {
         skuFamilySlug = slug;
         break;
@@ -269,9 +293,9 @@ document.querySelectorAll("[data-year]").forEach((el) => {
   directory.querySelector(".products-category-heading")?.insertAdjacentElement("afterend", status);
 })();
 
-// Quote Cart persistence. Confirmed family configurations are the only built-in catalogue source.
+// Quote Cart persistence. Currently offered family configurations are the only built-in catalogue source.
 const quoteStorageKey = "chromvaleQuoteProducts";
-const quoteCatalogProducts = Object.entries(window.CHROMVALE_COLUMN_FAMILIES || {}).flatMap(([familySlug, family]) =>
+const quoteCatalogProducts = Object.entries(window.CHROMVALE_COLUMN_FAMILIES || {}).filter(([familySlug]) => !unavailableFamilySlugs.has(familySlug)).flatMap(([familySlug, family]) =>
   (family.configurations || []).map((configuration, index) => ({
     id: `catalogue-${familySlug}-${configuration.partNo}-${index + 1}`,
     name: family.productName,
@@ -291,6 +315,7 @@ const normalizeQuoteItem = (item) => {
   const matchedCatalog = quoteCatalogProducts.find((product) => product.id === source.id || (source.sku && product.sku === source.sku));
   const name = String(source.name || matchedCatalog?.name || "").trim();
   if (!name) return null;
+  if (String(source.id || "").startsWith("catalogue-pfp-") || /\bPFP\b|pentafluorophenyl/i.test(name)) return null;
   const parsedQuantity = Number(source.quantity);
   return {
     id: String(source.id || matchedCatalog?.id || quoteItemId(name)),
@@ -371,7 +396,7 @@ const updateFormSubmissionStatus = (status, state, message) => {
   status.classList.add(`is-${state}`);
   status.textContent = message;
 };
-const submitFormspreeForm = async (form, status) => {
+const submitFormspreeForm = async (form, status, successMessage = formspreeSuccessMessage) => {
   if (form.dataset.submitting === "true") return false;
   if (!form.checkValidity()) {
     form.reportValidity();
@@ -409,7 +434,7 @@ const submitFormspreeForm = async (form, status) => {
       }
       throw new Error(message);
     }
-    updateFormSubmissionStatus(status, "success", formspreeSuccessMessage);
+    updateFormSubmissionStatus(status, "success", successMessage);
     return true;
   } catch (error) {
     updateFormSubmissionStatus(status, "error", error instanceof Error && error.message
@@ -480,8 +505,8 @@ if (quoteForm) {
       const searchable = [product.name, product.specification, product.columnType, product.columnSize, product.particleSize, product.sku].join(" ").toLowerCase();
       return terms.every((term) => searchable.includes(term));
     });
-    pickerStatus.textContent = `${matches.length} confirmed ${matches.length === 1 ? "configuration" : "configurations"} found`;
-    pickerList.innerHTML = matches.length ? matches.map((product) => `<li><button type="button" class="product-picker-option" data-select-catalogue-product="${escapeQuoteHtml(product.id)}"><span class="product-picker-option-name">${escapeQuoteHtml(product.name)}</span><span class="product-picker-option-spec">${escapeQuoteHtml(product.specification)}</span><span class="product-picker-option-meta">Part No. ${escapeQuoteHtml(product.sku)}${product.needsConfirmation ? " · Requires catalogue confirmation" : ""}</span></button></li>`).join("") : '<li class="product-picker-empty">No confirmed catalogue configuration matches that search. Add details in the notes field for a custom request.</li>';
+    pickerStatus.textContent = `${matches.length} listed ${matches.length === 1 ? "configuration" : "configurations"} found`;
+    pickerList.innerHTML = matches.length ? matches.map((product) => `<li><button type="button" class="product-picker-option" data-select-catalogue-product="${escapeQuoteHtml(product.id)}"><span class="product-picker-option-name">${escapeQuoteHtml(product.name)}</span><span class="product-picker-option-spec">${escapeQuoteHtml(product.specification)}</span><span class="product-picker-option-meta">Part No. ${escapeQuoteHtml(product.sku)}${product.needsConfirmation ? " · Requires catalogue confirmation" : ""}</span></button></li>`).join("") : '<li class="product-picker-empty">No listed catalogue configuration matches that search. Add details in the notes field for a custom request.</li>';
   };
 
   addProductButton.addEventListener("click", () => {
@@ -597,7 +622,8 @@ if (quoteForm) {
       return;
     }
 
-    if (await submitFormspreeForm(quoteForm, submissionStatus)) {
+    const inquirySuccessMessage = "Thank you. Your non-binding availability request has been received. This is not an order and no payment is due. ChromVale will respond by email after review.";
+    if (await submitFormspreeForm(quoteForm, submissionStatus, inquirySuccessMessage)) {
       writeQuoteProducts([]);
       renderCart();
       quoteForm.reset();
